@@ -109,6 +109,16 @@ const GheeStore: React.FC = () => {
     }
   };
 
+  const handleRemoveItem = (id: number): void => {
+    setCart(cart.filter((item) => item.id !== id));
+  };
+
+  const handleUpdateQuantity = (id: number, quantity: number): void => {
+    setCart(cart.map((item) =>
+      item.id === id ? { ...item, quantity } : item
+    ));
+  };
+
   const handleSizeChange = (productId: number, size: string): void => {
     setSelectedSizes({ ...selectedSizes, [productId]: size });
   };
@@ -194,10 +204,16 @@ const GheeStore: React.FC = () => {
       </div>
 
       {/* Slide Cart */}
-      {showCart && <CartSlide cart={cart} onClose={toggleCart} />}
+      {showCart && (
+        <CartSlide 
+          cart={cart} 
+          onClose={toggleCart}
+          onRemoveItem={handleRemoveItem}
+          onUpdateQuantity={handleUpdateQuantity}
+        />
+      )}
     </div>
   );
 };
-
 
 export default GheeStore;
