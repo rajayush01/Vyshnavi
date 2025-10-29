@@ -1,5 +1,5 @@
 import React from "react";
-import { X } from "lucide-react";
+import { X, Minus, Plus, Trash2 } from "lucide-react";
 
 interface CartItem {
   id: number;
@@ -12,9 +12,11 @@ interface CartItem {
 interface CartSlideProps {
   cart: CartItem[];
   onClose: () => void;
+  onRemoveItem: (id: number) => void;
+  onUpdateQuantity: (id: number, quantity: number) => void;
 }
 
-const CartSlide: React.FC<CartSlideProps> = ({ cart, onClose }) => {
+const CartSlide: React.FC<CartSlideProps> = ({ cart, onClose, onRemoveItem, onUpdateQuantity }) => {
   const totalPrice = cart.reduce(
     (sum: number, item: CartItem) => sum + item.price * item.quantity,
     0
@@ -52,7 +54,7 @@ const CartSlide: React.FC<CartSlideProps> = ({ cart, onClose }) => {
               {cart.map((item: CartItem) => (
                 <div
                   key={item.id}
-                  className="flex items-center gap-3 border-b pb-3 hover:bg-gray-50 rounded-md transition"
+                  className="flex items-start gap-3 border-b pb-3 hover:bg-gray-50 rounded-md transition p-2"
                 >
                   {/* Product Image */}
                   <img
@@ -65,14 +67,40 @@ const CartSlide: React.FC<CartSlideProps> = ({ cart, onClose }) => {
                   <div className="flex-1">
                     <p className="font-semibold text-gray-800">{item.name}</p>
                     <p className="text-sm text-gray-500">
-                      ₹{item.price.toLocaleString()} × {item.quantity}
+                      ₹{item.price.toLocaleString()}
                     </p>
+                    
+                    {/* Quantity Controls */}
+                    <div className="flex items-center gap-2 mt-2">
+                      <button
+                        onClick={() => onUpdateQuantity(item.id, Math.max(1, item.quantity - 1))}
+                        className="w-7 h-7 bg-gray-200 hover:bg-gray-300 rounded flex items-center justify-center transition"
+                      >
+                        <Minus size={14} />
+                      </button>
+                      <span className="text-sm font-medium w-8 text-center">{item.quantity}</span>
+                      <button
+                        onClick={() => onUpdateQuantity(item.id, item.quantity + 1)}
+                        className="w-7 h-7 bg-gray-200 hover:bg-gray-300 rounded flex items-center justify-center transition"
+                      >
+                        <Plus size={14} />
+                      </button>
+                    </div>
                   </div>
 
-                  {/* Total per item */}
-                  <span className="font-semibold text-gray-800">
-                    ₹{(item.price * item.quantity).toLocaleString()}
-                  </span>
+                  {/* Price & Remove */}
+                  <div className="flex flex-col items-end gap-2">
+                    <span className="font-semibold text-gray-800">
+                      ₹{(item.price * item.quantity).toLocaleString()}
+                    </span>
+                    <button
+                      onClick={() => onRemoveItem(item.id)}
+                      className="text-red-500 hover:text-red-700 p-1 hover:bg-red-50 rounded transition"
+                      title="Remove item"
+                    >
+                      <Trash2 size={16} />
+                    </button>
+                  </div>
                 </div>
               ))}
             </div>
