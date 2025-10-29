@@ -66,7 +66,7 @@ function App() {
 				>
 					<Route index element={<Home />} />
 					<Route path="/about" element={<AboutUs />} />
-					<Route path="/contact-us" element={<ContactUs />} />
+					{/* <Route path="/contact-us" element={<ContactUs />} /> */}
 					<Route path="/ghee" element={<GheeStore />} />
 					<Route path='/auth' element={<DairyAuthPage/>} />
 					<Route path="/details" element={<ProductDetails/>} />
@@ -92,5 +92,6 @@ function App() {
 		</Suspense>
 	);
 }
+
 
 export default App;
