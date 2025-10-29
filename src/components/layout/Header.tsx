@@ -117,7 +117,7 @@ const Header: React.FC<HeaderProps> = ({ onCartToggle, cartCount }) => {
                 }
                 className="text-2xl font-bold text-blue-600 hover:text-blue-700 transition-colors"
               >
-                <img src={logo} alt="" className="h-[70px]" />
+                <img src={logo} alt="" className="h-[60px]" />
               </button>
             </div>
 
@@ -343,5 +343,6 @@ const Header: React.FC<HeaderProps> = ({ onCartToggle, cartCount }) => {
     </>
   );
 };
+
 
 export default Header;
