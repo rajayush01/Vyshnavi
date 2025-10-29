@@ -1,0 +1,12 @@
+# Allow all search engines to crawl the site
+User-agent: *
+Allow: /
+
+# Block internal/development folders (only if they are exposed)
+Disallow: /node_modules/
+Disallow: /src/
+Disallow: /@vite/
+Disallow: /@react-refresh/
+
+# Sitemap (important for SEO – update with your real domain)
+Sitemap: http://localhost:5173/sitemap.xml
