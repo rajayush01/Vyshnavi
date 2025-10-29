@@ -99,25 +99,25 @@ const SAMPLE_VIDEOS = [
       }
     ]
   },
-  {
-    id: 5,
-    url: 'https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/ElephantsDream.mp4',
-    thumbnail: 'https://images.unsplash.com/photo-1540497077202-7c8a3999166f?w=400&h=600&fit=crop',
-    username: 'active_living',
-    caption: 'Stay energized all day ⚡',
-    likes: '27.8K',
-    comments: '1.8K',
-    avatar: 'https://i.pravatar.cc/150?img=5',
-    products: [
-      {
-        id: 9,
-        name: 'Pre-Workout Mix',
-        price: '₹1,799',
-        originalPrice: '₹2,299',
-        image: 'https://images.unsplash.com/photo-1505576391880-b3f9d713dc4f?w=200&h=200&fit=crop'
-      }
-    ]
-  }
+  // {
+  //   id: 5,
+  //   url: 'https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/ElephantsDream.mp4',
+  //   thumbnail: 'https://images.unsplash.com/photo-1540497077202-7c8a3999166f?w=400&h=600&fit=crop',
+  //   username: 'active_living',
+  //   caption: 'Stay energized all day ⚡',
+  //   likes: '27.8K',
+  //   comments: '1.8K',
+  //   avatar: 'https://i.pravatar.cc/150?img=5',
+  //   products: [
+  //     {
+  //       id: 9,
+  //       name: 'Pre-Workout Mix',
+  //       price: '₹1,799',
+  //       originalPrice: '₹2,299',
+  //       image: 'https://images.unsplash.com/photo-1505576391880-b3f9d713dc4f?w=200&h=200&fit=crop'
+  //     }
+  //   ]
+  // }
 ];
 
 export default function InstaReelsGrid() {
@@ -214,4 +214,5 @@ export default function InstaReelsGrid() {
       `}</style>
     </div>
   );
+
 }
