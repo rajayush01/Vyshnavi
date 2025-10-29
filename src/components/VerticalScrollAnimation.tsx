@@ -346,7 +346,7 @@ useEffect(() => {
                   <img
                     src={item.image}
                     alt={item.name}
-                    className="relative w-full h-full object-cover rounded-3xl mt-20"
+                    className="relative w-full h-full object-cover rounded-3xl mt-10"
                   />
                 </div>
 
@@ -441,5 +441,6 @@ useEffect(() => {
     </>
   );
 };
+
 
 export default VerticalScrollAnimation;
