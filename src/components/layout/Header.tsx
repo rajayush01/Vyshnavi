@@ -109,12 +109,7 @@ const Header: React.FC<HeaderProps> = ({ onCartToggle, cartCount }) => {
             {/* Logo */}
             <div className="flex items-center">
               <button
-                onClick={() =>
-                  handleNavigation("home", {
-                    type: "scroll",
-                    target: "hero-section",
-                  })
-                }
+                onClick={() => window.location.href = '/'}
                 className="text-2xl font-bold text-blue-600 hover:text-blue-700 transition-colors"
               >
                 <img src={logo} alt="" className="h-[60px]" />
@@ -222,17 +217,38 @@ const Header: React.FC<HeaderProps> = ({ onCartToggle, cartCount }) => {
               </div>
             </nav>
 
-            {/* Mobile Menu Button */}
-            <button
-              onClick={() => setIsMenuOpen(!isMenuOpen)}
-              className="lg:hidden p-2 text-gray-700 hover:text-blue-600 transition-colors"
-            >
-              {isMenuOpen ? (
-                <X className="w-6 h-6" />
-              ) : (
-                <Menu className="w-6 h-6" />
-              )}
-            </button>
+            {/* Mobile: Cart & Auth Icons + Hamburger */}
+            <div className="lg:hidden flex items-center gap-2">
+              <button
+                onClick={() => window.location.href = '/auth'}
+                className="bg-gray-100 hover:bg-gray-200 text-gray-700 p-2 rounded-full transition"
+              >
+                <User size={20} />
+              </button>
+
+              <button
+                onClick={onCartToggle}
+                className="relative bg-blue-500 hover:bg-blue-600 text-white p-2 rounded-full transition"
+              >
+                <ShoppingCart size={20} />
+                {cartCount > 0 && (
+                  <span className="absolute -top-1 -right-1 bg-red-500 text-xs text-white w-5 h-5 rounded-full flex items-center justify-center">
+                    {cartCount}
+                  </span>
+                )}
+              </button>
+
+              <button
+                onClick={() => setIsMenuOpen(!isMenuOpen)}
+                className="p-2 text-gray-700 hover:text-blue-600 transition-colors"
+              >
+                {isMenuOpen ? (
+                  <X className="w-6 h-6" />
+                ) : (
+                  <Menu className="w-6 h-6" />
+                )}
+              </button>
+            </div>
           </div>
         </div>
 
@@ -315,27 +331,6 @@ const Header: React.FC<HeaderProps> = ({ onCartToggle, cartCount }) => {
               >
                 Contact Us
               </button>
-
-              <div className="flex gap-2 mt-2">
-              <button
-                onClick={() => window.location.href = '/auth'}
-                className="bg-gray-100 hover:bg-gray-200 text-gray-700 px-4 py-2 rounded-full flex items-center gap-2 transition"
-              >
-                <User size={20} />
-              </button>
-
-              <button
-                onClick={onCartToggle}
-                className="relative bg-blue-500 hover:bg-blue-600 text-white px-4 py-2 rounded-full flex items-center gap-2 transition"
-              >
-                <ShoppingCart size={20} />
-                {cartCount > 0 && (
-                  <span className="absolute -top-1 -right-2 bg-red-500 text-xs text-white w-5 h-5 rounded-full flex items-center justify-center">
-                    {cartCount}
-                  </span>
-                )}
-              </button>
-              </div>
             </div>
           </div>
         )}
@@ -343,6 +338,5 @@ const Header: React.FC<HeaderProps> = ({ onCartToggle, cartCount }) => {
     </>
   );
 };
-
 
 export default Header;
