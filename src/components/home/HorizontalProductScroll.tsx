@@ -156,14 +156,17 @@ const HorizontalProductScroll: React.FC = () => {
               </div>
 
               {/* Buttons Section */}
-              <div className="flex gap-3 mt-4 pt-4 border-t border-gray-100">
-                <button className="flex-1 bg-green-700 hover:bg-green-800 text-white rounded-lg py-2 flex items-center justify-center gap-2 text-sm transition">
-                  <ShoppingCart size={16} /> Add to cart
-                </button>
-                <button className="flex-1 border border-green-700 text-green-700 hover:bg-green-50 rounded-lg py-2 flex items-center justify-center gap-1 text-sm font-medium transition">
-                  <Zap size={16} /> Buy Now
-                </button>
-              </div>
+            <div className="flex flex-col sm:flex-row gap-3 mt-4 pt-4 border-t border-gray-100 w-full">
+              <button className="flex-1 bg-green-700 hover:bg-green-800 text-white rounded-lg py-3 sm:py-2 flex items-center justify-center gap-2 text-sm sm:text-base transition w-full">
+                <ShoppingCart size={18} className="sm:w-4 sm:h-4" />
+                Add to Cart
+              </button>
+
+              <button className="flex-1 border border-green-700 text-green-700 hover:bg-green-50 rounded-lg py-3 sm:py-2 flex items-center justify-center gap-2 text-sm sm:text-base font-medium transition w-full">
+                <Zap size={18} className="sm:w-4 sm:h-4" />
+                Buy Now
+              </button>
+            </div>
             </div>
           </div>
         ))}
