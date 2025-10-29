@@ -114,7 +114,7 @@ const GheeStore: React.FC = () => {
   };
 
   const handleProductClick = (productId: number): void => {
-    navigate(`/details/${productId}`);
+    navigate(`/details`);
   };
 
   return (
@@ -198,5 +198,6 @@ const GheeStore: React.FC = () => {
     </div>
   );
 };
+
 
 export default GheeStore;
