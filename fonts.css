@@ -1,0 +1,63 @@
+@import url('https://fonts.googleapis.com/css2?family=Cinzel+Decorative:wght@400;700;900&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Cinzel:wght@400..900&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Cinzel:wght@400..900&family=Cormorant+SC:wght@300;400;500;600;700&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Bellefair&family=Cinzel:wght@400..900&family=Cormorant+SC:wght@300;400;500;600;700&display=swap');
+@font-face {
+  font-family: "Bulgatry";
+  src: url("./assets/fonts/BulgatryPersonalUse-4B886.ttf") format("truetype");
+  font-weight: normal;
+  font-style: normal;
+}
+
+.bulgatry-font {
+  font-family: "Bulgatry", sans-serif;
+}
+
+
+.cinzel-font {
+  font-family: 'Cinzel Decorative', serif;
+}
+
+.cinzel{
+  font-family: 'Cinzel', serif;
+}
+
+.cormorant-sc-light {
+  font-family: "Cormorant SC", serif;
+  font-weight: 300;
+  font-style: normal;
+}
+
+.cormorant-sc-regular {
+  font-family: "Cormorant SC", serif;
+  font-weight: 400;
+  font-style: normal;
+}
+
+.cormorant-sc-medium {
+  font-family: "Cormorant SC", serif;
+  font-weight: 500;
+  font-style: normal;
+}
+
+.cormorant-sc-semibold {
+  font-family: "Cormorant SC", serif;
+  font-weight: 600;
+  font-style: normal;
+}
+
+.cormorant-sc-bold {
+  font-family: "Cormorant SC", serif;
+  font-weight: 700;
+  font-style: normal;
+}
+
+
+.bellefair-regular {
+  font-family: "Bellefair", serif;
+  font-weight: 400;
+  font-style: normal;
+}
+
+
+
