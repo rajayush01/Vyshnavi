@@ -4,7 +4,6 @@ import MainLayout from './components/layout/MainLayout';
 import { useState, useEffect } from 'react';
 import NotFound from './pages/NotFound';
 import AboutUs from './pages/AboutUs';
-import ContactUs from './pages/ContactUs';
 import DairyLoadingAnimation from './components/ui/Loading';
 import GheeStore from './pages/GheeStore';
 
@@ -12,6 +11,7 @@ import DairyAuthPage from './pages/DairyAuthPage';
 import ProductDetails from './pages/ProductDetails';
 import Portfolio from './pages/Portfolio';
 import VerticalScrollAnimation from './components/VerticalScrollAnimation';
+import Profile from './pages/Profile';
 
 const Home = lazy(() => import('./pages/Home'));
 
@@ -71,6 +71,7 @@ function App() {
 					<Route path='/auth' element={<DairyAuthPage/>} />
 					<Route path="/details" element={<ProductDetails/>} />
 					<Route path='/portfolio' element={<ResponsivePortfolio/>} />
+					<Route path="/profile" element={ <Profile />} />
 				</Route>
 				<Route
 					path="/404"

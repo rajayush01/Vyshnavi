@@ -1,373 +1,255 @@
-import React, { useEffect, useRef, useState } from 'react';
-import { gsap } from 'gsap';
-import butter200 from "../assets/butter-200-bg.png";
+/**
+ * Portfolio.tsx — Vyshnavi Dairy Product Showcase
+ *
+ * DESIGN: category tabs across the top; a subtype pill-row sits beneath
+ * them listing every product in the active category. Clicking a pill
+ * instantly focuses the GSAP stacked carousel on that product.
+ * Single-item categories skip the pill-row. The right column shows the
+ * current product's description + all available variants; the bottom-right
+ * shows a row of thumbnails (gallery images if present, otherwise the
+ * product's main image as the sole thumb).
+ *
+ * DATA: imported entirely from vyshnaviData.ts — no local product arrays.
+ */
+
+import React, { useEffect, useRef, useState, useCallback } from "react";
+import { gsap } from "gsap";
+
+// ── Real asset imports ───────────────────────────────────────────────────
+import butter200   from "../assets/butter-200-bg.png";
 import butter200_1 from "../assets/butter-200_1.png";
 import butter200_2 from "../assets/butter-200_2.png";
 import butter200_3 from "../assets/butter-200_3.png";
-import butter500 from "../assets/butter-500-bg.png";
+import butter500   from "../assets/butter-500-bg.png";
 import butter500_1 from "../assets/butter-500_1.png";
 import butter500_2 from "../assets/butter-500_2.png";
 import butter500_3 from "../assets/butter-500_3.png";
-import buttermilk from "../assets/buttermilk.png";
+import buttermilk   from "../assets/buttermilk.png";
 import buttermilk_1 from "../assets/buttermilk_1.png";
 import buttermilk_2 from "../assets/buttermilk_2.png";
 import buttermilk_3 from "../assets/buttermilk_3.png";
 import buttermilk_4 from "../assets/buttermilk_4.png";
-import curd1 from "../assets/curd-pouch.png";
-import curd2 from "../assets/curd-pouch1.png";
-import curd3 from "../assets/curd-pouch2.png";
-import curd4 from "../assets/curd-pouch3.png";
-import curd_pouch from "../assets/curd.png";
+import curd1         from "../assets/curd-pouch.png";
+import curd2         from "../assets/curd-pouch1.png";
+import curd3         from "../assets/curd-pouch2.png";
+import curd4         from "../assets/curd-pouch3.png";
+import curd_pouch   from "../assets/curd.png";
 import curd_pouch_1 from "../assets/curd1.png";
 import curd_pouch_2 from "../assets/curd2.png";
 import curd_pouch_3 from "../assets/curd3.png";
-import curd_box from "../assets/curd-box.png";
-import curd_box_1 from "../assets/curd-box1.png";
-import curd_box_2 from "../assets/curd-box2.png";
-import curd_box_3 from "../assets/curd-box3.png";
-import healthy_curd_pouch from "../assets/healthy_curd_pouch.png";
+import curd_box     from "../assets/curd-box.png";
+import curd_box_1   from "../assets/curd-box1.png";
+import curd_box_2   from "../assets/curd-box2.png";
+import curd_box_3   from "../assets/curd-box3.png";
+import healthy_curd_pouch   from "../assets/healthy_curd_pouch.png";
 import healthy_curd_pouch_1 from "../assets/healthy_curd_pouch1.png";
 import healthy_curd_pouch_2 from "../assets/healthy_curd_pouch2.png";
 import healthy_curd_pouch_3 from "../assets/healthy_curd_pouch3.png";
-import badam_milk from "../assets/badam-milk.png";
+import badam_milk   from "../assets/badam-milk.png";
 import badam_milk_1 from "../assets/badam-milk1.png";
 import badam_milk_2 from "../assets/badam-milk2.png";
 import badam_milk_3 from "../assets/badam-milk3.png";
-import chocolate_milk from "../assets/chocolate-milk.png";
+import chocolate_milk   from "../assets/chocolate-milk.png";
 import chocolate_milk_1 from "../assets/chocolate-milk1.jpeg";
 import chocolate_milk_2 from "../assets/chocolate-milk2.jpeg";
 import chocolate_milk_3 from "../assets/chocolate-milk3.png";
-import spl_badam_milk from "../assets/spl-badam-milk.png";
+import spl_badam_milk   from "../assets/spl-badam-milk.png";
 import spl_badam_milk_1 from "../assets/spl-badam-milk1.jpeg";
 import spl_badam_milk_2 from "../assets/spl-badam-milk2.jpeg";
 import spl_badam_milk_3 from "../assets/spl-badam-milk3.png";
 
-interface ProductItem {
-  id: number;
-  name: string;
-  image: string;
-  description: string;
-  content: string;
-  gallery: string[];
+// ── Data source ──────────────────────────────────────────────────────────
+import { CATEGORIES, type ProductCategory, type ProductItem } from "../data/vyshnaviData";
+
+// ── Image map ────────────────────────────────────────────────────────────
+const IMAGE_MAP: Record<number, { primary: string; gallery: string[] }> = {
+  301: { primary: buttermilk,     gallery: [buttermilk_1, buttermilk_2, buttermilk_3, buttermilk_4] },
+  304: { primary: spl_badam_milk, gallery: [spl_badam_milk_1, spl_badam_milk_2, spl_badam_milk_3] },
+  305: { primary: badam_milk,     gallery: [badam_milk_1, badam_milk_2, badam_milk_3] },
+  306: { primary: chocolate_milk, gallery: [chocolate_milk_1, chocolate_milk_2, chocolate_milk_3] },
+  201: { primary: curd1,          gallery: [curd2, curd3, curd4] },
+  202: { primary: curd_pouch,     gallery: [curd_pouch_1, curd_pouch_2, curd_pouch_3] },
+  203: { primary: curd_box,       gallery: [curd_box_1, curd_box_2, curd_box_3] },
+  501: { primary: butter200,      gallery: [butter200_1, butter200_2, butter200_3] },
+  502: { primary: butter500,      gallery: [butter500_1, butter500_2, butter500_3] },
+};
+
+const CATEGORY_GRADIENT: Record<string, string> = {
+  milk:      "linear-gradient(135deg,#bfdbfe,#dbeafe)",
+  curd:      "linear-gradient(135deg,#bbf7d0,#dcfce7)",
+  beverages: "linear-gradient(135deg,#e9d5ff,#f3e8ff)",
+  paneer:    "linear-gradient(135deg,#fed7aa,#ffedd5)",
+  butter:    "linear-gradient(135deg,#fef08a,#fefce8)",
+  ghee:      "linear-gradient(135deg,#fde68a,#fffbeb)",
+  sweets:    "linear-gradient(135deg,#fbcfe8,#fdf2f8)",
+};
+
+// Category accent colours for the active subtype pill
+const CATEGORY_ACCENT: Record<string, string> = {
+  milk:      "#1d4ed8",
+  curd:      "#15803d",
+  beverages: "#7e22ce",
+  paneer:    "#c2410c",
+  butter:    "#a16207",
+  ghee:      "#b45309",
+  sweets:    "#be185d",
+};
+
+function resolveImage(item: ProductItem): string {
+  return IMAGE_MAP[item.id]?.primary ?? "";
 }
 
-interface ProductCategory {
-  name: string;
-  items: ProductItem[];
+function resolveGallery(item: ProductItem): string[] {
+  const mapped = IMAGE_MAP[item.id]?.gallery ?? [];
+  if (mapped.length) return mapped;
+  const primary = resolveImage(item);
+  return primary ? [primary] : [];
 }
 
-interface Products {
-  [key: string]: ProductCategory;
-}
+// ── Sub-components ───────────────────────────────────────────────────────
 
-interface ItemPosition {
-  x: string;
-  translateX: string;
-  scale: number;
-  y: string;
-  translateY: string;
-  zIndex: number;
-  opacity: number;
-  rotation: number;
-}
+interface PlaceholderProps { category: string; name: string }
 
-interface SelectedThumbnail extends ProductItem {
-  image: string;
-}
+const ImagePlaceholder: React.FC<PlaceholderProps> = ({ category, name }) => (
+  <div
+    className="w-64 h-80 rounded-2xl flex items-end justify-center pb-4"
+    style={{ background: CATEGORY_GRADIENT[category] ?? "#f3f4f6" }}
+  >
+    <span className="text-xs font-semibold text-gray-500 opacity-70 text-center px-2 leading-tight">
+      {name}
+    </span>
+  </div>
+);
 
-const products: Products = {
-  buttermilk: {
-    name: 'Buttermilk',
-    items: [
-      { 
-        id: 1, 
-        name: 'Buttermilk', 
-        image: buttermilk,
-        description: 'Full-bodied classic',
-        content: 'Rich in calcium and vitamins, our whole milk offers creamy goodness with all the natural fat content for maximum flavor and nutrition.',
-        gallery: [
-          buttermilk_1,
-          buttermilk_2,
-          buttermilk_3,
-          buttermilk_4
-        ]
-      },
-    ]
-  },
-  curd: {
-    name: 'Curd',
-    items: [
-      { 
-        id: 5, 
-        name: '2 Mini Curd Pouch', 
-        image: curd1,
-        description: 'Sharp and savory',
-        content: 'Aged to perfection, our cheddar delivers a bold, tangy flavor that elevates any dish from sandwiches to gourmet platters.',
-        gallery: [
-          curd2,
-          curd3,
-          curd4,
-        ]
-      },
-      { 
-        id: 6, 
-        name: 'Curd Pouch', 
-        image: curd_pouch,
-        description: 'Soft and stretchy',
-        content: 'Fresh mozzarella with a delicate texture perfect for pizzas, caprese salads, and melting over your favorite Italian dishes.',
-        gallery: [
-          curd_pouch_1,
-          curd_pouch_2,
-          curd_pouch_3,
-        ]
-      },
-      { 
-        id: 7, 
-        name: 'Healthy Curd Box', 
-        image: curd_box,
-        description: 'Aged excellence',
-        content: 'Authentic aged parmesan with a nutty, complex flavor profile. Grate it over pasta or enjoy it in chunks with wine.',
-        gallery: [
-          curd_box_1,
-          curd_box_2,
-          curd_box_3,
-        ]
-      },
-      { 
-        id: 8, 
-        name: 'Healthy Curd Pouch', 
-        image: healthy_curd_pouch,
-        description: 'Bold and distinctive',
-        content: 'For the adventurous palate. Rich, creamy texture with sharp blue veins that create an unforgettable taste experience.',
-        gallery: [
-          healthy_curd_pouch_1,
-          healthy_curd_pouch_2,
-          healthy_curd_pouch_3,
-        ]
-      }
-    ]
-  },
-  flavoured_milk: {
-    name: 'Flavoured Milk',
-    items: [
-      { 
-        id: 9, 
-        name: 'Badam Milk', 
-        image: badam_milk,
-        description: 'Thick and protein-rich',
-        content: 'Strained to creamy perfection, our Greek yogurt packs double the protein with a luxuriously thick texture. Perfect for breakfast or snacks.',
-        gallery: [
-          badam_milk_1,
-          badam_milk_2,
-          badam_milk_3,
-        ]
-      },
-      { 
-        id: 10, 
-        name: 'Chocolate Milk', 
-        image: chocolate_milk,
-        description: 'Simple and versatile',
-        content: 'Classic unflavored yogurt with live cultures. Use it in smoothies, cooking, or enjoy with your favorite toppings and sweeteners.',
-        gallery: [
-          chocolate_milk_1,
-          chocolate_milk_2,
-          chocolate_milk_3,
-        ]
-      },
-      { 
-        id: 11, 
-        name: 'Special Badam Milk', 
-        image: spl_badam_milk,
-        description: 'Naturally sweet',
-        content: 'Blended with real fruit pieces for a burst of natural sweetness. A delicious and nutritious treat that the whole family will love.',
-        gallery: [
-          spl_badam_milk_1,
-          spl_badam_milk_2,
-          spl_badam_milk_3,
-        ]
-      },
-    ]
-  },
-  butter: {
-    name: 'Butter',
-    items: [
-      { 
-        id: 13, 
-        name: 'Butter 200g', 
-        image: butter200,
-        description: 'Classic everyday butter',
-        content: 'Perfect balance of creamy butter and salt. Ideal for spreading on toast, cooking, and adding rich flavor to any recipe.',
-        gallery: [
-          butter200_1,
-          butter200_2,
-          butter200_3,
-        ]
-      },
-      { 
-        id: 14, 
-        name: 'Butter 500g', 
-        image: butter500,
-        description: 'Pure churned cream',
-        content: 'The baker\'s choice. Control your seasoning with pure, unsalted butter that lets you taste the true flavor of cream.',
-        gallery: [
-          butter500_1,
-          butter500_2,
-          butter500_3,
-        ]
-      },
-    ]
-  }
-}; 
+interface SelectedThumb { src: string; name: string }
+
+// ── Main component ───────────────────────────────────────────────────────
 
 const Portfolio: React.FC = () => {
-  const [selectedProduct, setSelectedProduct] = useState<string>('buttermilk');
-  const [currentIndex, setCurrentIndex] = useState<number>(0);
-  const [selectedThumbnail, setSelectedThumbnail] = useState<SelectedThumbnail | null>(null);
-  const itemsRef = useRef<(HTMLDivElement | null)[]>([]);
-  const autoPlayRef = useRef<NodeJS.Timeout | null>(null);
+  const [activeCategoryKey, setActiveCategoryKey] = useState<string>(CATEGORIES[0].key);
+  const [currentIndex, setCurrentIndex]           = useState<number>(0);
+  const [selectedThumb, setSelectedThumb]         = useState<SelectedThumb | null>(null);
+
+  const itemsRef     = useRef<(HTMLDivElement | null)[]>([]);
+  const autoPlayRef  = useRef<ReturnType<typeof setInterval> | null>(null);
   const containerRef = useRef<HTMLDivElement | null>(null);
-  const backgroundTextRef = useRef<HTMLDivElement | null>(null);
+  const bgTextRef    = useRef<HTMLDivElement | null>(null);
+  const pillsRef     = useRef<HTMLDivElement | null>(null);
 
-  const currentItems = products[selectedProduct].items;
+  const activeCategory: ProductCategory =
+    CATEGORIES.find((c) => c.key === activeCategoryKey) ?? CATEGORIES[0];
+  const currentItems: ProductItem[] = activeCategory.items;
+  const singleItem = currentItems.length === 1;
+  const accent = CATEGORY_ACCENT[activeCategoryKey] ?? "#1d4ed8";
 
-  const getItemPosition = (index: number, currentIdx: number, totalItems: number): ItemPosition => {
-    const diff = (index - currentIdx + totalItems) % totalItems;
-    
+  // ── Carousel helpers ───────────────────────────────────────────────────
+
+  const getPos = (idx: number, current: number, total: number) => {
+    const diff = (idx - current + total) % total;
     if (diff === 0) {
-      return {
-        x: '50%',
-        translateX: '-50%',
-        scale: 1.3,
-        y: '50%',
-        translateY: '-50%',
-        zIndex: 30,
-        opacity: 1,
-        rotation: 0
-      };
-    } else {
-      return {
-        x: '50%',
-        translateX: '-50%',
-        scale: 0.3,
-        y: '70%',
-        translateY: '-50%',
-        zIndex: 0,
-        opacity: 0,
-        rotation: 0
-      };
+      return { x: "50%", tx: "-50%", scale: 1.3, y: "50%", ty: "-50%", z: 30, opacity: 1, rot: 0 };
     }
+    const side  = diff <= total / 2 ? 1 : -1;
+    const depth = Math.min(diff, total - diff);
+    return {
+      x:  side > 0 ? "65%" : "35%",
+      tx: "-50%",
+      scale:   Math.max(0.25, 0.75 - depth * 0.15),
+      y:       "50%",
+      ty:      "-50%",
+      z:       30 - depth * 5,
+      opacity: Math.max(0, 0.5 - depth * 0.15),
+      rot:     side * depth * 4,
+    };
   };
-  
-  const animateToPositions = (newIndex: number): void => {
-    currentItems.forEach((_, index) => {
-      const pos = getItemPosition(index, newIndex, currentItems.length);
-      if (itemsRef.current[index]) {
-        gsap.to(itemsRef.current[index], {
-          left: pos.x,
-          x: pos.translateX,
-          top: pos.y,
-          y: pos.translateY,
-          scale: pos.scale,
-          zIndex: pos.zIndex,
-          opacity: pos.opacity,
-          rotation: pos.rotation,
-          duration: 0.8,
-          ease: 'power2.inOut'
+
+  const animateTo = useCallback((newIdx: number) => {
+    currentItems.forEach((_, i) => {
+      const p = getPos(i, newIdx, currentItems.length);
+      if (itemsRef.current[i]) {
+        gsap.to(itemsRef.current[i], {
+          left: p.x, x: p.tx, top: p.y, y: p.ty,
+          scale: p.scale, zIndex: p.z, opacity: p.opacity,
+          rotation: p.rot, duration: 0.8, ease: "power2.inOut",
         });
       }
     });
 
-    // Animate background text
-    if (backgroundTextRef.current) {
-      gsap.to(backgroundTextRef.current, {
-        x: -50,
-        opacity: 0.15,
-        duration: 0.4,
-        ease: 'power2.inOut',
+    if (bgTextRef.current) {
+      gsap.to(bgTextRef.current, {
+        x: -40, opacity: 0.15, duration: 0.35, ease: "power2.inOut",
         onComplete: () => {
-          if (backgroundTextRef.current) {
-            gsap.to(backgroundTextRef.current, {
-              x: 0,
-              opacity: 0.08,
-              duration: 0.4,
-              ease: 'power2.inOut'
-            });
-          }
-        }
+          gsap.to(bgTextRef.current, { x: 0, opacity: 0.06, duration: 0.35, ease: "power2.inOut" });
+        },
       });
     }
 
-    setCurrentIndex(newIndex);
-  };
+    setCurrentIndex(newIdx);
 
-  const nextItem = (): void => {
-    const nextIndex = (currentIndex + 1) % currentItems.length;
-    animateToPositions(nextIndex);
-    resetAutoPlay();
-  };
-
-  const prevItem = (): void => {
-    const prevIndex = (currentIndex - 1 + currentItems.length) % currentItems.length;
-    animateToPositions(prevIndex);
-    resetAutoPlay();
-  };
-
-  const resetAutoPlay = (): void => {
-    if (autoPlayRef.current) {
-      clearInterval(autoPlayRef.current);
+    // Scroll the pill row so the active pill is in view
+    if (pillsRef.current) {
+      const pill = pillsRef.current.children[newIdx] as HTMLElement | undefined;
+      pill?.scrollIntoView({ behavior: "smooth", block: "nearest", inline: "center" });
     }
+  }, [currentItems]); // eslint-disable-line react-hooks/exhaustive-deps
+
+  const resetAutoPlay = useCallback(() => {
+    if (autoPlayRef.current) clearInterval(autoPlayRef.current);
+    if (singleItem) return;
     autoPlayRef.current = setInterval(() => {
-      setCurrentIndex(prev => {
+      setCurrentIndex((prev) => {
         const next = (prev + 1) % currentItems.length;
-        animateToPositions(next);
+        animateTo(next);
         return next;
       });
     }, 5000);
+  }, [singleItem, currentItems.length, animateTo]);
+
+  const next = () => {
+    if (singleItem) return;
+    animateTo((currentIndex + 1) % currentItems.length);
+    resetAutoPlay();
   };
 
-  const changeProduct = (productKey: string): void => {
-    if (containerRef.current) {
-      gsap.to(containerRef.current, {
-        opacity: 0,
-        duration: 0.3,
-        onComplete: () => {
-          setSelectedProduct(productKey);
-          setCurrentIndex(0);
-          if (containerRef.current) {
-            gsap.to(containerRef.current, {
-              opacity: 1,
-              duration: 0.3
-            });
-          }
-        }
-      });
-    }
+  const prev = () => {
+    if (singleItem) return;
+    animateTo((currentIndex - 1 + currentItems.length) % currentItems.length);
+    resetAutoPlay();
   };
 
+  const jumpTo = (idx: number) => {
+    animateTo(idx);
+    resetAutoPlay();
+  };
+
+  const changeCategory = (key: string) => {
+    if (!containerRef.current) return;
+    gsap.to(containerRef.current, {
+      opacity: 0, duration: 0.25,
+      onComplete: () => {
+        setActiveCategoryKey(key);
+        setCurrentIndex(0);
+        gsap.to(containerRef.current, { opacity: 1, duration: 0.25 });
+      },
+    });
+  };
+
+  // ── Init on category change ────────────────────────────────────────────
   useEffect(() => {
-    const timer = setTimeout(() => {
-      currentItems.forEach((_, index) => {
-        const pos = getItemPosition(index, 0, currentItems.length);
-        if (itemsRef.current[index]) {
-          gsap.set(itemsRef.current[index], {
-            left: pos.x,
-            x: pos.translateX,
-            top: pos.y,
-            y: pos.translateY,
-            scale: pos.scale,
-            zIndex: pos.zIndex,
-            opacity: pos.opacity,
-            rotation: pos.rotation
+    const t = setTimeout(() => {
+      currentItems.forEach((_, i) => {
+        const p = getPos(i, 0, currentItems.length);
+        if (itemsRef.current[i]) {
+          gsap.set(itemsRef.current[i], {
+            left: p.x, x: p.tx, top: p.y, y: p.ty,
+            scale: p.scale, zIndex: p.z, opacity: p.opacity, rotation: p.rot,
           });
         }
       });
 
       if (itemsRef.current[0]) {
         gsap.from(itemsRef.current[0], {
-          scale: 0,
-          rotation: -180,
-          duration: 1,
-          ease: 'elastic.out(1, 0.5)'
+          scale: 0, rotation: -180, duration: 1, ease: "elastic.out(1, 0.5)",
         });
       }
 
@@ -375,148 +257,260 @@ const Portfolio: React.FC = () => {
     }, 0);
 
     return () => {
-      clearTimeout(timer);
-      if (autoPlayRef.current) {
-        clearInterval(autoPlayRef.current);
-      }
+      clearTimeout(t);
+      if (autoPlayRef.current) clearInterval(autoPlayRef.current);
     };
-  }, [selectedProduct]);
+  }, [activeCategoryKey]); // eslint-disable-line react-hooks/exhaustive-deps
 
+  const current    = currentItems[currentIndex];
+  const gallery    = resolveGallery(current);
+  const primaryImg = resolveImage(current);
+
+  // ── Render ─────────────────────────────────────────────────────────────
   return (
     <div className="relative w-full h-screen bg-gradient-to-br from-blue-50 via-white to-blue-100 overflow-hidden">
-      {/* Product Category Buttons */}
-      <div className="absolute top-32 left-1/2 transform -translate-x-1/2 z-50 flex gap-3 flex-wrap justify-center px-4">
-        {Object.keys(products).map((productKey) => (
+
+      {/* ── Category Tab Bar ── */}
+      <div className="absolute top-28 left-1/2 -translate-x-1/2 z-50 flex gap-2 flex-wrap justify-center px-4">
+        {CATEGORIES.map((cat) => (
           <button
-            key={productKey}
-            onClick={() => changeProduct(productKey)}
-            className={`px-6 py-3 rounded-full font-semibold text-sm uppercase tracking-wide transition-all duration-300 ${
-              selectedProduct === productKey
-                ? 'bg-blue-600 text-white shadow-lg scale-105'
-                : 'bg-white text-gray-700 hover:bg-amber-50 shadow-md'
+            key={cat.key}
+            onClick={() => changeCategory(cat.key)}
+            className={`px-5 py-2.5 rounded-full font-semibold text-xs uppercase tracking-wider transition-all duration-300 ${
+              activeCategoryKey === cat.key
+                ? "text-white shadow-lg scale-105"
+                : "bg-white text-gray-700 hover:bg-amber-50 shadow-md"
             }`}
+            style={
+              activeCategoryKey === cat.key
+                ? { backgroundColor: accent }
+                : undefined
+            }
           >
-            {products[productKey].name}
+            {cat.name}
           </button>
         ))}
       </div>
 
-      {/* Large Background Text - Current Item Name */}
-      <div 
-        ref={backgroundTextRef}
-        className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 z-0 pointer-events-none"
-        style={{ opacity: 0.08 }}
-      >
-        <h1 className="text-[10rem] font-black text-gray-800 whitespace-nowrap select-none">
-          {currentItems[currentIndex].name.toUpperCase()}
-        </h1>
-      </div>
-
-      {/* Product Items Container */}
-      <div ref={containerRef} className="relative w-full h-full">
-        {/* Product Items */}
-        {currentItems.map((item, index) => (
+      {/* ── Subtype Pill Row ── */}
+      {!singleItem && (
+        <div className="absolute top-[7.5rem] left-0 right-0 z-50 flex justify-center px-6 mt-8">
+          {/* Subtle container with scroll affordance */}
           <div
-            key={item.id}
-            ref={(el) => (itemsRef.current[index] = el)}
-            className="absolute opacity-0"
-            style={{ willChange: 'transform, opacity' }}
+            ref={pillsRef}
+            className="flex gap-2 overflow-x-auto pb-1 max-w-3xl scrollbar-hide"
+            style={{ scrollbarWidth: "none", msOverflowStyle: "none" }}
           >
-            <img 
-              src={item.image} 
-              alt={item.name}
-              className="w-64 h-80 object-cover "
-            />
-          </div>
-        ))}
-      </div>
-
-      {/* Left Bottom Content Section - Current Item Description */}
-      <div className="absolute left-8 bottom-32 z-40 max-w-md">
-        <div className="bg-white/80 backdrop-blur-md rounded-2xl p-6 shadow-xl">
-          <h3 className="text-2xl font-bold text-gray-800 mb-2">
-            {currentItems[currentIndex].description}
-          </h3>
-          <p className="text-gray-600 leading-relaxed">
-            {currentItems[currentIndex].content}
-          </p>
-        </div>
-      </div>
-
-      {/* Navigation Buttons - Bottom Left */}
-      <div className="absolute left-8 bottom-8 z-40 flex gap-4">
-        <button
-          onClick={prevItem}
-          className="w-14 h-14 bg-white/90 backdrop-blur-md rounded-full shadow-xl flex items-center justify-center hover:bg-amber-50 transition-colors"
-        >
-          <svg className="w-6 h-6 text-gray-800" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={3} d="M15 19l-7-7 7-7" />
-          </svg>
-        </button>
-
-        <button
-          onClick={nextItem}
-          className="w-14 h-14 bg-white/90 backdrop-blur-md rounded-full shadow-xl flex items-center justify-center hover:bg-amber-50 transition-colors"
-        >
-          <svg className="w-6 h-6 text-gray-800" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={3} d="M9 5l7 7-7 7" />
-          </svg>
-        </button>
-      </div>
-
-      {/* Right Bottom Thumbnail Gallery */}
-      <div className="absolute right-8 bottom-8 z-40 flex flex-col gap-3">
-        {currentItems[currentIndex].gallery.map((galleryImage, index) => (
-          <button
-            key={index}
-            onClick={() => setSelectedThumbnail({ ...currentItems[currentIndex], image: galleryImage })}
-            className="w-16 h-16 rounded-lg overflow-hidden shadow-lg transition-all duration-300 hover:scale-110"
-          >
-            <img src={galleryImage} alt={`${currentItems[currentIndex].name} ${index + 1}`} className="w-full h-full object-cover" />
-          </button>
-        ))}
-      </div>
-
-      {/* Thumbnail Modal */}
-      {selectedThumbnail && (
-        <div 
-          className="fixed inset-0 z-50 bg-black/80 flex items-center justify-center p-8"
-          onClick={() => setSelectedThumbnail(null)}
-        >
-          <div className="relative max-w-4xl max-h-full">
-            <img 
-              src={selectedThumbnail.image} 
-              alt={selectedThumbnail.name}
-              className="w-full h-full object-contain rounded-2xl shadow-2xl"
-            />
-            <button
-              onClick={() => setSelectedThumbnail(null)}
-              className="absolute top-4 right-4 w-12 h-12 bg-white rounded-full flex items-center justify-center hover:bg-gray-100 transition-colors"
-            >
-              <svg className="w-6 h-6 text-gray-800" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
-              </svg>
-            </button>
-            <div className="absolute bottom-4 left-1/2 transform -translate-x-1/2 bg-white/90 backdrop-blur-md px-6 py-3 rounded-full">
-              <p className="text-gray-800 font-semibold">{selectedThumbnail.name}</p>
-            </div>
+            {currentItems.map((item, i) => {
+              const isActive = i === currentIndex;
+              return (
+                <button
+                  key={item.id}
+                  onClick={() => jumpTo(i)}
+                  className="flex-shrink-0 flex items-center gap-1.5 px-3 py-1.5 rounded-full text-[11px] font-semibold transition-all duration-300 whitespace-nowrap"
+                  style={
+                    isActive
+                      ? {
+                          backgroundColor: accent,
+                          color: "#fff",
+                          boxShadow: `0 2px 12px ${accent}55`,
+                          transform: "scale(1.06)",
+                        }
+                      : {
+                          backgroundColor: "rgba(255,255,255,0.85)",
+                          color: "#374151",
+                          border: "1px solid rgba(0,0,0,0.08)",
+                        }
+                  }
+                >
+                  {/* Active dot indicator */}
+                  {isActive && (
+                    <span
+                      className="inline-block w-1.5 h-1.5 rounded-full bg-white opacity-80"
+                    />
+                  )}
+                  {item.name}
+                  {item.tag && (
+                    <span
+                      className="inline-block text-[9px] font-bold uppercase tracking-wider px-1.5 py-0.5 rounded-full"
+                      style={{
+                        backgroundColor: isActive ? "rgba(255,255,255,0.25)" : accent,
+                        color: isActive ? "#fff" : "#fff",
+                      }}
+                    >
+                      {item.tag === "Best Seller" ? "★" : "New"}
+                    </span>
+                  )}
+                </button>
+              );
+            })}
           </div>
         </div>
       )}
 
-      {/* Progress indicators */}
-      <div className="absolute bottom-8 left-1/2 transform -translate-x-1/2 flex gap-2 z-10">
-        {currentItems.map((_, index) => (
+      {/* ── Background watermark text ── */}
+      <div
+        ref={bgTextRef}
+        className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 z-0 pointer-events-none"
+        style={{ opacity: 0.06 }}
+      >
+        <h1 className="text-[8rem] font-black text-gray-800 whitespace-nowrap select-none">
+          {current.name.toUpperCase()}
+        </h1>
+      </div>
+
+      {/* ── Product carousel ── */}
+      <div ref={containerRef} className="relative w-full h-full mt-10">
+        {currentItems.map((item, i) => (
           <div
-            key={index}
-            className={`h-2 rounded-full transition-all ${
-              index === currentIndex ? 'bg-blue-600 w-8' : 'bg-gray-400 w-2'
-            }`}
-          />
+            key={item.id}
+            ref={(el) => (itemsRef.current[i] = el)}
+            className="absolute opacity-0 cursor-pointer"
+            style={{ willChange: "transform, opacity" }}
+            onClick={() => jumpTo(i)}        // clicking a background card focuses it
+          >
+            {resolveImage(item) ? (
+              <img
+                src={resolveImage(item)}
+                alt={item.name}
+                className="w-56 h-72 object-contain drop-shadow-2xl"
+              />
+            ) : (
+              <ImagePlaceholder category={activeCategoryKey} name={item.name} />
+            )}
+          </div>
         ))}
       </div>
+
+      {/* ── Left description panel ── */}
+      <div className="absolute left-6 bottom-32 z-40 max-w-xs">
+        <div className="bg-white/85 backdrop-blur-md rounded-2xl p-5 shadow-xl border border-white/60">
+          {current.tag && (
+            <span
+              className="inline-block text-[10px] font-bold uppercase tracking-widest px-2 py-0.5 rounded mb-3 text-white"
+              style={{ backgroundColor: current.tag === "Best Seller" ? "#1d4ed8" : "#16a34a" }}
+            >
+              {current.tag}
+            </span>
+          )}
+
+          <h3 className="text-xl font-bold text-gray-900 mb-1">{current.name}</h3>
+          <p className="text-xs font-semibold uppercase tracking-wide mb-2" style={{ color: accent }}>
+            {current.description}
+          </p>
+          <p className="text-gray-600 text-sm leading-relaxed mb-3">{current.content}</p>
+
+          {current.variants.length > 0 && (
+            <div>
+              <p className="text-[10px] font-bold uppercase tracking-widest text-gray-400 mb-1.5">
+                Available sizes
+              </p>
+              <div className="flex flex-wrap gap-1.5">
+                {current.variants.map((v, vi) => (
+                  <span
+                    key={vi}
+                    className="text-[10px] font-semibold border rounded px-2 py-0.5"
+                    style={{
+                      borderColor: `${accent}40`,
+                      color: accent,
+                      backgroundColor: `${accent}0d`,
+                    }}
+                  >
+                    {v.size}{v.packType ? ` (${v.packType})` : ""}
+                  </span>
+                ))}
+              </div>
+            </div>
+          )}
+        </div>
+      </div>
+
+      {/* ── Prev / Next buttons ── */}
+      {!singleItem && (
+        <div className="absolute left-6 bottom-8 z-40 flex gap-3">
+          <button
+            onClick={prev}
+            className="w-12 h-12 bg-white/90 backdrop-blur-md rounded-full shadow-xl flex items-center justify-center hover:bg-amber-50 transition-colors"
+            aria-label="Previous product"
+          >
+            <svg className="w-5 h-5 text-gray-800" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={3} d="M15 19l-7-7 7-7" />
+            </svg>
+          </button>
+          <button
+            onClick={next}
+            className="w-12 h-12 bg-white/90 backdrop-blur-md rounded-full shadow-xl flex items-center justify-center hover:bg-amber-50 transition-colors"
+            aria-label="Next product"
+          >
+            <svg className="w-5 h-5 text-gray-800" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={3} d="M9 5l7 7-7 7" />
+            </svg>
+          </button>
+        </div>
+      )}
+
+      {/* ── Right thumbnail rail ── */}
+      {gallery.length > 0 && (
+        <div className="absolute right-6 bottom-8 z-40 flex flex-col gap-2">
+          {gallery.map((src, gi) => (
+            <button
+              key={gi}
+              onClick={() => setSelectedThumb({ src, name: current.name })}
+              className="w-14 h-14 rounded-lg overflow-hidden shadow-lg transition-all duration-300 hover:scale-110 ring-2 ring-transparent hover:ring-blue-400"
+            >
+              <img src={src} alt={`${current.name} ${gi + 1}`} className="w-full h-full object-cover" />
+            </button>
+          ))}
+        </div>
+      )}
+
+      {/* ── Dot progress ── */}
+      {!singleItem && (
+        <div className="absolute bottom-8 left-1/2 -translate-x-1/2 flex gap-2 z-10">
+          {currentItems.map((_, i) => (
+            <button
+              key={i}
+              onClick={() => jumpTo(i)}
+              className="h-2 rounded-full transition-all"
+              style={{
+                width: i === currentIndex ? "1.75rem" : "0.5rem",
+                backgroundColor: i === currentIndex ? accent : "#d1d5db",
+              }}
+              aria-label={`Go to product ${i + 1}`}
+            />
+          ))}
+        </div>
+      )}
+
+      {/* ── Thumbnail lightbox modal ── */}
+      {selectedThumb && (
+        <div
+          className="fixed inset-0 z-50 bg-black/80 flex items-center justify-center p-8"
+          onClick={() => setSelectedThumb(null)}
+        >
+          <div className="relative max-w-3xl max-h-full" onClick={(e) => e.stopPropagation()}>
+            <img
+              src={selectedThumb.src}
+              alt={selectedThumb.name}
+              className="w-full h-full object-contain rounded-2xl shadow-2xl max-h-[80vh]"
+            />
+            <button
+              onClick={() => setSelectedThumb(null)}
+              className="absolute top-3 right-3 w-10 h-10 bg-white rounded-full flex items-center justify-center hover:bg-gray-100 transition-colors shadow-lg"
+              aria-label="Close"
+            >
+              <svg className="w-5 h-5 text-gray-800" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+              </svg>
+            </button>
+            <div className="absolute bottom-3 left-1/2 -translate-x-1/2 bg-white/90 backdrop-blur-md px-5 py-2 rounded-full shadow">
+              <p className="text-gray-800 text-sm font-semibold">{selectedThumb.name}</p>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
-}
+};
 
 export default Portfolio;

@@ -314,7 +314,7 @@ const Header: React.FC<HeaderProps> = ({ onCartToggle, cartCount }) => {
                     : "text-gray-700 hover:bg-gray-50"
                 }`}
               >
-                Portfolio
+                Our Products
               </button>
               <button
                 onClick={() =>
