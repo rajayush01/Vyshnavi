@@ -54,6 +54,30 @@ import d2 from "../assets/d2.png";
 import d3 from "../assets/d3.png";
 import d4 from "../assets/d4.png";
 
+import c1 from "../assets/c1.png";
+import c2 from "../assets/c2.png";
+import c3 from "../assets/c3.png";
+
+import CB1 from "../assets/CB1.png";
+import CB2 from "../assets/CB2.png";
+import CB3 from "../assets/CB3.png";
+
+import Cp1 from "../assets/Cp1.png";
+import Cp2 from "../assets/cp2.png";    
+import Cp3 from "../assets/cp3.png";
+
+import mc1 from "../assets/mc1.png";
+import mc2 from "../assets/mc2.png";
+import mc3 from "../assets/mc3.png";  
+
+
+import nc1 from "../assets/nc1.png";
+import nc2 from "../assets/nc2.png";
+
+
+import Twomc1 from "../assets/Twomc1.png";
+import Twomc2 from "../assets/Twomc2.png";
+import  Twomc3 from "../assets/Twomc3.png";
 
 // --------------- PLACEHOLDER IMAGE HELPER ---------------
 // Replace these with real `import` statements in the consuming component.
