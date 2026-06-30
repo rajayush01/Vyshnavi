@@ -1,276 +1,81 @@
 import React, { useEffect, useRef, useState } from 'react';
 import gsap from 'gsap';
 import { ScrollTrigger } from 'gsap/ScrollTrigger';
-import butter200 from "../assets/butter-200-bg.png";
-import butter200_1 from "../assets/butter-200_1.png";
-import butter200_2 from "../assets/butter-200_2.png";
-import butter200_3 from "../assets/butter-200_3.png";
-import butter500 from "../assets/butter-500-bg.png";
-import butter500_1 from "../assets/butter-500_1.png";
-import butter500_2 from "../assets/butter-500_2.png";
-import butter500_3 from "../assets/butter-500_3.png";
-import buttermilk from "../assets/buttermilk.png";
-import buttermilk_1 from "../assets/buttermilk_1.png";
-import buttermilk_2 from "../assets/buttermilk_2.png";
-import buttermilk_3 from "../assets/buttermilk_3.png";
-import buttermilk_4 from "../assets/buttermilk_4.png";
-import curd1 from "../assets/curd-pouch.png";
-import curd2 from "../assets/curd-pouch1.png";
-import curd3 from "../assets/curd-pouch2.png";
-import curd4 from "../assets/curd-pouch3.png";
-import curd_pouch from "../assets/curd.png";
-import curd_pouch_1 from "../assets/curd1.png";
-import curd_pouch_2 from "../assets/curd2.png";
-import curd_pouch_3 from "../assets/curd3.png";
-import curd_box from "../assets/curd-box.png";
-import curd_box_1 from "../assets/curd-box1.png";
-import curd_box_2 from "../assets/curd-box2.png";
-import curd_box_3 from "../assets/curd-box3.png";
-import healthy_curd_pouch from "../assets/healthy_curd_pouch.png";
-import healthy_curd_pouch_1 from "../assets/healthy_curd_pouch1.png";
-import healthy_curd_pouch_2 from "../assets/healthy_curd_pouch2.png";
-import healthy_curd_pouch_3 from "../assets/healthy_curd_pouch3.png";
-import badam_milk from "../assets/badam-milk.png";
-import badam_milk_1 from "../assets/badam-milk1.png";
-import badam_milk_2 from "../assets/badam-milk2.png";
-import badam_milk_3 from "../assets/badam-milk3.png";
-import chocolate_milk from "../assets/chocolate-milk.png";
-import chocolate_milk_1 from "../assets/chocolate-milk1.jpeg";
-import chocolate_milk_2 from "../assets/chocolate-milk2.jpeg";
-import chocolate_milk_3 from "../assets/chocolate-milk3.png";
-import spl_badam_milk from "../assets/spl-badam-milk.png";
-import spl_badam_milk_1 from "../assets/spl-badam-milk1.jpeg";
-import spl_badam_milk_2 from "../assets/spl-badam-milk2.jpeg";
-import spl_badam_milk_3 from "../assets/spl-badam-milk3.png";
+import { CATEGORIES, type ProductCategory, type ProductItem } from '../data/vyshnaviData';
 
 gsap.registerPlugin(ScrollTrigger);
 
-// // Placeholder images for local imports
-// const buttermilk = 'https://images.unsplash.com/photo-1563636619-e9143da7973b?w=800&h=1000&fit=crop';
-// const butter200 = 'https://images.unsplash.com/photo-1589985270826-4b7bb135bc9d?w=800&h=1000&fit=crop';
-// const butter500 = 'https://images.unsplash.com/photo-1596560548464-f010549b84d7?w=800&h=1000&fit=crop';
-
-const products = {
-  buttermilk: {
-    name: 'Buttermilk',
-    gradient: 'from-blue-500 to-cyan-600',
-    items: [
-      { 
-        id: 1, 
-        name: 'Buttermilk', 
-        image: buttermilk,
-        description: 'Full-bodied classic',
-        content: 'Rich in calcium and vitamins, our whole milk offers creamy goodness with all the natural fat content for maximum flavor and nutrition.',
-        gallery: [
-          buttermilk_1,
-          buttermilk_2,
-          buttermilk_3,
-          buttermilk_4
-        ]
-      },
-      // { 
-      //   id: 2, 
-      //   name: 'Skim Milk', 
-      //   image: 'https://images.unsplash.com/photo-1563636619-e9143da7973b?w=800&h=1000&fit=crop',
-      //   description: 'Light and healthy',
-      //   content: 'All the protein and calcium you need with zero fat. Perfect for those watching their calorie intake without compromising on nutrition.',
-      //   gallery: [
-      //     'https://images.unsplash.com/photo-1563636619-e9143da7973b?w=400&h=500&fit=crop',
-      //     'https://images.unsplash.com/photo-1550583724-b2692b85b150?w=400&h=500&fit=crop',
-      //     'https://images.unsplash.com/photo-1600788907416-456578634209?w=400&h=500&fit=crop',
-      //     'https://images.unsplash.com/photo-1523473827533-2a64d0d36748?w=400&h=500&fit=crop'
-      //   ]
-      // },
-      // { 
-      //   id: 3, 
-      //   name: 'Organic Milk', 
-      //   image: 'https://images.unsplash.com/photo-1550583724-b2692b85b150?w=800&h=1000&fit=crop',
-      //   description: 'Pure and natural',
-      //   content: 'Sourced from organic farms with grass-fed cows, free from antibiotics and synthetic hormones. Taste the difference of authentic organic farming.',
-      //   gallery: [
-      //     'https://images.unsplash.com/photo-1550583724-b2692b85b150?w=400&h=500&fit=crop',
-      //     'https://images.unsplash.com/photo-1523473827533-2a64d0d36748?w=400&h=500&fit=crop',
-      //     'https://images.unsplash.com/photo-1563636619-e9143da7973b?w=400&h=500&fit=crop',
-      //     'https://images.unsplash.com/photo-1600788907416-456578634209?w=400&h=500&fit=crop'
-      //   ]
-      // },
-      // { 
-      //   id: 4, 
-      //   name: 'Flavored Milk', 
-      //   image: 'https://images.unsplash.com/photo-1481671703460-040cb8a2d909?w=800&h=1000&fit=crop',
-      //   description: 'Delicious varieties',
-      //   content: 'From chocolate to strawberry, enjoy your favorite flavors with the goodness of real milk. Perfect for kids and adults alike.',
-      //   gallery: [
-      //     'https://images.unsplash.com/photo-1481671703460-040cb8a2d909?w=400&h=500&fit=crop',
-      //     'https://images.unsplash.com/photo-1628773822990-202d14ca5ca9?w=400&h=500&fit=crop',
-      //     'https://images.unsplash.com/photo-1563636619-e9143da7973b?w=400&h=500&fit=crop',
-      //     'https://images.unsplash.com/photo-1550583724-b2692b85b150?w=400&h=500&fit=crop'
-      //   ]
-      // }
-    ]
-  },
-  curd: {
-    name: 'Curd',
-    gradient: 'from-amber-500 to-orange-600',
-    items: [
-      { 
-        id: 5, 
-        name: '2 Mini Curd Pouch', 
-        image: curd1,
-        description: 'Sharp and savory',
-        content: 'Aged to perfection, our cheddar delivers a bold, tangy flavor that elevates any dish from sandwiches to gourmet platters.',
-        gallery: [
-          curd2,
-          curd3,
-          curd4,
-        ]
-      },
-      { 
-        id: 6, 
-        name: 'Curd Pouch', 
-        image: curd_pouch,
-        description: 'Soft and stretchy',
-        content: 'Fresh mozzarella with a delicate texture perfect for pizzas, caprese salads, and melting over your favorite Italian dishes.',
-        gallery: [
-          curd_pouch_1,
-          curd_pouch_2,
-          curd_pouch_3,
-        ]
-      },
-      { 
-        id: 7, 
-        name: 'Healthy Curd Box', 
-        image: curd_box,
-        description: 'Aged excellence',
-        content: 'Authentic aged parmesan with a nutty, complex flavor profile. Grate it over pasta or enjoy it in chunks with wine.',
-        gallery: [
-          curd_box_1,
-          curd_box_2,
-          curd_box_3,
-        ]
-      },
-      { 
-        id: 8, 
-        name: 'Healthy Curd Pouch', 
-        image: healthy_curd_pouch,
-        description: 'Bold and distinctive',
-        content: 'For the adventurous palate. Rich, creamy texture with sharp blue veins that create an unforgettable taste experience.',
-        gallery: [
-          healthy_curd_pouch_1,
-          healthy_curd_pouch_2,
-          healthy_curd_pouch_3,
-        ]
-      }
-    ]
-  },
-  flavoured_milk: {
-    name: 'Flavoured Milk',
-    gradient: 'from-pink-500 to-rose-600',
-    items: [
-      { 
-        id: 9, 
-        name: 'Badam Milk', 
-        image: badam_milk,
-        description: 'Thick and protein-rich',
-        content: 'Strained to creamy perfection, our Greek yogurt packs double the protein with a luxuriously thick texture. Perfect for breakfast or snacks.',
-        gallery: [
-          badam_milk_1,
-          badam_milk_2,
-          badam_milk_3,
-        ]
-      },
-      { 
-        id: 10, 
-        name: 'Chocolate Milk', 
-        image: chocolate_milk,
-        description: 'Simple and versatile',
-        content: 'Classic unflavored yogurt with live cultures. Use it in smoothies, cooking, or enjoy with your favorite toppings and sweeteners.',
-        gallery: [
-          chocolate_milk_1,
-          chocolate_milk_2,
-          chocolate_milk_3,
-        ]
-      },
-      { 
-        id: 11, 
-        name: 'Special Badam Milk', 
-        image: spl_badam_milk,
-        description: 'Naturally sweet',
-        content: 'Blended with real fruit pieces for a burst of natural sweetness. A delicious and nutritious treat that the whole family will love.',
-        gallery: [
-          spl_badam_milk_1,
-          spl_badam_milk_2,
-          spl_badam_milk_3,
-        ]
-      },
-    ]
-  },
-  butter: {
-    name: 'Butter',
-    gradient: 'from-yellow-400 to-amber-500',
-    items: [
-      { 
-        id: 13, 
-        name: 'Butter 200g', 
-        image: butter200,
-        description: 'Classic everyday butter',
-        content: 'Perfect balance of creamy butter and salt. Ideal for spreading on toast, cooking, and adding rich flavor to any recipe.',
-        gallery: [
-          butter200_1,
-          butter200_2,
-          butter200_3,
-        ]
-      },
-      { 
-        id: 14, 
-        name: 'Butter 500g', 
-        image: butter500,
-        description: 'Pure churned cream',
-        content: 'The baker\'s choice. Control your seasoning with pure, unsalted butter that lets you taste the true flavor of cream.',
-        gallery: [
-          butter500_1,
-          butter500_2,
-          butter500_3,
-        ]
-      },
-    ]
-  }
+// ── Category → gradient mapping ──────────────────────────────────────────────
+// Tailwind classes can't be dynamic, so we map each category key to a fixed
+// gradient. Add more keys here if new categories are added to vyshnaviData.ts.
+const CATEGORY_GRADIENTS: Record<string, string> = {
+  milk:       'from-blue-500 to-cyan-600',
+  curd:       'from-green-500 to-emerald-600',
+  beverages:  'from-purple-500 to-violet-600',
+  paneer:     'from-orange-400 to-amber-500',
+  butter:     'from-yellow-400 to-amber-500',
+  ghee:       'from-amber-500 to-orange-600',
+  sweets:     'from-pink-500 to-rose-600',
 };
 
-const VerticalScrollAnimation: React.FC = () => {
-  const containerRef = useRef<HTMLDivElement>(null);
-  const sectionRefs = useRef<(HTMLDivElement | null)[]>([]);
-  const [selectedCategory, setSelectedCategory] = useState<string>('buttermilk');
-  const [selectedGallery, setSelectedGallery] = useState<{item: any, imageIndex: number} | null>(null);
+// Fallback gradient for any future categories not yet mapped
+const FALLBACK_GRADIENT = 'from-slate-500 to-gray-600';
 
-  // Get the index of first item of selected category
-  const getCategoryScrollIndex = (categoryKey: string) => {
-    let index = 0;
-    for (const [key, category] of Object.entries(products)) {
-      if (key === categoryKey) return index;
-      index += category.items.length;
-    }
-    return 0;
-  };
+// ── Flat section shape consumed by the scroll animation ──────────────────────
+interface FlatSection extends ProductItem {
+  categoryKey: string;
+  categoryName: string;
+  gradient: string;
+}
 
-  // Flatten all products into sections
-  const allSections = Object.entries(products).flatMap(([key, category]) => 
-    category.items.map(item => ({
-      categoryKey: key,
-      category: category.name,
-      gradient: category.gradient,
-      ...item
+// ── Build flat list from CATEGORIES ─────────────────────────────────────────
+const buildSections = (): FlatSection[] =>
+  CATEGORIES.flatMap((cat: ProductCategory) =>
+    cat.items.map((item: ProductItem) => ({
+      ...item,
+      categoryKey:  cat.key,
+      categoryName: cat.name,
+      gradient:     CATEGORY_GRADIENTS[cat.key] ?? FALLBACK_GRADIENT,
     }))
   );
 
-useEffect(() => {
-    const sections = sectionRefs.current.filter(s => s !== null);
+// ── Placeholder image component ──────────────────────────────────────────────
+// Renders a branded placeholder when image is an empty string (PH).
+const ProductImage: React.FC<{
+  src: string;
+  alt: string;
+  className?: string;
+}> = ({ src, alt, className = '' }) => {
+  if (src) {
+    return <img src={src} alt={alt} className={className} />;
+  }
+  return (
+    <div className={`${className} flex flex-col items-center justify-center bg-white/10 backdrop-blur-sm border-2 border-white/20 rounded-3xl`}>
+      <span className="text-6xl mb-3 opacity-60">🥛</span>
+      <p className="text-white/60 text-sm font-medium text-center px-4">{alt}</p>
+    </div>
+  );
+};
+
+// ── Main component ───────────────────────────────────────────────────────────
+const VerticalScrollAnimation: React.FC = () => {
+  const containerRef    = useRef<HTMLDivElement>(null);
+  const sectionRefs     = useRef<(HTMLDivElement | null)[]>([]);
+  const [activeCategory, setActiveCategory] = useState<string>(CATEGORIES[0]?.key ?? '');
+  const [selectedGallery, setSelectedGallery] = useState<{
+    item: FlatSection;
+    imageIndex: number;
+  } | null>(null);
+
+  const allSections = buildSections();
+
+  // ── GSAP stacked scroll setup ─────────────────────────────────────────────
+  useEffect(() => {
+    const sections = sectionRefs.current.filter((s): s is HTMLDivElement => s !== null);
     if (sections.length === 0) return;
 
-    gsap.set(sections.slice(1), {
-      yPercent: 100,
-      opacity: 0,
-    });
+    // Stack all sections below the first off-screen
+    gsap.set(sections.slice(1), { yPercent: 100, opacity: 0 });
 
     sections.forEach((section, index) => {
       if (index === 0) return;
@@ -284,108 +89,156 @@ useEffect(() => {
           start: 'top top',
           end: 'bottom top',
           scrub: 1,
-          onEnter: () => {
-            setSelectedCategory(allSections[index].categoryKey);
-          },
-          onEnterBack: () => {
-            setSelectedCategory(allSections[index].categoryKey);
-          }
+          onEnter:     () => setActiveCategory(allSections[index].categoryKey),
+          onEnterBack: () => setActiveCategory(allSections[index].categoryKey),
         },
       });
     });
 
     return () => {
-      ScrollTrigger.getAll().forEach(trigger => trigger.kill());
+      ScrollTrigger.getAll().forEach(t => t.kill());
     };
   }, []);
 
-  // const scrollToCategory = (categoryKey: string) => {
-  //   const index = getCategoryScrollIndex(categoryKey);
-  //   setSelectedCategory(categoryKey);
-  //   sectionRefs.current[index]?.scrollIntoView({ behavior: 'smooth' });
-  // };
+  // ── Category pill navigation ──────────────────────────────────────────────
+  const scrollToCategory = (categoryKey: string) => {
+    const firstIndex = allSections.findIndex(s => s.categoryKey === categoryKey);
+    if (firstIndex === -1) return;
+    setActiveCategory(categoryKey);
+    sectionRefs.current[firstIndex]?.scrollIntoView({ behavior: 'smooth' });
+  };
 
+  // ── Render ────────────────────────────────────────────────────────────────
   return (
     <>
-      {/* Fixed Category Navigation */}
-      {/* <div className="fixed top-8 left-1/2 transform -translate-x-1/2 z-50 flex gap-3 flex-wrap justify-center px-4">
-        {Object.keys(products).map((productKey) => (
+      {/* ── Fixed category navigation pills ── */}
+      <div className="fixed top-6 left-1/2 -translate-x-1/2 z-50 flex gap-2 flex-wrap justify-center px-4 max-w-[90vw]">
+        {CATEGORIES.map((cat) => (
           <button
-            key={productKey}
-            onClick={() => scrollToCategory(productKey)}
-            className={`px-6 py-3 rounded-full font-semibold text-sm uppercase tracking-wide transition-all duration-300 ${
-              selectedCategory === productKey
-                ? 'bg-blue-600 text-white shadow-lg scale-105'
-                : 'bg-white text-gray-700 hover:bg-blue-50 shadow-md'
+            key={cat.key}
+            onClick={() => scrollToCategory(cat.key)}
+            className={`px-4 py-2 rounded-full text-xs font-semibold uppercase tracking-wide transition-all duration-300 shadow-md ${
+              activeCategory === cat.key
+                ? 'bg-white text-gray-900 scale-105 shadow-lg'
+                : 'bg-white/20 backdrop-blur-md text-white hover:bg-white/30'
             }`}
           >
-            {products[productKey].name}
+            {cat.name}
           </button>
         ))}
-      </div> */}
+      </div>
 
+      {/* ── Scroll sections ── */}
       <div ref={containerRef} className="relative mt-28">
         {allSections.map((item, index) => (
           <div
             key={item.id}
-            ref={el => sectionRefs.current[index] = el}
+            ref={el => { sectionRefs.current[index] = el; }}
             className={`h-screen w-full flex items-center justify-center bg-gradient-to-br ${item.gradient} sticky top-0 overflow-hidden`}
           >
-            {/* Large Background Text */}
-            <div className="absolute inset-0 flex items-center justify-center pointer-events-none opacity-10">
-              <h1 className="text-[8rem] md:text-[12rem] font-black text-white whitespace-nowrap select-none">
+            {/* Watermark text */}
+            <div className="absolute inset-0 flex items-center justify-center pointer-events-none opacity-[0.07]">
+              <h1 className="text-[6rem] md:text-[10rem] font-black text-white whitespace-nowrap select-none tracking-tighter">
                 {item.name.toUpperCase()}
               </h1>
             </div>
 
             <div className="container mx-auto px-6 md:px-12 grid md:grid-cols-2 gap-8 items-center relative z-10">
-              {/* Product Image with Gallery Thumbnails */}
-              <div className="order-1 md:order-2 flex flex-col items-center gap-6">
-                <div className="relative w-72 h-96 md:w-96 md:h-[500px]">
-                  <div className="absolute inset-0 rounded-3xl transform rotate-3"></div>
-                  <img
+
+              {/* ── Right: image + gallery ── */}
+              <div className="order-1 md:order-2 flex flex-col items-center gap-5">
+                <div className="relative w-64 h-80 md:w-80 md:h-[440px]">
+                  <div className="absolute inset-0 rounded-3xl bg-white/10 transform rotate-3 blur-sm" />
+                  <ProductImage
                     src={item.image}
                     alt={item.name}
-                    className="relative w-full h-full object-cover rounded-3xl mt-10"
+                    className="relative w-full h-full object-cover rounded-3xl mt-8 shadow-2xl"
                   />
+
+                  {/* Tag badge */}
+                  {item.tag && (
+                    <span className="absolute top-3 left-3 bg-white/90 backdrop-blur-sm text-gray-900 text-xs font-bold px-3 py-1 rounded-full shadow-md">
+                      {item.tag}
+                    </span>
+                  )}
+
+                  {/* Rating */}
+                  {item.rating && (
+                    <div className="absolute bottom-3 right-3 bg-black/40 backdrop-blur-md text-white text-xs font-semibold px-3 py-1.5 rounded-full flex items-center gap-1">
+                      <span className="text-yellow-400">★</span>
+                      {item.rating}
+                      {item.reviews && (
+                        <span className="opacity-70 ml-1">({item.reviews})</span>
+                      )}
+                    </div>
+                  )}
                 </div>
 
-                {/* Gallery Thumbnails */}
-                <div className="flex gap-3">
-                  {item.gallery.slice(0, 4).map((galleryImg, idx) => (
-                    <button
-                      key={idx}
-                      onClick={() => setSelectedGallery({ item, imageIndex: idx })}
-                      className="w-16 h-16 rounded-lg overflow-hidden shadow-lg transition-all duration-300 hover:scale-110 border-2 border-white/50"
-                    >
-                      <img src={galleryImg} alt={`${item.name} ${idx + 1}`} className="w-full h-full object-cover" />
-                    </button>
-                  ))}
-                </div>
+                {/* Gallery thumbnails — only shown if gallery images exist */}
+                {item.gallery.filter(Boolean).length > 0 && (
+                  <div className="flex gap-3">
+                    {item.gallery.filter(Boolean).slice(0, 4).map((galleryImg, idx) => (
+                      <button
+                        key={idx}
+                        onClick={() => setSelectedGallery({ item, imageIndex: idx })}
+                        className="w-14 h-14 rounded-xl overflow-hidden shadow-lg transition-all duration-300 hover:scale-110 border-2 border-white/40 hover:border-white"
+                      >
+                        <img
+                          src={galleryImg}
+                          alt={`${item.name} view ${idx + 1}`}
+                          className="w-full h-full object-cover"
+                        />
+                      </button>
+                    ))}
+                  </div>
+                )}
               </div>
 
-              {/* Text Content */}
-              <div className="text-white space-y-6 order-2 md:order-1">
-                <div className="inline-block px-4 py-2 bg-white/20 backdrop-blur-sm rounded-full text-sm font-semibold mb-2">
-                  {item.category}
+              {/* ── Left: text content ── */}
+              <div className="text-white space-y-5 order-2 md:order-1">
+                {/* Category badge */}
+                <div className="inline-flex items-center gap-2 px-4 py-2 bg-white/20 backdrop-blur-sm rounded-full text-xs font-bold uppercase tracking-widest">
+                  {item.categoryName}
                 </div>
-                <div className="space-y-3">
-                  <p className="text-xl md:text-2xl font-medium opacity-90">{item.description}</p>
-                  <h1 className="text-5xl md:text-7xl font-bold leading-tight">{item.name}</h1>
+
+                <div className="space-y-2">
+                  <p className="text-lg md:text-xl font-medium opacity-80 leading-snug">
+                    {item.description}
+                  </p>
+                  <h2 className="text-4xl md:text-6xl font-black leading-tight">
+                    {item.name}
+                  </h2>
                 </div>
-                <p className="text-lg md:text-xl opacity-90 leading-relaxed max-w-xl">
+
+                <p className="text-base md:text-lg opacity-85 leading-relaxed max-w-lg">
                   {item.content}
                 </p>
 
-                <button className="bg-white text-gray-900 px-8 py-4 rounded-full font-semibold text-lg hover:bg-opacity-90 transition-all transform hover:scale-105 shadow-xl">
+                {/* Variants */}
+                {item.variants.length > 0 && (
+                  <div className="flex flex-wrap gap-2">
+                    {item.variants.map((v, i) => (
+                      <span
+                        key={i}
+                        className="px-3 py-1.5 bg-white/15 backdrop-blur-sm rounded-full text-xs font-semibold border border-white/25"
+                      >
+                        {v.size}
+                        {v.packType ? ` · ${v.packType}` : ''}
+                        {v.price ? ` · ₹${v.price}` : ''}
+                      </span>
+                    ))}
+                  </div>
+                )}
+
+                <button className="mt-2 bg-white text-gray-900 px-7 py-3.5 rounded-full font-bold text-sm uppercase tracking-wide hover:bg-opacity-90 transition-all transform hover:scale-105 shadow-xl">
                   View Details
                 </button>
               </div>
             </div>
 
-            {/* Scroll Indicator (only on first section) */}
+            {/* Scroll indicator on first section */}
             {index === 0 && (
-              <div className="absolute bottom-8 left-1/2 transform -translate-x-1/2 text-white opacity-70 animate-bounce">
+              <div className="absolute bottom-8 left-1/2 -translate-x-1/2 text-white opacity-60 animate-bounce">
                 <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 14l-7 7m0 0l-7-7m7 7V3" />
                 </svg>
@@ -395,52 +248,96 @@ useEffect(() => {
         ))}
       </div>
 
-      {/* Gallery Modal */}
+      {/* ── Gallery lightbox modal ── */}
       {selectedGallery && (
-        <div 
+        <div
           className="fixed inset-0 z-[100] bg-black/90 flex items-center justify-center p-4 md:p-8"
           onClick={() => setSelectedGallery(null)}
         >
-          <div className="relative max-w-5xl w-full">
-            <img 
-              src={selectedGallery.item.gallery[selectedGallery.imageIndex]} 
+          <div className="relative max-w-4xl w-full" onClick={e => e.stopPropagation()}>
+            <img
+              src={selectedGallery.item.gallery[selectedGallery.imageIndex]}
               alt={selectedGallery.item.name}
               className="w-full h-auto max-h-[80vh] object-contain rounded-2xl shadow-2xl"
-              onClick={(e) => e.stopPropagation()}
             />
+
+            {/* Close button */}
             <button
               onClick={() => setSelectedGallery(null)}
-              className="absolute top-4 right-4 w-10 h-10 md:w-12 md:h-12 bg-white rounded-full flex items-center justify-center hover:bg-gray-100 transition-colors shadow-xl"
+              className="absolute top-4 right-4 w-11 h-11 bg-white rounded-full flex items-center justify-center hover:bg-gray-100 transition-colors shadow-xl"
             >
-              <svg className="w-5 h-5 md:w-6 md:h-6 text-gray-800" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <svg className="w-5 h-5 text-gray-800" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
               </svg>
             </button>
-            <div className="absolute bottom-4 left-1/2 transform -translate-x-1/2 bg-white/90 backdrop-blur-md px-4 md:px-6 py-2 md:py-3 rounded-full">
-              <p className="text-sm md:text-base text-gray-800 font-semibold">{selectedGallery.item.name}</p>
+
+            {/* Product name label */}
+            <div className="absolute bottom-16 left-1/2 -translate-x-1/2">
+              <div className="bg-white/90 backdrop-blur-md px-5 py-2.5 rounded-full shadow-lg">
+                <p className="text-sm text-gray-800 font-semibold whitespace-nowrap">
+                  {selectedGallery.item.name}
+                </p>
+              </div>
             </div>
 
-            {/* Gallery Navigation Dots */}
-            <div className="absolute bottom-16 md:bottom-20 left-1/2 transform -translate-x-1/2 flex gap-2">
-              {selectedGallery.item.gallery.map((_: any, idx: number) => (
+            {/* Navigation dots */}
+            <div className="absolute bottom-5 left-1/2 -translate-x-1/2 flex gap-2">
+              {selectedGallery.item.gallery.filter(Boolean).map((_: string, idx: number) => (
                 <button
                   key={idx}
-                  onClick={(e) => {
+                  onClick={e => {
                     e.stopPropagation();
                     setSelectedGallery({ ...selectedGallery, imageIndex: idx });
                   }}
-                  className={`h-2 rounded-full transition-all ${
-                    idx === selectedGallery.imageIndex ? 'bg-white w-8' : 'bg-white/50 w-2'
+                  className={`h-2 rounded-full transition-all duration-300 ${
+                    idx === selectedGallery.imageIndex
+                      ? 'bg-white w-7'
+                      : 'bg-white/40 w-2 hover:bg-white/70'
                   }`}
                 />
               ))}
             </div>
+
+            {/* Arrow navigation */}
+            {selectedGallery.item.gallery.filter(Boolean).length > 1 && (
+              <>
+                <button
+                  onClick={e => {
+                    e.stopPropagation();
+                    const total = selectedGallery.item.gallery.filter(Boolean).length;
+                    setSelectedGallery({
+                      ...selectedGallery,
+                      imageIndex: (selectedGallery.imageIndex - 1 + total) % total,
+                    });
+                  }}
+                  className="absolute left-4 top-1/2 -translate-y-1/2 w-10 h-10 bg-white/20 backdrop-blur-sm hover:bg-white/40 rounded-full flex items-center justify-center text-white transition-all"
+                >
+                  <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
+                  </svg>
+                </button>
+                <button
+                  onClick={e => {
+                    e.stopPropagation();
+                    const total = selectedGallery.item.gallery.filter(Boolean).length;
+                    setSelectedGallery({
+                      ...selectedGallery,
+                      imageIndex: (selectedGallery.imageIndex + 1) % total,
+                    });
+                  }}
+                  className="absolute right-4 top-1/2 -translate-y-1/2 w-10 h-10 bg-white/20 backdrop-blur-sm hover:bg-white/40 rounded-full flex items-center justify-center text-white transition-all"
+                >
+                  <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
+                  </svg>
+                </button>
+              </>
+            )}
           </div>
         </div>
       )}
     </>
   );
 };
-
 
 export default VerticalScrollAnimation;

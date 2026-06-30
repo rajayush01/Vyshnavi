@@ -1,78 +1,15 @@
 /**
  * Portfolio.tsx — Vyshnavi Dairy Product Showcase
  *
- * DESIGN: category tabs across the top; a subtype pill-row sits beneath
- * them listing every product in the active category. Clicking a pill
- * instantly focuses the GSAP stacked carousel on that product.
- * Single-item categories skip the pill-row. The right column shows the
- * current product's description + all available variants; the bottom-right
- * shows a row of thumbnails (gallery images if present, otherwise the
- * product's main image as the sole thumb).
- *
- * DATA: imported entirely from vyshnaviData.ts — no local product arrays.
+ * Images and gallery are read directly from item.image / item.gallery
+ * as defined in vyshnaviData.ts. No local IMAGE_MAP needed.
  */
 
 import React, { useEffect, useRef, useState, useCallback } from "react";
 import { gsap } from "gsap";
-
-// ── Real asset imports ───────────────────────────────────────────────────
-import butter200   from "../assets/butter-200-bg.png";
-import butter200_1 from "../assets/butter-200_1.png";
-import butter200_2 from "../assets/butter-200_2.png";
-import butter200_3 from "../assets/butter-200_3.png";
-import butter500   from "../assets/butter-500-bg.png";
-import butter500_1 from "../assets/butter-500_1.png";
-import butter500_2 from "../assets/butter-500_2.png";
-import butter500_3 from "../assets/butter-500_3.png";
-import buttermilk   from "../assets/buttermilk.png";
-import buttermilk_1 from "../assets/buttermilk_1.png";
-import buttermilk_2 from "../assets/buttermilk_2.png";
-import buttermilk_3 from "../assets/buttermilk_3.png";
-import buttermilk_4 from "../assets/buttermilk_4.png";
-import curd1         from "../assets/curd-pouch.png";
-import curd2         from "../assets/curd-pouch1.png";
-import curd3         from "../assets/curd-pouch2.png";
-import curd4         from "../assets/curd-pouch3.png";
-import curd_pouch   from "../assets/curd.png";
-import curd_pouch_1 from "../assets/curd1.png";
-import curd_pouch_2 from "../assets/curd2.png";
-import curd_pouch_3 from "../assets/curd3.png";
-import curd_box     from "../assets/curd-box.png";
-import curd_box_1   from "../assets/curd-box1.png";
-import curd_box_2   from "../assets/curd-box2.png";
-import curd_box_3   from "../assets/curd-box3.png";
-import healthy_curd_pouch   from "../assets/healthy_curd_pouch.png";
-import healthy_curd_pouch_1 from "../assets/healthy_curd_pouch1.png";
-import healthy_curd_pouch_2 from "../assets/healthy_curd_pouch2.png";
-import healthy_curd_pouch_3 from "../assets/healthy_curd_pouch3.png";
-import badam_milk   from "../assets/badam-milk.png";
-import badam_milk_1 from "../assets/badam-milk1.png";
-import badam_milk_2 from "../assets/badam-milk2.png";
-import badam_milk_3 from "../assets/badam-milk3.png";
-import chocolate_milk   from "../assets/chocolate-milk.png";
-import chocolate_milk_1 from "../assets/chocolate-milk1.jpeg";
-import chocolate_milk_2 from "../assets/chocolate-milk2.jpeg";
-import chocolate_milk_3 from "../assets/chocolate-milk3.png";
-import spl_badam_milk   from "../assets/spl-badam-milk.png";
-import spl_badam_milk_1 from "../assets/spl-badam-milk1.jpeg";
-import spl_badam_milk_2 from "../assets/spl-badam-milk2.jpeg";
-import spl_badam_milk_3 from "../assets/spl-badam-milk3.png";
-
-// ── Data source ──────────────────────────────────────────────────────────
 import { CATEGORIES, type ProductCategory, type ProductItem } from "../data/vyshnaviData";
 
-// ── Image map ────────────────────────────────────────────────────────────
-const IMAGE_MAP: Record<number, { primary: string; gallery: string[] }> = {
-  301: { primary: buttermilk,     gallery: [buttermilk_1, buttermilk_2, buttermilk_3, buttermilk_4] },
-  304: { primary: spl_badam_milk, gallery: [spl_badam_milk_1, spl_badam_milk_2, spl_badam_milk_3] },
-  305: { primary: badam_milk,     gallery: [badam_milk_1, badam_milk_2, badam_milk_3] },
-  306: { primary: chocolate_milk, gallery: [chocolate_milk_1, chocolate_milk_2, chocolate_milk_3] },
-  201: { primary: curd1,          gallery: [curd2, curd3, curd4] },
-  202: { primary: curd_pouch,     gallery: [curd_pouch_1, curd_pouch_2, curd_pouch_3] },
-  203: { primary: curd_box,       gallery: [curd_box_1, curd_box_2, curd_box_3] },
-  501: { primary: butter200,      gallery: [butter200_1, butter200_2, butter200_3] },
-  502: { primary: butter500,      gallery: [butter500_1, butter500_2, butter500_3] },
-};
+// ── Category helpers (derived from data) ─────────────────────────────────
 
 const CATEGORY_GRADIENT: Record<string, string> = {
   milk:      "linear-gradient(135deg,#bfdbfe,#dbeafe)",
@@ -84,29 +21,7 @@ const CATEGORY_GRADIENT: Record<string, string> = {
   sweets:    "linear-gradient(135deg,#fbcfe8,#fdf2f8)",
 };
 
-// Category accent colours for the active subtype pill
-const CATEGORY_ACCENT: Record<string, string> = {
-  milk:      "#1d4ed8",
-  curd:      "#15803d",
-  beverages: "#7e22ce",
-  paneer:    "#c2410c",
-  butter:    "#a16207",
-  ghee:      "#b45309",
-  sweets:    "#be185d",
-};
-
-function resolveImage(item: ProductItem): string {
-  return IMAGE_MAP[item.id]?.primary ?? "";
-}
-
-function resolveGallery(item: ProductItem): string[] {
-  const mapped = IMAGE_MAP[item.id]?.gallery ?? [];
-  if (mapped.length) return mapped;
-  const primary = resolveImage(item);
-  return primary ? [primary] : [];
-}
-
-// ── Sub-components ───────────────────────────────────────────────────────
+// ── Sub-components ────────────────────────────────────────────────────────
 
 interface PlaceholderProps { category: string; name: string }
 
@@ -123,7 +38,7 @@ const ImagePlaceholder: React.FC<PlaceholderProps> = ({ category, name }) => (
 
 interface SelectedThumb { src: string; name: string }
 
-// ── Main component ───────────────────────────────────────────────────────
+// ── Main component ────────────────────────────────────────────────────────
 
 const Portfolio: React.FC = () => {
   const [activeCategoryKey, setActiveCategoryKey] = useState<string>(CATEGORIES[0].key);
@@ -140,9 +55,9 @@ const Portfolio: React.FC = () => {
     CATEGORIES.find((c) => c.key === activeCategoryKey) ?? CATEGORIES[0];
   const currentItems: ProductItem[] = activeCategory.items;
   const singleItem = currentItems.length === 1;
-  const accent = CATEGORY_ACCENT[activeCategoryKey] ?? "#1d4ed8";
+  const accent = activeCategory.accentHex;
 
-  // ── Carousel helpers ───────────────────────────────────────────────────
+  // ── Carousel helpers ──────────────────────────────────────
 
   const getPos = (idx: number, current: number, total: number) => {
     const diff = (idx - current + total) % total;
@@ -152,8 +67,8 @@ const Portfolio: React.FC = () => {
     const side  = diff <= total / 2 ? 1 : -1;
     const depth = Math.min(diff, total - diff);
     return {
-      x:  side > 0 ? "65%" : "35%",
-      tx: "-50%",
+      x:       side > 0 ? "65%" : "35%",
+      tx:      "-50%",
       scale:   Math.max(0.25, 0.75 - depth * 0.15),
       y:       "50%",
       ty:      "-50%",
@@ -186,7 +101,6 @@ const Portfolio: React.FC = () => {
 
     setCurrentIndex(newIdx);
 
-    // Scroll the pill row so the active pill is in view
     if (pillsRef.current) {
       const pill = pillsRef.current.children[newIdx] as HTMLElement | undefined;
       pill?.scrollIntoView({ behavior: "smooth", block: "nearest", inline: "center" });
@@ -234,7 +148,7 @@ const Portfolio: React.FC = () => {
     });
   };
 
-  // ── Init on category change ────────────────────────────────────────────
+  // ── Init on category change ────────────────────────────────
   useEffect(() => {
     const t = setTimeout(() => {
       currentItems.forEach((_, i) => {
@@ -262,11 +176,12 @@ const Portfolio: React.FC = () => {
     };
   }, [activeCategoryKey]); // eslint-disable-line react-hooks/exhaustive-deps
 
-  const current    = currentItems[currentIndex];
-  const gallery    = resolveGallery(current);
-  const primaryImg = resolveImage(current);
+  const current = currentItems[currentIndex];
+  // Read image and gallery directly from the data item
+  const gallery    = current.gallery.length > 0 ? current.gallery : (current.image ? [current.image] : []);
+  const primaryImg = current.image;
 
-  // ── Render ─────────────────────────────────────────────────────────────
+  // ── Render ────────────────────────────────────────────────
   return (
     <div className="relative w-full h-screen bg-gradient-to-br from-blue-50 via-white to-blue-100 overflow-hidden">
 
@@ -281,11 +196,7 @@ const Portfolio: React.FC = () => {
                 ? "text-white shadow-lg scale-105"
                 : "bg-white text-gray-700 hover:bg-amber-50 shadow-md"
             }`}
-            style={
-              activeCategoryKey === cat.key
-                ? { backgroundColor: accent }
-                : undefined
-            }
+            style={activeCategoryKey === cat.key ? { backgroundColor: accent } : undefined}
           >
             {cat.name}
           </button>
@@ -295,7 +206,6 @@ const Portfolio: React.FC = () => {
       {/* ── Subtype Pill Row ── */}
       {!singleItem && (
         <div className="absolute top-[7.5rem] left-0 right-0 z-50 flex justify-center px-6 mt-8">
-          {/* Subtle container with scroll affordance */}
           <div
             ref={pillsRef}
             className="flex gap-2 overflow-x-auto pb-1 max-w-3xl scrollbar-hide"
@@ -310,32 +220,18 @@ const Portfolio: React.FC = () => {
                   className="flex-shrink-0 flex items-center gap-1.5 px-3 py-1.5 rounded-full text-[11px] font-semibold transition-all duration-300 whitespace-nowrap"
                   style={
                     isActive
-                      ? {
-                          backgroundColor: accent,
-                          color: "#fff",
-                          boxShadow: `0 2px 12px ${accent}55`,
-                          transform: "scale(1.06)",
-                        }
-                      : {
-                          backgroundColor: "rgba(255,255,255,0.85)",
-                          color: "#374151",
-                          border: "1px solid rgba(0,0,0,0.08)",
-                        }
+                      ? { backgroundColor: accent, color: "#fff", boxShadow: `0 2px 12px ${accent}55`, transform: "scale(1.06)" }
+                      : { backgroundColor: "rgba(255,255,255,0.85)", color: "#374151", border: "1px solid rgba(0,0,0,0.08)" }
                   }
                 >
-                  {/* Active dot indicator */}
-                  {isActive && (
-                    <span
-                      className="inline-block w-1.5 h-1.5 rounded-full bg-white opacity-80"
-                    />
-                  )}
+                  {isActive && <span className="inline-block w-1.5 h-1.5 rounded-full bg-white opacity-80" />}
                   {item.name}
                   {item.tag && (
                     <span
                       className="inline-block text-[9px] font-bold uppercase tracking-wider px-1.5 py-0.5 rounded-full"
                       style={{
                         backgroundColor: isActive ? "rgba(255,255,255,0.25)" : accent,
-                        color: isActive ? "#fff" : "#fff",
+                        color: "#fff",
                       }}
                     >
                       {item.tag === "Best Seller" ? "★" : "New"}
@@ -367,11 +263,11 @@ const Portfolio: React.FC = () => {
             ref={(el) => (itemsRef.current[i] = el)}
             className="absolute opacity-0 cursor-pointer"
             style={{ willChange: "transform, opacity" }}
-            onClick={() => jumpTo(i)}        // clicking a background card focuses it
+            onClick={() => jumpTo(i)}
           >
-            {resolveImage(item) ? (
+            {item.image ? (
               <img
-                src={resolveImage(item)}
+                src={item.image}
                 alt={item.name}
                 className="w-56 h-72 object-contain drop-shadow-2xl"
               />
@@ -393,13 +289,11 @@ const Portfolio: React.FC = () => {
               {current.tag}
             </span>
           )}
-
           <h3 className="text-xl font-bold text-gray-900 mb-1">{current.name}</h3>
           <p className="text-xs font-semibold uppercase tracking-wide mb-2" style={{ color: accent }}>
             {current.description}
           </p>
           <p className="text-gray-600 text-sm leading-relaxed mb-3">{current.content}</p>
-
           {current.variants.length > 0 && (
             <div>
               <p className="text-[10px] font-bold uppercase tracking-widest text-gray-400 mb-1.5">
@@ -410,11 +304,7 @@ const Portfolio: React.FC = () => {
                   <span
                     key={vi}
                     className="text-[10px] font-semibold border rounded px-2 py-0.5"
-                    style={{
-                      borderColor: `${accent}40`,
-                      color: accent,
-                      backgroundColor: `${accent}0d`,
-                    }}
+                    style={{ borderColor: `${accent}40`, color: accent, backgroundColor: `${accent}0d` }}
                   >
                     {v.size}{v.packType ? ` (${v.packType})` : ""}
                   </span>
@@ -428,20 +318,12 @@ const Portfolio: React.FC = () => {
       {/* ── Prev / Next buttons ── */}
       {!singleItem && (
         <div className="absolute left-6 bottom-8 z-40 flex gap-3">
-          <button
-            onClick={prev}
-            className="w-12 h-12 bg-white/90 backdrop-blur-md rounded-full shadow-xl flex items-center justify-center hover:bg-amber-50 transition-colors"
-            aria-label="Previous product"
-          >
+          <button onClick={prev} className="w-12 h-12 bg-white/90 backdrop-blur-md rounded-full shadow-xl flex items-center justify-center hover:bg-amber-50 transition-colors" aria-label="Previous product">
             <svg className="w-5 h-5 text-gray-800" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={3} d="M15 19l-7-7 7-7" />
             </svg>
           </button>
-          <button
-            onClick={next}
-            className="w-12 h-12 bg-white/90 backdrop-blur-md rounded-full shadow-xl flex items-center justify-center hover:bg-amber-50 transition-colors"
-            aria-label="Next product"
-          >
+          <button onClick={next} className="w-12 h-12 bg-white/90 backdrop-blur-md rounded-full shadow-xl flex items-center justify-center hover:bg-amber-50 transition-colors" aria-label="Next product">
             <svg className="w-5 h-5 text-gray-800" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={3} d="M9 5l7 7-7 7" />
             </svg>
@@ -472,10 +354,7 @@ const Portfolio: React.FC = () => {
               key={i}
               onClick={() => jumpTo(i)}
               className="h-2 rounded-full transition-all"
-              style={{
-                width: i === currentIndex ? "1.75rem" : "0.5rem",
-                backgroundColor: i === currentIndex ? accent : "#d1d5db",
-              }}
+              style={{ width: i === currentIndex ? "1.75rem" : "0.5rem", backgroundColor: i === currentIndex ? accent : "#d1d5db" }}
               aria-label={`Go to product ${i + 1}`}
             />
           ))}
@@ -484,21 +363,10 @@ const Portfolio: React.FC = () => {
 
       {/* ── Thumbnail lightbox modal ── */}
       {selectedThumb && (
-        <div
-          className="fixed inset-0 z-50 bg-black/80 flex items-center justify-center p-8"
-          onClick={() => setSelectedThumb(null)}
-        >
+        <div className="fixed inset-0 z-50 bg-black/80 flex items-center justify-center p-8" onClick={() => setSelectedThumb(null)}>
           <div className="relative max-w-3xl max-h-full" onClick={(e) => e.stopPropagation()}>
-            <img
-              src={selectedThumb.src}
-              alt={selectedThumb.name}
-              className="w-full h-full object-contain rounded-2xl shadow-2xl max-h-[80vh]"
-            />
-            <button
-              onClick={() => setSelectedThumb(null)}
-              className="absolute top-3 right-3 w-10 h-10 bg-white rounded-full flex items-center justify-center hover:bg-gray-100 transition-colors shadow-lg"
-              aria-label="Close"
-            >
+            <img src={selectedThumb.src} alt={selectedThumb.name} className="w-full h-full object-contain rounded-2xl shadow-2xl max-h-[80vh]" />
+            <button onClick={() => setSelectedThumb(null)} className="absolute top-3 right-3 w-10 h-10 bg-white rounded-full flex items-center justify-center hover:bg-gray-100 transition-colors shadow-lg" aria-label="Close">
               <svg className="w-5 h-5 text-gray-800" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
               </svg>

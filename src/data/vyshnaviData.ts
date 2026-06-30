@@ -4,6 +4,11 @@
 // ============================================================
 
 // --------------- TYPE DEFINITIONS ---------------
+import buttermilk1 from "../assets/Butter Milk/Butter Milk/4.png"
+import buttermilk2 from "../assets/Butter Milk/Butter Milk/3.png"
+import buttermilk3 from "../assets/Butter Milk/Butter Milk/2.png"
+import buttermilk4 from "../assets/Butter Milk/Butter Milk/1.png"
+
 
 export interface ProductVariant {
   size: string;
@@ -250,7 +255,7 @@ export const CATEGORIES: ProductCategory[] = [
         content:
           "Traditionally churned and lightly spiced, our buttermilk is the ultimate summer cooler. Packed with electrolytes and live cultures to refresh and restore.",
         variants: [{ size: "180 ml", packType: "pouch" }],
-        gallery: [],
+        gallery: [buttermilk1,buttermilk2,buttermilk3,buttermilk4],
         tag: "Best Seller",
         rating: 4.7,
         reviews: 280,

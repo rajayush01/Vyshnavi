@@ -17,7 +17,7 @@ import { ChevronLeft, ChevronRight } from "lucide-react";
 // ── Real asset imports ───────────────────────────────────────────────────
 import butter200    from "../../assets/butter-200-bg.png";
 import butter500    from "../../assets/butter-500-bg.png";
-import buttermilk   from "../../assets/buttermilk.png";
+// import buttermilk   from "../../assets/buttermilk.png";
 import curd1        from "../../assets/curd-pouch.png";
 import curd_pouch   from "../../assets/curd.png";
 import curd_box     from "../../assets/curd-box.png";
@@ -37,7 +37,7 @@ import {
 
 // ── Image map ────────────────────────────────────────────────────────────
 const IMAGE_MAP: Record<number, string> = {
-  301: buttermilk,
+  // 301: buttermilk,
   304: spl_badam_milk,
   305: badam_milk,
   306: chocolate_milk,
