@@ -44,6 +44,45 @@ export interface ProductCategory {
   subtitle: string;
   items: ProductItem[];
 }
+import m1 from "../assets/m1.png";
+import m2 from "../assets/m2.png";
+import m3 from "../assets/m3.png";
+import m4 from "../assets/m4.png";
+
+import t1 from "../assets/t1.png";  
+import t2 from "../assets/t2.png";
+import t3 from "../assets/t3.png";
+import t4 from "../assets/t4.png";
+
+import d1 from "../assets/d1 (1).png";
+import d2 from "../assets/d2.png";
+import d3 from "../assets/d3.png";
+import d4 from "../assets/d4.png";
+
+import c1 from "../assets/c1.png";
+import c2 from "../assets/c2.png";
+import c3 from "../assets/c3.png";
+
+import CB1 from "../assets/CB1.png";
+import CB2 from "../assets/CB2.png";
+import CB3 from "../assets/CB3.png";
+
+import Cp1 from "../assets/Cp1.png";
+import Cp2 from "../assets/cp2.png";    
+import Cp3 from "../assets/cp3.png";
+
+import mc1 from "../assets/mc1.png";
+import mc2 from "../assets/mc2.png";
+import mc3 from "../assets/mc3.png";  
+
+
+import nc1 from "../assets/nc1.png";
+import nc2 from "../assets/nc2.png";
+
+
+import Twomc1 from "../assets/Twomc1.png";
+import Twomc2 from "../assets/Twomc2.png";
+import  Twomc3 from "../assets/Twomc3.png";
 
 // --------------- PLACEHOLDER IMAGE HELPER ---------------
 // Replace these with real `import` statements in the consuming component.
@@ -66,12 +105,12 @@ export const CATEGORIES: ProductCategory[] = [
       {
         id: 101,
         name: "Mahagold Milk",
-        image: PH,
+        image: m1,
         description: "Premium full-cream",
         content:
           "Mahagold is our flagship full-cream milk, rich in natural fat and brimming with farm-fresh flavour. Sourced from hand-selected herds and chilled within hours of milking.",
         variants: [{ size: "500 ml", packType: "pouch" }],
-        gallery: [],
+        gallery: [m1,m2,m3,m4],
         tag: "Best Seller",
         rating: 4.9,
         reviews: 312,
@@ -127,7 +166,7 @@ export const CATEGORIES: ProductCategory[] = [
       {
         id: 106,
         name: "Toned Taaza Milk",
-        image: PH,
+        image: t4,
         description: "Light & refreshing",
         content:
           "Toned for a lighter feel while retaining full nutritional value. Taaza is the go-to choice for health-conscious households who want freshness without heaviness.",
@@ -136,7 +175,7 @@ export const CATEGORIES: ProductCategory[] = [
           { size: "500 ml", packType: "pouch" },
           { size: "1000 ml", packType: "pouch" },
         ],
-        gallery: [],
+        gallery: [t4,t1,t2,t3],
       },
       {
         id: 107,
@@ -151,7 +190,7 @@ export const CATEGORIES: ProductCategory[] = [
       {
         id: 108,
         name: "Double Toned Milk",
-        image: PH,
+        image: d1,
         description: "Lightest of all",
         content:
           "Double-toned for the lowest fat content in our milk range. Ideal for calorie-watchers and those on medically advised low-fat diets.",
@@ -159,7 +198,7 @@ export const CATEGORIES: ProductCategory[] = [
           { size: "165 ml", packType: "pouch" },
           { size: "450 ml", packType: "pouch" },
         ],
-        gallery: [],
+        gallery: [d1,d2,d3,d4],
       },
       {
         id: 109,
