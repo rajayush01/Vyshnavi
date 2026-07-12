@@ -133,7 +133,7 @@ export interface ProductVariant {
   discount?: string;
   originalPrice?: number;
   packType?: string;
-  image?: string[];
+  images?: string[];
 }
 
 export interface ProductItem {
