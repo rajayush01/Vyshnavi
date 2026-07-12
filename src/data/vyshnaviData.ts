@@ -528,6 +528,7 @@ export const CATEGORIES: ProductCategory[] = [
       id: 601,
       name: "Cow Ghee",
       // image: cow1l_1, // default hero shot
+      image: cowghee1lt1,
       description: "A2-rich clarity",
       content:
         "Made from the milk of indigenous desi cows via the traditional bilona method. Rich in A2 beta-casein proteins, butyric acid, and a divine aroma that fills the kitchen.",
@@ -539,6 +540,13 @@ export const CATEGORIES: ProductCategory[] = [
         { size: "1 liter",  packType: "jar",   images: [cowghee1lt1, cowghee1lt2, cowghee1lt3, cowghee1lt4, cowghee1lt5] },
         { size: "5 liters", packType: "jar",   images: [cowghee5lt1, cowghee5lt2, cowghee5lt3, cowghee5lt4, cowghee5lt5] },
       ],
+       gallery: [
+        cowghee1lt1,
+        cowghee1lt2,
+        cowghee1lt3,
+        cowghee1lt4,
+        cowghee1lt5,
+      ],
       // gallery: [cow1l_1, cow1l_2, cow1l_3, cow1l_4], // legacy field, mirrors default variant
       tag: "Best Seller",
       rating: 4.9,
@@ -547,7 +555,7 @@ export const CATEGORIES: ProductCategory[] = [
     {
       id: 602,
       name: "Buffalo Ghee",
-      // image: buf1l_1,
+      image: bfghee1lt1,
       description: "Bold & buttery",
       content:
         "Crafted from buffalo cream, this ghee has a higher fat content and a deeply rich, nutty aroma. Ideal for festive cooking and traditional sweets.",
@@ -557,11 +565,18 @@ export const CATEGORIES: ProductCategory[] = [
         { size: "1 liter",  packType: "jar", images: [bfghee1lt1, bfghee1lt2, bfghee1lt3, bfghee1lt4] },
         { size: "5 liters", packType: "jar", images: [bfghee5lt1, bfghee5lt2, bfghee5lt3, bfghee5lt4] },
       ],
+      gallery: [
+        bfghee1lt1,
+        bfghee1lt2,
+        bfghee1lt3,
+        bfghee1lt4,
+      ],
       // gallery: [buf1l_1, buf1l_2, buf1l_3, buf1l_4],
     },
     {
       id: 603,
       name: "Special Ghee",
+      image: PH, 
       // image: cow5l_1, // placeholder until Special Ghee has its own folder
       description: "Signature blend",
       content:
