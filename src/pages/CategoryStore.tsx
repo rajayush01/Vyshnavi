@@ -14,7 +14,7 @@ import React, { useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import { Star, ShoppingCart, Sparkles, ArrowLeft } from "lucide-react";
 import Header from "@/components/layout/Header";
-import { useCart } from "@/context/CartContext";
+import { useCart } from "@/context/cartContext";
 import {
   getCategoryByKey,
   CATEGORIES,

@@ -3,7 +3,7 @@ import { useLocation } from "react-router-dom";
 import { Menu, ShoppingCart, X, User } from "lucide-react";
 import "../../fonts.css";
 import logo from "../../assets/logo.png";
-import { useCart } from "@/context/CartContext";
+import { useCart } from "@/context/cartContext";
 
 type Action =
   | { type: "scroll"; target: string }

@@ -15,7 +15,7 @@ import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { Star, ShoppingCart, Sparkles } from "lucide-react";
 import Header from "@/components/layout/Header";
-import { useCart } from "@/context/CartContext";
+import { useCart } from "@/context/cartContext";
 
 // ── Data source ──────────────────────────────────────────────────────────
 import {
