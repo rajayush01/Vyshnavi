@@ -1,22 +1,29 @@
 import React, { useState, useEffect } from "react";
+import { useLocation } from "react-router-dom";
 import { Menu, ShoppingCart, X, User } from "lucide-react";
 import "../../fonts.css";
 import logo from "../../assets/logo.png";
+import { useCart } from "@/context/CartContext";
 
 type Action =
   | { type: "scroll"; target: string }
   | { type: "navigate"; target: string };
 
-interface HeaderProps {
-  onCartToggle: () => void;
-  cartCount: number;
-}
+const NAV_ITEMS: { key: string; label: string; action: Action }[] = [
+  { key: "home", label: "Home", action: { type: "scroll", target: "hero-section" } },
+  { key: "ghee", label: "Ghee", action: { type: "navigate", target: "/ghee" } },
+  { key: "about", label: "About Us", action: { type: "navigate", target: "/about" } },
+  { key: "portfolio", label: "Portfolio", action: { type: "navigate", target: "/portfolio" } },
+  { key: "contact", label: "Contact Us", action: { type: "navigate", target: "/contact-us" } },
+];
 
-const Header: React.FC<HeaderProps> = ({ onCartToggle, cartCount }) => {
+const Header: React.FC = () => {
+  const { cartCount, toggleCart } = useCart();
+  const location = useLocation();
+  const isPortfolio = location.pathname.startsWith("/portfolio");
   const [scrolled, setScrolled] = useState<boolean>(false);
   const [activeTab, setActiveTab] = useState<string>("home");
   const [isMenuOpen, setIsMenuOpen] = useState<boolean>(false);
-  
 
   useEffect(() => {
     const handleScroll = (): void => {
@@ -25,6 +32,12 @@ const Header: React.FC<HeaderProps> = ({ onCartToggle, cartCount }) => {
     window.addEventListener("scroll", handleScroll);
     return () => window.removeEventListener("scroll", handleScroll);
   }, []);
+
+  // Lock body scroll while the mobile drawer is open
+  useEffect(() => {
+    document.body.style.overflow = isMenuOpen ? "hidden" : "";
+    return () => { document.body.style.overflow = ""; };
+  }, [isMenuOpen]);
 
   const scrollToSection = (sectionId: string): void => {
     const element = document.getElementById(sectionId);
@@ -47,294 +60,223 @@ const Header: React.FC<HeaderProps> = ({ onCartToggle, cartCount }) => {
   return (
     <>
       <style>{`
-        .header-shadow {
-          box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
-        }
-        
-        .nav-link {
+        .nav-pill {
           position: relative;
-          transition: all 0.3s ease;
+          transition: color 0.25s ease;
         }
-        
-        .nav-link::after {
+        .nav-pill::after {
           content: '';
           position: absolute;
-          bottom: -8px;
+          bottom: -6px;
           left: 50%;
           transform: translateX(-50%);
           width: 0;
           height: 2px;
-          background: #3b82f6;
-          transition: width 0.3s ease;
+          border-radius: 2px;
+          background: linear-gradient(90deg, #2563eb, #06b6d4);
+          transition: width 0.3s cubic-bezier(0.25,0.46,0.45,0.94);
         }
-        
-        .nav-link.active::after,
-        .nav-link:hover::after {
+        .nav-pill.active::after,
+        .nav-pill:hover::after {
           width: 100%;
         }
 
-        @keyframes scroll {
-          0% {
-            transform: translateX(0);
-          }
-          100% {
-            transform: translateX(-50%);
-          }
+        @keyframes marqueeScrollHeader {
+          0% { transform: translateX(0); }
+          100% { transform: translateX(-50%); }
         }
-        
         .scroll-banner {
-          animation: scroll 30s linear infinite;
+          animation: marqueeScrollHeader 26s linear infinite;
           white-space: nowrap;
         }
-        
         .scroll-banner:hover {
           animation-play-state: paused;
         }
+
+        .header-shell {
+          transition: all 0.35s cubic-bezier(0.25,0.46,0.45,0.94);
+        }
+
+        .drawer-backdrop {
+          animation: drawerFadeIn 0.3s ease forwards;
+        }
+        .drawer-panel {
+          animation: drawerSlideIn 0.35s cubic-bezier(0.25,0.46,0.45,0.94) forwards;
+        }
+        @keyframes drawerFadeIn { from { opacity: 0; } to { opacity: 1; } }
+        @keyframes drawerSlideIn { from { transform: translateX(100%); } to { transform: translateX(0); } }
       `}</style>
 
-      {/* Continuous Scroll Banner */}
-      <div className="fixed top-0 left-0 right-0 w-full z-50 bg-gradient-to-r from-blue-300 to-blue-200 text-blue-900 text-sm py-3 overflow-hidden">
-        <div className="scroll-banner inline-flex">
-          <span className="inline-flex items-center px-8">
-            🚀 Welcome to Our Platform • Innovative Solutions for Modern
-            Businesses • Join Us Today • 🚀 Welcome to Our Platform • Innovative
-            Solutions for Modern Businesses • Join Us Today •
-          </span>
+      {/* Top promo marquee — hidden on /portfolio for a full-bleed, immersive header */}
+      {!isPortfolio && (
+        <div className="fixed top-0 left-0 right-0 w-full z-50 h-9 flex items-center bg-gradient-to-r from-blue-600 via-blue-500 to-cyan-500 text-white text-[11px] sm:text-xs overflow-hidden">
+          <div className="scroll-banner inline-flex font-semibold tracking-wide">
+            <span className="inline-flex items-center px-8">
+              🥛&nbsp; Fresh Milk Delivered Daily &nbsp;•&nbsp; Trusted by 10,000+ Families &nbsp;•&nbsp; Lab-Tested Purity, Every Batch &nbsp;•&nbsp; 🥛&nbsp; Fresh Milk Delivered Daily &nbsp;•&nbsp; Trusted by 10,000+ Families &nbsp;•&nbsp; Lab-Tested Purity, Every Batch &nbsp;•&nbsp;
+            </span>
+          </div>
         </div>
-      </div>
+      )}
 
-      <header className="fixed top-10 left-0 right-0 w-full z-50 bg-white shadow-xl shadow-white">
+      {/* Main header */}
+      <header
+        className={`header-shell fixed left-0 right-0 w-full z-50 ${isPortfolio ? "top-0" : "top-9"} ${
+          isPortfolio
+            ? "bg-transparent mt-1"
+            : scrolled
+            ? "bg-white/90 backdrop-blur-xl shadow-[0_8px_30px_-15px_rgba(37,99,235,0.35)] border-b border-blue-50"
+            : "bg-white/70 backdrop-blur-md"
+        }`}
+      >
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="flex justify-between items-center h-16 lg:h-20">
+          <div className={`flex justify-between items-center transition-all duration-300 ${scrolled ? "h-14 lg:h-16" : "h-16 lg:h-20"}`}>
             {/* Logo */}
             <div className="flex items-center">
               <button
-                onClick={() => window.location.href = '/'}
-                className="text-2xl font-bold text-blue-600 hover:text-blue-700 transition-colors"
+                onClick={() => (window.location.href = "/")}
+                className={`text-2xl font-bold transition-colors ${
+                  isPortfolio
+                    ? "bg-white/10 backdrop-blur-md border border-white/15 rounded-2xl px-3 py-1.5"
+                    : "text-blue-600 hover:text-blue-700"
+                }`}
               >
-                <img src={logo} alt="" className="h-[60px]" />
+                <img src={logo} alt="Vyshnavi Dairy" className={`transition-all duration-300 ${scrolled && !isPortfolio ? "h-11" : "h-[60px]"} ${isPortfolio ? "h-9" : ""}`} />
               </button>
             </div>
 
             {/* Desktop Navigation */}
-            <nav className="hidden lg:flex items-center space-x-8 .cormorant-sc-bold">
-              <button
-                onClick={() =>
-                  handleNavigation("home", {
-                    type: "scroll",
-                    target: "hero-section",
-                  })
-                }
-                className={`nav-link text-base font-medium transition-colors ${
-                  activeTab === "home"
-                    ? "text-blue-600 active"
-                    : "text-gray-700 hover:text-blue-600"
-                }`}
-              >
-                Home
-              </button>
-              <button
-                onClick={() =>
-                  handleNavigation("ghee", {
-                    type: "navigate",
-                    target: "/ghee",
-                  })
-                }
-                className={`nav-link text-base font-medium transition-colors ${
-                  activeTab === "ghee"
-                    ? "text-blue-600 active"
-                    : "text-gray-700 hover:text-blue-600"
-                }`}
-              >
-                Ghee
-              </button>
-              <button
-                onClick={() =>
-                  handleNavigation("about", {
-                    type: "navigate",
-                    target: "/about",
-                  })
-                }
-                className={`nav-link text-base font-medium transition-colors ${
-                  activeTab === "about"
-                    ? "text-blue-600 active"
-                    : "text-gray-700 hover:text-blue-600"
-                }`}
-              >
-                About Us
-              </button>
-              <button
-                onClick={() =>
-                  handleNavigation("portfolio", {
-                    type: "navigate",
-                    target: "/portfolio",
-                  })
-                }
-                className={`nav-link text-base font-medium transition-colors ${
-                  activeTab === "portfolio"
-                    ? "text-blue-600 active"
-                    : "text-gray-700 hover:text-blue-600"
-                }`}
-              >
-                Portfolio
-              </button>
-              <button
-                onClick={() =>
-                  handleNavigation("contact", {
-                    type: "navigate",
-                    target: "/contact-us",
-                  })
-                }
-                className={`nav-link text-base font-medium transition-colors ${
-                  activeTab === "contact"
-                    ? "text-blue-600 active"
-                    : "text-gray-700 hover:text-blue-600"
-                }`}
-              >
-                Contact Us
-              </button>
+            <nav className="hidden lg:flex items-center gap-9">
+              {!isPortfolio &&
+                NAV_ITEMS.map((item) => (
+                  <button
+                    key={item.key}
+                    onClick={() => handleNavigation(item.key, item.action)}
+                    className={`nav-pill text-[15px] font-semibold transition-colors ${
+                      activeTab === item.key ? "text-blue-600 active" : "text-slate-700 hover:text-blue-600"
+                    }`}
+                  >
+                    {item.label}
+                  </button>
+                ))}
 
-              
-              <div className="flex gap-2">
-              <button
-                onClick={() => window.location.href = '/auth'}
-                className="bg-gray-100 hover:bg-gray-200 text-gray-700 px-4 py-2 rounded-full flex items-center gap-2 transition"
-              >
-                <User size={20} />
-              </button>
+              <div className="flex items-center gap-2 pl-2">
+                <button
+                  onClick={() => (window.location.href = "/auth")}
+                  className={`w-10 h-10 rounded-full flex items-center justify-center transition-all duration-200 ${
+                    isPortfolio
+                      ? "bg-white/10 hover:bg-white/20 border border-white/20 text-white backdrop-blur-md"
+                      : "bg-slate-50 hover:bg-blue-50 border border-slate-100 hover:border-blue-200 text-slate-600 hover:text-blue-600"
+                  }`}
+                  aria-label="Account"
+                >
+                  <User size={18} />
+                </button>
 
-              <button
-                onClick={onCartToggle}
-                className="relative bg-blue-500 hover:bg-blue-600 text-white px-4 py-2 rounded-full flex items-center gap-2 transition"
-              >
-                <ShoppingCart size={20} />
-                {cartCount > 0 && (
-                  <span className="absolute -top-1 -right-2 bg-red-500 text-xs text-white w-5 h-5 rounded-full flex items-center justify-center">
-                    {cartCount}
-                  </span>
-                )}
-              </button>
+                <button
+                  onClick={toggleCart}
+                  className="relative w-10 h-10 rounded-full bg-gradient-to-br from-blue-600 to-cyan-500 hover:shadow-[0_10px_25px_-8px_rgba(37,99,235,0.6)] text-white flex items-center justify-center transition-all duration-200 hover:scale-105"
+                  aria-label="Cart"
+                >
+                  <ShoppingCart size={18} />
+                  {cartCount > 0 && (
+                    <span className="absolute -top-1.5 -right-1.5 bg-red-500 text-[10px] font-bold text-white w-5 h-5 rounded-full flex items-center justify-center border-2 border-white">
+                      {cartCount}
+                    </span>
+                  )}
+                </button>
               </div>
             </nav>
 
-            {/* Mobile: Cart & Auth Icons + Hamburger */}
+            {/* Mobile: Cart & Auth Icons + Hamburger (hamburger hidden on /portfolio — no links to show) */}
             <div className="lg:hidden flex items-center gap-2">
               <button
-                onClick={() => window.location.href = '/auth'}
-                className="bg-gray-100 hover:bg-gray-200 text-gray-700 p-2 rounded-full transition"
+                onClick={() => (window.location.href = "/auth")}
+                className={`w-9 h-9 rounded-full flex items-center justify-center transition ${
+                  isPortfolio
+                    ? "bg-white/10 border border-white/20 text-white backdrop-blur-md"
+                    : "bg-slate-50 border border-slate-100 text-slate-600"
+                }`}
+                aria-label="Account"
               >
-                <User size={20} />
+                <User size={17} />
               </button>
 
               <button
-                onClick={onCartToggle}
-                className="relative bg-blue-500 hover:bg-blue-600 text-white p-2 rounded-full transition"
+                onClick={toggleCart}
+                className="relative w-9 h-9 rounded-full bg-gradient-to-br from-blue-600 to-cyan-500 text-white flex items-center justify-center transition"
+                aria-label="Cart"
               >
-                <ShoppingCart size={20} />
+                <ShoppingCart size={17} />
                 {cartCount > 0 && (
-                  <span className="absolute -top-1 -right-1 bg-red-500 text-xs text-white w-5 h-5 rounded-full flex items-center justify-center">
+                  <span className="absolute -top-1.5 -right-1.5 bg-red-500 text-[10px] font-bold text-white w-5 h-5 rounded-full flex items-center justify-center border-2 border-white">
                     {cartCount}
                   </span>
                 )}
               </button>
 
-              <button
-                onClick={() => setIsMenuOpen(!isMenuOpen)}
-                className="p-2 text-gray-700 hover:text-blue-600 transition-colors"
+              {!isPortfolio && (
+                <button
+                  onClick={() => setIsMenuOpen(true)}
+                className="p-2 text-slate-700 hover:text-blue-600 transition-colors"
+                aria-label="Open menu"
               >
-                {isMenuOpen ? (
-                  <X className="w-6 h-6" />
-                ) : (
-                  <Menu className="w-6 h-6" />
-                )}
+                <Menu className="w-6 h-6" />
+              </button>
+              )}
+            </div>
+          </div>
+        </div>
+      </header>
+
+      {/* Mobile drawer */}
+      {isMenuOpen && (
+        <div className="lg:hidden fixed inset-0 z-[60]">
+          <div
+            className="drawer-backdrop absolute inset-0 bg-slate-950/50 backdrop-blur-sm"
+            onClick={() => setIsMenuOpen(false)}
+          />
+          <div className="drawer-panel absolute top-0 right-0 h-full w-[82%] max-w-sm bg-white shadow-2xl flex flex-col">
+            <div className="flex items-center justify-between px-6 py-5 border-b border-slate-100">
+              <img src={logo} alt="Vyshnavi Dairy" className="h-10" />
+              <button
+                onClick={() => setIsMenuOpen(false)}
+                className="w-9 h-9 rounded-full bg-slate-50 flex items-center justify-center text-slate-600"
+                aria-label="Close menu"
+              >
+                <X className="w-5 h-5" />
+              </button>
+            </div>
+
+            <nav className="flex-1 overflow-y-auto px-4 py-5 space-y-1.5">
+              {NAV_ITEMS.map((item) => (
+                <button
+                  key={item.key}
+                  onClick={() => handleNavigation(item.key, item.action)}
+                  className={`flex items-center justify-between w-full text-left px-4 py-3.5 rounded-2xl font-semibold text-[15px] transition-colors ${
+                    activeTab === item.key
+                      ? "text-blue-600 bg-blue-50"
+                      : "text-slate-700 hover:bg-slate-50"
+                  }`}
+                >
+                  {item.label}
+                  {activeTab === item.key && (
+                    <span className="w-1.5 h-1.5 rounded-full bg-blue-600" />
+                  )}
+                </button>
+              ))}
+            </nav>
+
+            <div className="px-6 py-5 border-t border-slate-100">
+              <button
+                onClick={() => (window.location.href = "/auth")}
+                className="w-full flex items-center justify-center gap-2 py-3 rounded-full bg-slate-50 border border-slate-100 text-slate-700 font-semibold text-sm"
+              >
+                <User size={16} /> My Account
               </button>
             </div>
           </div>
         </div>
-
-        {/* Mobile Navigation */}
-        {isMenuOpen && (
-          <div className="lg:hidden bg-white border-t border-gray-200">
-            <div className="px-4 py-3 space-y-1">
-              <button
-                onClick={() =>
-                  handleNavigation("home", {
-                    type: "scroll",
-                    target: "hero-section",
-                  })
-                }
-                className={`block w-full text-left px-4 py-3 rounded-lg font-medium transition-colors ${
-                  activeTab === "home"
-                    ? "text-blue-600 bg-blue-50"
-                    : "text-gray-700 hover:bg-gray-50"
-                }`}
-              >
-                Home
-              </button>
-              <button
-                onClick={() =>
-                  handleNavigation("ghee", {
-                    type: "navigate",
-                    target: "/ghee",
-                  })
-                }
-                className={`block w-full text-left px-4 py-3 rounded-lg font-medium transition-colors ${
-                  activeTab === "ghee"
-                    ? "text-blue-600 bg-blue-50"
-                    : "text-gray-700 hover:bg-gray-50"
-                }`}
-              >
-                Ghee
-              </button>
-              <button
-                onClick={() =>
-                  handleNavigation("about", {
-                    type: "navigate",
-                    target: "/about",
-                  })
-                }
-                className={`block w-full text-left px-4 py-3 rounded-lg font-medium transition-colors ${
-                  activeTab === "about"
-                    ? "text-blue-600 bg-blue-50"
-                    : "text-gray-700 hover:bg-gray-50"
-                }`}
-              >
-                About Us
-              </button>
-              <button
-                onClick={() =>
-                  handleNavigation("portfolio", {
-                    type: "navigate",
-                    target: "/portfolio",
-                  })
-                }
-                className={`block w-full text-left px-4 py-3 rounded-lg font-medium transition-colors ${
-                  activeTab === "portfolio"
-                    ? "text-blue-600 bg-blue-50"
-                    : "text-gray-700 hover:bg-gray-50"
-                }`}
-              >
-                Our Products
-              </button>
-              <button
-                onClick={() =>
-                  handleNavigation("contact", {
-                    type: "navigate",
-                    target: "/contact-us",
-                  })
-                }
-                className={`block w-full text-left px-4 py-3 rounded-lg font-medium transition-colors ${
-                  activeTab === "contact"
-                    ? "text-blue-600 bg-blue-50"
-                    : "text-gray-700 hover:bg-gray-50"
-                }`}
-              >
-                Contact Us
-              </button>
-            </div>
-          </div>
-        )}
-      </header>
+      )}
     </>
   );
 };

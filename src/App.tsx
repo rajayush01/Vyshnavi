@@ -12,6 +12,8 @@ import ProductDetails from './pages/ProductDetails';
 import Portfolio from './pages/Portfolio';
 import VerticalScrollAnimation from './components/VerticalScrollAnimation';
 import Profile from './pages/Profile';
+import { CartProvider } from './context/CartContext';
+import CategoryStore from './pages/CategoryStore';
 
 const Home = lazy(() => import('./pages/Home'));
 
@@ -48,49 +50,56 @@ function App() {
 	}
 
 	return (
-		<Suspense
-			fallback={
-				<div className="min-h-screen">
-					<DairyLoadingAnimation />
-				</div>
-			}
-		>
-			<Routes>
-				<Route
-					path="/"
-					element={
-						<MainLayout>
-							<Outlet />
-						</MainLayout>
-					}
-				>
-					<Route index element={<Home />} />
-					<Route path="/about" element={<AboutUs />} />
-					{/* <Route path="/contact-us" element={<ContactUs />} /> */}
-					<Route path="/ghee" element={<GheeStore />} />
-					<Route path='/auth' element={<DairyAuthPage/>} />
-					<Route path="/details" element={<ProductDetails/>} />
-					<Route path='/portfolio' element={<ResponsivePortfolio/>} />
-					<Route path="/profile" element={ <Profile />} />
-				</Route>
-				<Route
-					path="/404"
-					element={
-						<MainLayout>
-							<NotFound />
-						</MainLayout>
-					}
-				/>
-				<Route
-					path="*"
-					element={
-						<MainLayout>
-							<NotFound />
-						</MainLayout>
-					}
-				/>
-			</Routes>
-		</Suspense>
+		// CartProvider wraps every route so the cart — and the slide-out
+		// drawer it renders — is shared across Home, GheeStore, ProductDetails,
+		// and anywhere else that calls useCart().
+		<CartProvider>
+			<Suspense
+				fallback={
+					<div className="min-h-screen">
+						<DairyLoadingAnimation />
+					</div>
+				}
+			>
+				<Routes>
+					<Route
+						path="/"
+						element={
+							<MainLayout>
+								<Outlet />
+							</MainLayout>
+						}
+					>
+						<Route index element={<Home />} />
+						<Route path="/about" element={<AboutUs />} />
+						{/* <Route path="/contact-us" element={<ContactUs />} /> */}
+						<Route path="/ghee" element={<GheeStore />} />
+						<Route path='/auth' element={<DairyAuthPage/>} />
+						<Route path="/details" element={<ProductDetails/>} />
+						<Route path="/details/:id" element={<ProductDetails/>} />
+						<Route path='/portfolio' element={<ResponsivePortfolio/>} />
+						<Route path="/profile" element={ <Profile />} />
+						<Route path="/category/:key" element={<CategoryStore />} />
+					</Route>
+					<Route
+						path="/404"
+						element={
+							<MainLayout>
+								<NotFound />
+							</MainLayout>
+						}
+					/>
+					<Route
+						path="*"
+						element={
+							<MainLayout>
+								<NotFound />
+							</MainLayout>
+						}
+					/>
+				</Routes>
+			</Suspense>
+		</CartProvider>
 	);
 }
 

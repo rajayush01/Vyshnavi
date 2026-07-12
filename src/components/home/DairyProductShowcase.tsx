@@ -1,66 +1,21 @@
 /**
  * DairyProductShowcase.tsx — Vyshnavi Dairy
  *
- * 3-up paginated card grid driven entirely by vyshnaviData.ts.
- * Each card shows one ProductItem. Pages through items in steps of 3,
- * with dot-pagination and prev/next arrows.
+ * Category showcase: one card per product category (Milk, Curd, Beverages,
+ * Paneer, Butter, Ghee, Sweets), each with a representative image, a live
+ * item count, and a "Shop Category" button that routes to the full listing
+ * for that category — /ghee for Ghee (its own bespoke page), and
+ * /category/:key for everything else.
  *
- * Pass a `categoryKey` prop to show only one category's items,
- * or omit it to show all products across all categories.
- *
- * IMAGE NOTE: Extend IMAGE_MAP below as you add real product images.
+ * Fully driven by CATEGORIES from vyshnaviData.ts.
  */
 
-import React, { useState } from "react";
-import { ChevronLeft, ChevronRight } from "lucide-react";
-
-// ── Real asset imports ───────────────────────────────────────────────────
-import butter200    from "../../assets/butter-200-bg.png";
-import butter500    from "../../assets/butter-500-bg.png";
-// import buttermilk   from "../../assets/buttermilk.png";
-import curd1        from "../../assets/curd-pouch.png";
-import curd_pouch   from "../../assets/curd.png";
-import curd_box     from "../../assets/curd-box.png";
-import badam_milk   from "../../assets/badam-milk.png";
-import chocolate_milk from "../../assets/chocolate-milk.png";
-import spl_badam_milk from "../../assets/spl-badam-milk.png";
-import img_ghee1    from "../../assets/cow-ghee1l-1.png";
-import img_ghee2    from "../../assets/cow-ghee5l-1.png";
-import img_ghee3    from "../../assets/buffalo-ghee1l-1.png";
+import React, { useRef } from "react";
+import { useNavigate } from "react-router-dom";
+import { ArrowRight, ChevronLeft, ChevronRight } from "lucide-react";
 
 // ── Data source ──────────────────────────────────────────────────────────
-import {
-  CATEGORIES,
-  type ProductItem,
-  type ProductCategory,
-} from "../../data/vyshnaviData";
-
-// ── Image map ────────────────────────────────────────────────────────────
-const IMAGE_MAP: Record<number, string> = {
-  // 301: buttermilk,
-  304: spl_badam_milk,
-  305: badam_milk,
-  306: chocolate_milk,
-  201: curd1,
-  202: curd_pouch,
-  203: curd_box,
-  501: butter200,
-  502: butter500,
-  601: img_ghee1,
-  602: img_ghee3,
-  603: img_ghee2,
-};
-
-// ── Category accent colour for the tagline text ──────────────────────────
-const ACCENT_COLOR: Record<string, string> = {
-  milk:      "text-blue-600",
-  curd:      "text-green-600",
-  beverages: "text-purple-600",
-  paneer:    "text-orange-600",
-  butter:    "text-yellow-600",
-  ghee:      "text-amber-600",
-  sweets:    "text-pink-600",
-};
+import { CATEGORIES, type ProductCategory } from "../../data/vyshnaviData";
 
 const FALLBACK_GRADIENT: Record<string, string> = {
   milk:      "linear-gradient(135deg,#bfdbfe,#dbeafe)",
@@ -72,192 +27,179 @@ const FALLBACK_GRADIENT: Record<string, string> = {
   sweets:    "linear-gradient(135deg,#fbcfe8,#fdf2f8)",
 };
 
-// ── Props ────────────────────────────────────────────────────────────────
-interface DairyProductShowcaseProps {
-  /** If supplied, only items from this category are shown */
-  categoryKey?: string;
+function categoryHref(category: ProductCategory): string {
+  // Ghee has its own bespoke store page; everything else uses the generic one
+  return category.key === "ghee" ? "/ghee" : `/category/${category.key}`;
 }
 
-// ── Flat entry type ──────────────────────────────────────────────────────
-interface Entry {
-  item: ProductItem;
-  category: ProductCategory;
+// Pick a representative image: first item in the category that actually has one
+function representativeImage(category: ProductCategory): string | null {
+  const withImage = category.items.find((i) => !!i.image);
+  return withImage?.image ?? null;
 }
 
-// ── Main component ───────────────────────────────────────────────────────
-const DairyProductShowcase: React.FC<DairyProductShowcaseProps> = ({
-  categoryKey,
-}) => {
-  const [pageIndex, setPageIndex] = useState(0);
-  const PAGE_SIZE = 3;
+const DairyProductShowcase: React.FC = () => {
+  const navigate = useNavigate();
+  const railRef = useRef<HTMLDivElement>(null);
 
-  // Build flat entry list
-  const entries: Entry[] = [];
-  if (categoryKey) {
-    const cat = CATEGORIES.find((c) => c.key === categoryKey);
-    if (cat) cat.items.forEach((item) => entries.push({ item, category: cat }));
-  } else {
-    CATEGORIES.forEach((cat) =>
-      cat.items.forEach((item) => entries.push({ item, category: cat }))
-    );
-  }
-
-  const totalPages = Math.ceil(entries.length / PAGE_SIZE);
-  const visibleEntries = entries.slice(
-    pageIndex * PAGE_SIZE,
-    pageIndex * PAGE_SIZE + PAGE_SIZE
-  );
-
-  const handlePrev = () => setPageIndex((p) => Math.max(0, p - 1));
-  const handleNext = () => setPageIndex((p) => Math.min(totalPages - 1, p + 1));
+  const scrollByCard = (direction: 1 | -1) => {
+    const rail = railRef.current;
+    if (!rail) return;
+    const card = rail.firstElementChild as HTMLElement | null;
+    const step = (card?.offsetWidth ?? 320) + 28; // card width + gap
+    rail.scrollBy({ left: step * direction, behavior: "smooth" });
+  };
 
   return (
-    <div className="w-full max-w-7xl mx-auto px-4 py-12">
+    <div className="relative w-full max-w-7xl mx-auto px-4 py-16 sm:py-20 overflow-hidden">
+      {/* Decorative dairy illustrations */}
+      <svg className="hidden md:block absolute top-2 left-[2%] w-14 h-14 opacity-50 animate-float-slow pointer-events-none" viewBox="0 0 64 64" fill="none">
+        <path d="M32 6 C40 22 50 30 50 42 C50 52 42 58 32 58 C22 58 14 52 14 42 C14 30 24 22 32 6 Z" fill="#ffffff" stroke="#60a5fa" strokeWidth="2" />
+        <ellipse cx="27" cy="40" rx="4" ry="6" fill="#bfdbfe" opacity="0.7" />
+      </svg>
+      <svg className="hidden md:block absolute top-1/3 right-[2%] w-16 h-16 opacity-50 animate-float pointer-events-none" viewBox="0 0 64 64" fill="none">
+        <path d="M20 24 L44 24 L41 56 L23 56 Z" fill="#ffffff" stroke="#3b82f6" strokeWidth="2" />
+        <path d="M24 24 L20 14 L44 14 L40 24 Z" fill="#dbeafe" stroke="#3b82f6" strokeWidth="2" />
+        <rect x="27" y="8" width="10" height="6" rx="2" fill="#3b82f6" />
+        <line x1="20" y1="34" x2="44" y2="34" stroke="#93c5fd" strokeWidth="1.5" />
+      </svg>
+      <svg className="hidden md:block absolute bottom-24 left-[4%] w-12 h-12 opacity-50 animate-float pointer-events-none" viewBox="0 0 64 64" fill="none">
+        <path d="M8 44 L52 20 L58 44 Z" fill="#ffffff" stroke="#fbbf24" strokeWidth="2" />
+        <circle cx="30" cy="36" r="2" fill="#fbbf24" />
+        <circle cx="40" cy="32" r="1.5" fill="#fbbf24" />
+        <circle cx="22" cy="40" r="1.5" fill="#fbbf24" />
+      </svg>
+      <svg className="hidden md:block absolute bottom-8 right-[4%] w-12 h-12 opacity-50 animate-float-slow pointer-events-none" viewBox="0 0 64 64" fill="none">
+        <rect x="12" y="24" width="40" height="24" rx="3" fill="#fef3c7" stroke="#f59e0b" strokeWidth="2" />
+        <rect x="12" y="24" width="40" height="6" fill="#fde68a" />
+      </svg>
+
       <div className="relative">
+        {/* Eyebrow + heading */}
+        <div className="flex flex-col sm:flex-row sm:items-end sm:justify-between gap-4 mb-10 sm:mb-12">
+          <div className="text-center sm:text-left">
+            <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-blue-50 border border-blue-100 mb-4">
+              <svg width="9" height="11" viewBox="0 0 32 40" fill="none">
+                <path d="M16 2 C22 14 28 20 28 28 C28 34.6 22.6 40 16 40 C9.4 40 4 34.6 4 28 C4 20 10 14 16 2 Z" fill="#2563eb" />
+              </svg>
+              <span className="text-[11px] font-bold uppercase tracking-[0.25em] text-blue-700">
+                Shop By Category
+              </span>
+            </div>
+            <h2 className="text-3xl md:text-4xl font-bold text-gray-900 tracking-tight">
+              Our Products
+            </h2>
+          </div>
 
-        {/* Navigation arrows */}
-        <button
-          onClick={handlePrev}
-          disabled={pageIndex === 0}
-          aria-label="Previous page"
-          className={`absolute left-0 top-1/2 -translate-y-1/2 z-10 transition-all ${
-            pageIndex === 0
-              ? "opacity-20 cursor-not-allowed"
-              : "opacity-50 hover:opacity-100"
-          }`}
-        >
-          <ChevronLeft className="w-10 h-10 text-gray-600" />
-        </button>
+          {/* Rail nav arrows */}
+          <div className="hidden sm:flex items-center gap-2">
+            <button
+              onClick={() => scrollByCard(-1)}
+              aria-label="Scroll categories left"
+              className="w-11 h-11 rounded-full border border-blue-100 bg-white flex items-center justify-center hover:bg-blue-50 hover:border-blue-300 transition-all shadow-sm"
+            >
+              <ChevronLeft className="w-5 h-5 text-blue-600" />
+            </button>
+            <button
+              onClick={() => scrollByCard(1)}
+              aria-label="Scroll categories right"
+              className="w-11 h-11 rounded-full border border-blue-100 bg-white flex items-center justify-center hover:bg-blue-50 hover:border-blue-300 transition-all shadow-sm"
+            >
+              <ChevronRight className="w-5 h-5 text-blue-600" />
+            </button>
+          </div>
+        </div>
 
-        <button
-          onClick={handleNext}
-          disabled={pageIndex >= totalPages - 1}
-          aria-label="Next page"
-          className={`absolute right-0 top-1/2 -translate-y-1/2 z-10 transition-all ${
-            pageIndex >= totalPages - 1
-              ? "opacity-20 cursor-not-allowed"
-              : "opacity-50 hover:opacity-100"
-          }`}
-        >
-          <ChevronRight className="w-10 h-10 text-gray-600" />
-        </button>
-
-        {/* 3-column grid */}
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-4 px-10">
-          {visibleEntries.map(({ item, category }, idx) => {
-            const img = IMAGE_MAP[item.id] ?? null;
-            const accentClass = ACCENT_COLOR[category.key] ?? "text-gray-600";
+        {/* Category scroll rail */}
+        <div className="relative -mx-4 px-4">
+          <div className="pointer-events-none absolute inset-y-0 left-0 w-10 bg-gradient-to-r from-white to-transparent z-10" />
+          <div className="pointer-events-none absolute inset-y-0 right-0 w-10 bg-gradient-to-l from-white to-transparent z-10" />
+          <div
+            ref={railRef}
+            className="flex gap-6 sm:gap-7 overflow-x-auto pb-4 snap-x snap-mandatory scrollbar-hide scroll-smooth"
+          >
+          {CATEGORIES.map((category) => {
+            const img = representativeImage(category);
+            const href = categoryHref(category);
 
             return (
               <div
-                key={item.id}
-                className={`${category.color} rounded-2xl overflow-hidden shadow-md hover:shadow-xl transition-all duration-300 hover:-translate-y-1 flex flex-col`}
+                key={category.key}
+                onClick={() => navigate(href)}
+                className={`${category.color} group relative rounded-3xl overflow-hidden border border-white/60 shadow-[0_15px_40px_-20px_rgba(15,23,42,0.35)] hover:shadow-[0_30px_60px_-20px_rgba(37,99,235,0.35)] transition-all duration-500 ease-out hover:-translate-y-1.5 cursor-pointer flex flex-col flex-shrink-0 w-[80%] sm:w-[340px] snap-start`}
               >
-                {/* Text block */}
-                <div className="p-8 flex-shrink-0">
-                  {/* Category label */}
-                  <p className="text-[10px] font-black uppercase tracking-[0.2em] text-gray-400 mb-2">
-                    {category.name}
-                  </p>
+                {/* Subtle corner milk-drop watermark */}
+                <svg className="absolute top-3 right-3 w-6 h-6 opacity-20 pointer-events-none z-10" viewBox="0 0 64 64" fill="none">
+                  <path d="M32 10 C38 22 46 28 46 38 C46 46 40 51 32 51 C24 51 18 46 18 38 C18 28 26 22 32 10 Z" fill="#ffffff" />
+                </svg>
 
-                  <h2 className="text-3xl font-bold text-gray-900 mb-2 leading-tight">
-                    {item.name}
-                  </h2>
-
-                  <p className={`font-bold text-sm mb-1 uppercase tracking-wide ${accentClass}`}>
-                    {item.description}
-                  </p>
-
-                  {/* Variant pills */}
-                  <div className="flex flex-wrap gap-1 mb-4">
-                    {item.variants.slice(0, 4).map((v, vi) => (
-                      <span
-                        key={vi}
-                        className="text-[10px] bg-white/60 border border-white/80 rounded px-2 py-0.5 text-gray-600 font-medium"
-                      >
-                        {v.size}
-                      </span>
-                    ))}
-                    {item.variants.length > 4 && (
-                      <span className="text-[10px] text-gray-500 font-semibold self-center">
-                        +{item.variants.length - 4}
-                      </span>
-                    )}
-                  </div>
-
-                  <p className="text-gray-600 text-sm mb-5 leading-relaxed line-clamp-3">
-                    {item.content}
-                  </p>
-
-                  {/* Tag badge */}
-                  {item.tag && (
-                    <span
-                      className={`inline-block text-[10px] font-bold uppercase tracking-widest px-2.5 py-1 rounded-full mb-4 text-white ${
-                        item.tag === "Best Seller" ? "bg-blue-600" : "bg-green-600"
-                      }`}
-                    >
-                      {item.tag}
-                    </span>
-                  )}
-
-                  <button className="text-sm font-bold text-gray-900 hover:text-gray-600 transition-colors inline-flex items-center gap-1">
-                    View More <span className="text-base">→</span>
-                  </button>
-                </div>
-
-                {/* Product image */}
-                <div className="h-56 flex items-center justify-center p-4 mt-auto">
+                {/* Image */}
+                <div className="relative h-52 sm:h-56 flex items-center justify-center overflow-hidden">
+                  <div className="absolute w-2/3 h-2/3 rounded-full bg-white/40 blur-2xl" />
                   {img ? (
                     <img
                       src={img}
-                      alt={item.name}
-                      className="h-52 object-contain drop-shadow-lg"
+                      alt={category.name}
+                      className="relative h-40 sm:h-44 object-contain drop-shadow-lg transition-transform duration-500 group-hover:scale-105"
                     />
                   ) : (
                     <div
-                      className="w-36 h-44 rounded-xl flex items-end justify-center pb-3 opacity-60"
+                      className="relative w-36 h-36 rounded-2xl flex items-center justify-center opacity-70"
                       style={{ background: FALLBACK_GRADIENT[category.key] ?? "#e5e7eb" }}
                     >
-                      <span className="text-[10px] text-gray-500 font-semibold text-center px-2">
-                        {item.name}
+                      <span className="text-xs text-gray-500 font-semibold text-center px-3">
+                        {category.name}
                       </span>
                     </div>
                   )}
+
+                  {/* Item count badge */}
+                  <span className="absolute top-4 left-4 text-[10px] font-bold uppercase tracking-widest px-2.5 py-1 rounded-full bg-white/85 backdrop-blur-sm text-gray-700 shadow-sm">
+                    {category.items.length} item{category.items.length !== 1 ? "s" : ""}
+                  </span>
+                </div>
+
+                {/* Text block */}
+                <div className="p-6 sm:p-7 flex flex-col flex-grow">
+                  <p className="text-[10px] font-black uppercase tracking-[0.2em] text-gray-400 mb-1.5">
+                    {category.tagline}
+                  </p>
+                  <h3 className="text-2xl font-bold text-gray-900 mb-2 leading-tight tracking-tight">
+                    {category.name}
+                  </h3>
+                  <p className="text-gray-600 text-sm mb-6 leading-relaxed">
+                    {category.subtitle}
+                  </p>
+
+                  <button
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      navigate(href);
+                    }}
+                    className="mt-auto inline-flex items-center justify-center gap-2 bg-white/90 hover:bg-white text-gray-900 font-bold text-sm py-3 rounded-xl shadow-sm hover:shadow-md transition-all duration-300 group/btn"
+                  >
+                    Shop {category.name}
+                    <ArrowRight className="w-4 h-4 transition-transform duration-300 group-hover/btn:translate-x-1" />
+                  </button>
                 </div>
               </div>
             );
           })}
-
-          {/* Empty slot filler so grid stays 3-col on last page */}
-          {visibleEntries.length < PAGE_SIZE &&
-            Array.from({ length: PAGE_SIZE - visibleEntries.length }).map((_, i) => (
-              <div key={`empty-${i}`} className="hidden md:block" />
-            ))}
+          </div>
         </div>
-
-        {/* Pagination dots */}
-        <div className="flex justify-center gap-3 mt-10">
-          {Array.from({ length: totalPages }).map((_, i) => (
-            <button
-              key={i}
-              onClick={() => setPageIndex(i)}
-              aria-label={`Page ${i + 1}`}
-              className={`h-2.5 rounded-full transition-all duration-300 ${
-                pageIndex === i
-                  ? "bg-gray-800 w-8"
-                  : "bg-gray-300 w-2.5 hover:bg-gray-400"
-              }`}
-            />
-          ))}
-        </div>
-
-        {/* Page counter */}
-        <p className="text-center text-xs text-gray-400 mt-3 font-medium">
-          {pageIndex * PAGE_SIZE + 1}–
-          {Math.min((pageIndex + 1) * PAGE_SIZE, entries.length)} of{" "}
-          {entries.length} products
-        </p>
       </div>
+
+      {/* Ambient keyframes */}
+      <style>{`
+        @keyframes floatUpDown {
+          0%, 100% { transform: translateY(0px); }
+          50% { transform: translateY(-10px); }
+        }
+        .animate-float { animation: floatUpDown 5s ease-in-out infinite; }
+        .animate-float-slow { animation: floatUpDown 7s ease-in-out infinite; }
+        .scrollbar-hide::-webkit-scrollbar { display: none; }
+        .scrollbar-hide { scrollbar-width: none; -ms-overflow-style: none; }
+      `}</style>
     </div>
   );
 };

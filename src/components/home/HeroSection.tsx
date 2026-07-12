@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import { ChevronLeft, ChevronRight } from 'lucide-react';
 import bnr from "../../assets/bnr.webp"
 import bnr2 from "../../assets/bnr2.jpg"
 
@@ -39,145 +40,155 @@ const HeroSection = () => {
 
   useEffect(() => {
     if (!isAutoPlaying) return;
-    
     const timer = setInterval(() => {
       setCurrentSlide((prev) => (prev + 1) % slides.length);
-    }, 5000);
-    
+    }, 5500);
     return () => clearInterval(timer);
   }, [isAutoPlaying, slides.length]);
 
-  // const goToSlide = (index) => {
-  //   setCurrentSlide(index);
-  //   setIsAutoPlaying(false);
-  //   setTimeout(() => setIsAutoPlaying(true), 10000);
-  // };
+  const goToSlide = (index: number) => {
+    setCurrentSlide(index);
+    setIsAutoPlaying(false);
+    setTimeout(() => setIsAutoPlaying(true), 10000);
+  };
 
-  // const goToPrevious = () => {
-  //   setCurrentSlide((prev) => (prev - 1 + slides.length) % slides.length);
-  //   setIsAutoPlaying(false);
-  //   setTimeout(() => setIsAutoPlaying(true), 10000);
-  // };
+  const goToPrevious = () => goToSlide((currentSlide - 1 + slides.length) % slides.length);
+  const goToNext = () => goToSlide((currentSlide + 1) % slides.length);
 
-  // const goToNext = () => {
-  //   setCurrentSlide((prev) => (prev + 1) % slides.length);
-  //   setIsAutoPlaying(false);
-  //   setTimeout(() => setIsAutoPlaying(true), 10000);
-  // };
+  const slide = slides[currentSlide];
 
   return (
-    <div className="relative w-full h-[450px] sm:h-[550px] lg:h-[600px] overflow-hidden bg-slate-900 mt-28">
-      {/* Top accent line */}
-      <div className="absolute top-0 left-0 right-0 h-1 bg-gradient-to-r from-cyan-500 via-blue-500 to-cyan-500 z-30"></div>
-      
-      {/* Slides */}
-      {slides.map((slide, index) => (
+    <div className="relative w-full h-[560px] sm:h-[640px] lg:h-[92vh] lg:max-h-[760px] overflow-hidden bg-slate-900 mt-28">
+      {/* Slides — background images crossfade */}
+      {slides.map((s, index) => (
         <div
           key={index}
-          className={`absolute inset-0 transition-all duration-700 ease-in-out ${
-            index === currentSlide 
-              ? 'opacity-100 translate-x-0' 
-              : index < currentSlide 
-                ? 'opacity-0 -translate-x-full' 
-                : 'opacity-0 translate-x-full'
+          className={`absolute inset-0 transition-opacity duration-[1400ms] ease-out ${
+            index === currentSlide ? 'opacity-100' : 'opacity-0 pointer-events-none'
           }`}
         >
-          {/* Background Image with Overlay */}
-          <div 
-            className="absolute inset-0 bg-cover bg-center"
-            style={{ backgroundImage: `url(${slide.image})` }}
+          <div
+            className="absolute inset-0 bg-cover bg-center scale-[1.04]"
+            style={{ backgroundImage: `url(${s.image})` }}
           >
-            {/* <div className="absolute inset-0 bg-gradient-to-r from-slate-900/85 via-slate-900/70 to-slate-900/50" /> */}
+            <div className="absolute inset-0 bg-gradient-to-t from-slate-950/85 via-slate-950/20 to-slate-950/40" />
           </div>
-
-          {/* Content */}
-          
         </div>
       ))}
 
-      {/* Navigation Arrows */}
-      {/* <button
-        onClick={goToPrevious}
-        className="absolute left-4 sm:left-6 top-1/2 -translate-y-1/2 bg-slate-800/70 hover:bg-slate-800/90 backdrop-blur-sm text-white p-3 sm:p-4 rounded-full transition-all z-20 group border-2 border-white/20 hover:border-cyan-400/50"
-        aria-label="Previous slide"
-      >
-        <ChevronLeft className="w-5 h-5 sm:w-6 sm:h-6 group-hover:scale-110 transition-transform text-cyan-400" />
-      </button>
-      
-      <button
-        onClick={goToNext}
-        className="absolute right-4 sm:right-6 top-1/2 -translate-y-1/2 bg-slate-800/70 hover:bg-slate-800/90 backdrop-blur-sm text-white p-3 sm:p-4 rounded-full transition-all z-20 group border-2 border-white/20 hover:border-cyan-400/50"
-        aria-label="Next slide"
-      >
-        <ChevronRight className="w-5 h-5 sm:w-6 sm:h-6 group-hover:scale-110 transition-transform text-cyan-400" />
-      </button> */}
-
-      {/* Slide Indicators */}
-      {/* <div className="absolute bottom-8 sm:bottom-12 left-1/2 transform -translate-x-1/2 flex space-x-3 z-20">
+      {/* Vertical slide rail — right edge, desktop only */}
+      <div className="hidden lg:flex flex-col gap-3 absolute right-8 top-1/2 -translate-y-1/2 z-20">
         {slides.map((_, index) => (
           <button
             key={index}
             onClick={() => goToSlide(index)}
-            className={`transition-all rounded-full ${
-              index === currentSlide 
-                ? 'bg-gradient-to-r from-cyan-400 to-blue-500 w-12 sm:w-14 h-3' 
-                : 'bg-white/40 hover:bg-white/60 w-3 h-3'
+            aria-label={`Go to slide ${index + 1}`}
+            className="group relative flex items-center justify-end"
+          >
+            <span
+              className={`transition-all duration-500 rounded-full ${
+                index === currentSlide
+                  ? 'w-8 h-8 border-2 border-cyan-400 bg-cyan-400/10'
+                  : 'w-2.5 h-2.5 bg-white/40 group-hover:bg-white/70'
+              }`}
+            />
+            {index === currentSlide && (
+              <span className="absolute right-3 text-[11px] font-bold text-cyan-300 tabular-nums">
+                {String(index + 1).padStart(2, '0')}
+              </span>
+            )}
+          </button>
+        ))}
+      </div>
+
+      {/* Floating glass content card — anchored bottom-left, overlapping edge */}
+      <div className="absolute inset-x-0 bottom-0 z-20 px-5 sm:px-10 lg:px-16">
+        <div className="max-w-lg pb-10 sm:pb-14 lg:pb-16">
+          <div
+            key={currentSlide}
+            className="rounded-[26px] sm:rounded-[32px] bg-white/10 backdrop-blur-xl border border-white/15 p-6 sm:p-8 lg:p-10 shadow-[0_40px_80px_-30px_rgba(0,0,0,0.6)] animate-[heroFadeUp_0.8s_cubic-bezier(0.25,0.46,0.45,0.94)_both]"
+          >
+            <span className="inline-block mb-4 px-3.5 py-1.5 rounded-full text-[10px] font-bold uppercase tracking-[0.25em] bg-cyan-400/15 border border-cyan-300/30 text-cyan-300">
+              {slide.badge}
+            </span>
+            <h1 className="text-3xl sm:text-4xl lg:text-5xl font-black text-white leading-[1.08] tracking-tight mb-4">
+              {slide.title}
+            </h1>
+            <p className="text-sm sm:text-base text-slate-300 leading-relaxed mb-7 max-w-sm">
+              {slide.subtitle}
+            </p>
+
+            {/* CTA row: button + prev/next + counter */}
+            <div className="flex items-center gap-4 flex-wrap">
+              <button className="relative overflow-hidden bg-gradient-to-r from-cyan-500 to-blue-600 text-white px-7 py-3 rounded-full font-semibold text-sm tracking-wide shadow-[0_15px_35px_-10px_rgba(6,182,212,0.65)] hover:shadow-[0_20px_45px_-8px_rgba(6,182,212,0.85)] hover:scale-105 transition-all duration-300">
+                {slide.cta}
+              </button>
+
+              <div className="flex items-center gap-2.5 bg-white/5 border border-white/15 rounded-full pl-1.5 pr-4 py-1.5">
+                <button
+                  onClick={goToPrevious}
+                  aria-label="Previous slide"
+                  className="w-8 h-8 rounded-full bg-white/10 hover:bg-cyan-400/25 border border-white/15 hover:border-cyan-400/50 flex items-center justify-center transition-all duration-300 group"
+                >
+                  <ChevronLeft className="w-4 h-4 text-slate-300 group-hover:text-cyan-300 group-hover:-translate-x-0.5 transition-all" />
+                </button>
+
+                <span className="text-xs font-bold tabular-nums text-white tracking-wide">
+                  {String(currentSlide + 1).padStart(2, '0')}
+                  <span className="text-slate-400 font-medium mx-0.5">/</span>
+                  <span className="text-slate-400 font-medium">{String(slides.length).padStart(2, '0')}</span>
+                </span>
+
+                <button
+                  onClick={goToNext}
+                  aria-label="Next slide"
+                  className="w-8 h-8 rounded-full bg-white/10 hover:bg-cyan-400/25 border border-white/15 hover:border-cyan-400/50 flex items-center justify-center transition-all duration-300 group"
+                >
+                  <ChevronRight className="w-4 h-4 text-slate-300 group-hover:text-cyan-300 group-hover:translate-x-0.5 transition-all" />
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      {/* Mobile dot indicators */}
+      <div className="lg:hidden absolute bottom-4 left-1/2 -translate-x-1/2 z-20 flex gap-2">
+        {slides.map((_, index) => (
+          <button
+            key={index}
+            onClick={() => goToSlide(index)}
+            className={`h-2 rounded-full transition-all duration-500 ${
+              index === currentSlide ? 'bg-cyan-400 w-7' : 'bg-white/40 w-2'
             }`}
             aria-label={`Go to slide ${index + 1}`}
           />
         ))}
-      </div> */}
+      </div>
 
-      {/* Slide Counter with enhanced design */}
-      {/* <div className="absolute top-6 sm:top-8 right-6 sm:right-8 z-20">
-        <div className="bg-slate-800/70 backdrop-blur-sm text-white px-4 py-2 rounded-full text-sm font-bold border-2 border-white/20 flex items-center gap-2">
-          <span className="text-cyan-400">{currentSlide + 1}</span>
-          <span className="text-slate-400">/</span>
-          <span className="text-slate-300">{slides.length}</span>
-        </div>
-      </div> */}
+      {/* Edge arrows */}
+      {/* <button
+        onClick={goToPrevious}
+        className="absolute left-4 sm:left-6 top-1/2 -translate-y-1/2 bg-white/10 hover:bg-white/20 backdrop-blur-md text-white p-3 rounded-full transition-all z-20 group border border-white/20 hover:border-cyan-400/50"
+        aria-label="Previous slide"
+      >
+        <ChevronLeft className="w-5 h-5 group-hover:-translate-x-0.5 transition-transform text-cyan-300" />
+      </button>
+      <button
+        onClick={goToNext}
+        className="absolute right-4 sm:right-6 top-1/2 -translate-y-1/2 lg:right-20 bg-white/10 hover:bg-white/20 backdrop-blur-md text-white p-3 rounded-full transition-all z-20 group border border-white/20 hover:border-cyan-400/50"
+        aria-label="Next slide"
+      >
+        <ChevronRight className="w-5 h-5 group-hover:translate-x-0.5 transition-transform text-cyan-300" />
+      </button> */}
 
-      {/* Decorative elements */}
-      <div className="absolute top-20 left-10 w-20 h-20 border-2 border-cyan-400/20 rounded-full animate-pulse hidden lg:block"></div>
-      <div className="absolute bottom-20 right-10 w-32 h-32 border-2 border-blue-400/20 rounded-full animate-pulse hidden lg:block"></div>
-
-      {/* Bottom accent line with red highlight */}
-      <div className="absolute bottom-0 left-0 right-0 h-1 bg-gradient-to-r from-cyan-500 via-red-500 to-cyan-500 z-30"></div>
+      {/* Top accent line */}
+      <div className="absolute top-0 left-0 right-0 h-[3px] bg-gradient-to-r from-cyan-500 via-blue-500 to-cyan-500 z-30"></div>
 
       <style>{`
-        @keyframes fadeInUp {
-          from {
-            opacity: 0;
-            transform: translateY(40px);
-          }
-          to {
-            opacity: 1;
-            transform: translateY(0);
-          }
-        }
-
-        .animate-fadeInUp {
-          animation: fadeInUp 0.9s ease-out forwards;
-        }
-
-        .animation-delay-100 {
-          animation-delay: 0.1s;
-          opacity: 0;
-        }
-
-        .animation-delay-200 {
-          animation-delay: 0.2s;
-          opacity: 0;
-        }
-
-        .animation-delay-300 {
-          animation-delay: 0.3s;
-          opacity: 0;
-        }
-
-        .animation-delay-400 {
-          animation-delay: 0.4s;
-          opacity: 0;
+        @keyframes heroFadeUp {
+          from { opacity: 0; transform: translateY(24px); }
+          to { opacity: 1; transform: translateY(0); }
         }
       `}</style>
     </div>

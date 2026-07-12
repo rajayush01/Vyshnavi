@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { ChevronLeft, ChevronRight } from 'lucide-react';
+import { ChevronLeft, ChevronRight, Quote } from 'lucide-react';
 
 interface Testimonial {
   id: number;
@@ -42,131 +42,100 @@ const TestimonialCarousel = () => {
   ];
 
   const [currentIndex, setCurrentIndex] = useState(0);
-  
-  // Responsive items per page
-  const getItemsPerPage = () => {
-    if (typeof window !== 'undefined') {
-      if (window.innerWidth < 768) return 1; // Mobile
-      if (window.innerWidth < 1024) return 2; // Tablet
-      return 3; // Desktop
-    }
-    return 3;
-  };
+  const active = testimonials[currentIndex];
 
-  const [itemsPerPage, setItemsPerPage] = useState(getItemsPerPage());
-  const maxIndex = Math.max(0, testimonials.length - itemsPerPage);
-
-  // Handle window resize
-  useState(() => {
-    if (typeof window !== 'undefined') {
-      const handleResize = () => {
-        const newItemsPerPage = getItemsPerPage();
-        setItemsPerPage(newItemsPerPage);
-        setCurrentIndex(prev => Math.min(prev, Math.max(0, testimonials.length - newItemsPerPage)));
-      };
-
-      window.addEventListener('resize', handleResize);
-      return () => window.removeEventListener('resize', handleResize);
-    }
-  });
-
-  const handlePrevious = () => {
-    setCurrentIndex(prev => Math.max(0, prev - 1));
-  };
-
-  const handleNext = () => {
-    setCurrentIndex(prev => Math.min(maxIndex, prev + 1));
-  };
-
-  const goToSlide = (index: number) => {
-    setCurrentIndex(index);
-  };
+  const handlePrevious = () => setCurrentIndex((prev) => (prev - 1 + testimonials.length) % testimonials.length);
+  const handleNext = () => setCurrentIndex((prev) => (prev + 1) % testimonials.length);
 
   return (
-    <div className="w-full py-8 sm:py-12 lg:py-16 px-4 -mb-14">
-      <div className="max-w-7xl mx-auto">
-        <h2 className="text-2xl sm:text-3xl lg:text-4xl font-bold text-center text-gray-800 mb-8 sm:mb-10 lg:mb-12">
+    <div className="w-full py-20 sm:py-24 px-4 -mb-14">
+      <div className="max-w-4xl mx-auto">
+        <div className="flex justify-center mb-4">
+          <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-blue-50 border border-blue-100">
+            <svg width="9" height="11" viewBox="0 0 32 40" fill="none">
+              <path d="M16 2 C22 14 28 20 28 28 C28 34.6 22.6 40 16 40 C9.4 40 4 34.6 4 28 C4 20 10 14 16 2 Z" fill="#2563eb" />
+            </svg>
+            <span className="text-[11px] font-bold uppercase tracking-[0.25em] text-blue-700">
+              Trusted By Families
+            </span>
+          </div>
+        </div>
+        <h2 className="text-2xl sm:text-3xl lg:text-4xl font-bold text-center text-gray-800 mb-12 sm:mb-14 tracking-tight">
           What Do Our Customers Say
         </h2>
 
-        <div className="relative overflow-hidden">
-          <div 
-            className="flex transition-transform duration-500 ease-in-out"
-            style={{ transform: `translateX(-${currentIndex * (100 / itemsPerPage)}%)` }}
-          >
-            {testimonials.map((testimonial) => (
-              <div
-                key={testimonial.id}
-                className="flex-shrink-0 px-2 sm:px-3"
-                style={{ width: `${100 / itemsPerPage}%` }}
-              >
-                <div className="bg-white rounded-xl sm:rounded-2xl shadow-md p-4 sm:p-6 lg:p-8 h-full flex flex-col">
-                  <p className="text-gray-600 text-xs sm:text-sm leading-relaxed mb-6 sm:mb-8 flex-grow">
-                    {testimonial.text}
-                  </p>
-                  
-                  <div className="flex items-center gap-3 sm:gap-4">
-                    <img
-                      src={testimonial.image}
-                      alt={testimonial.name}
-                      className="w-12 h-12 sm:w-14 sm:h-14 lg:w-16 lg:h-16 rounded-full object-cover flex-shrink-0"
-                    />
-                    <div className="min-w-0">
-                      <h4 className="font-semibold text-gray-800 mb-1 text-sm sm:text-base truncate">
-                        {testimonial.name}
-                      </h4>
-                      <div className="flex gap-1">
-                        {[...Array(testimonial.rating)].map((_, i) => (
-                          <svg
-                            key={i}
-                            className="w-3 h-3 sm:w-4 sm:h-4 fill-yellow-400"
-                            viewBox="0 0 20 20"
-                          >
-                            <path d="M10 15l-5.878 3.09 1.123-6.545L.489 6.91l6.572-.955L10 0l2.939 5.955 6.572.955-4.756 4.635 1.123 6.545z" />
-                          </svg>
-                        ))}
-                      </div>
-                    </div>
-                  </div>
-                </div>
-              </div>
-            ))}
+        {/* Spotlight quote card */}
+        <div className="relative bg-white rounded-[32px] shadow-[0_40px_80px_-30px_rgba(37,99,235,0.35)] border border-blue-50 px-6 sm:px-14 py-10 sm:py-14 text-center">
+          <div className="absolute top-0 left-1/2 -translate-x-1/2 -translate-y-1/2 w-16 h-16 rounded-2xl bg-gradient-to-br from-blue-600 to-cyan-500 flex items-center justify-center shadow-[0_15px_35px_-10px_rgba(37,99,235,0.6)]">
+            <Quote className="w-7 h-7 text-white" fill="white" />
+          </div>
+
+          <div key={active.id} className="animate-[testimonialFade_0.5s_ease-out]">
+            <div className="flex justify-center gap-1 mb-6 mt-4">
+              {[...Array(active.rating)].map((_, i) => (
+                <svg key={i} className="w-4 h-4 fill-amber-400" viewBox="0 0 20 20">
+                  <path d="M10 15l-5.878 3.09 1.123-6.545L.489 6.91l6.572-.955L10 0l2.939 5.955 6.572.955-4.756 4.635 1.123 6.545z" />
+                </svg>
+              ))}
+            </div>
+
+            <p className="text-lg sm:text-xl text-slate-700 leading-relaxed font-medium mb-8 max-w-2xl mx-auto">
+              "{active.text}"
+            </p>
+
+            <div className="flex flex-col items-center gap-2">
+              <img
+                src={active.image}
+                alt={active.name}
+                className="w-16 h-16 rounded-full object-cover ring-4 ring-blue-50"
+              />
+              <h4 className="font-bold text-gray-800 text-base">{active.name}</h4>
+              <span className="text-xs text-slate-400 font-medium uppercase tracking-wide">Verified Customer</span>
+            </div>
           </div>
         </div>
 
-        <div className="flex items-center justify-center gap-3 sm:gap-4 mt-8 sm:mt-10 lg:mt-12">
+        {/* Thumbnail rail + arrows */}
+        <div className="flex items-center justify-center gap-4 mt-10">
           <button
             onClick={handlePrevious}
-            disabled={currentIndex === 0}
-            className="w-10 h-10 sm:w-12 sm:h-12 rounded-full border-2 border-gray-300 flex items-center justify-center hover:bg-gray-100 disabled:opacity-40 disabled:cursor-not-allowed transition-all"
-            aria-label="Previous testimonials"
+            className="w-11 h-11 rounded-full border border-blue-100 bg-white flex items-center justify-center hover:bg-blue-50 hover:border-blue-300 transition-all shadow-sm flex-shrink-0"
+            aria-label="Previous testimonial"
           >
-            <ChevronLeft className="w-4 h-4 sm:w-5 sm:h-5 text-gray-600" />
+            <ChevronLeft className="w-5 h-5 text-blue-600" />
           </button>
 
-          <div className="flex gap-1.5 sm:gap-2">
-            {[...Array(maxIndex + 1)].map((_, index) => (
+          <div className="flex gap-3">
+            {testimonials.map((t, index) => (
               <button
-                key={index}
-                onClick={() => goToSlide(index)}
-                className={`h-2 rounded-full transition-all ${
-                  index === currentIndex ? 'bg-gray-800 w-4 sm:w-6' : 'bg-gray-300 w-2'
+                key={t.id}
+                onClick={() => setCurrentIndex(index)}
+                aria-label={`View testimonial from ${t.name}`}
+                className={`relative rounded-full overflow-hidden transition-all duration-300 ${
+                  index === currentIndex ? 'w-12 h-12 ring-3 ring-blue-500 ring-offset-2' : 'w-10 h-10 opacity-50 hover:opacity-80'
                 }`}
-                aria-label={`Go to slide ${index + 1}`}
-              />
+              >
+                <img src={t.image} alt={t.name} className="w-full h-full object-cover" />
+              </button>
             ))}
           </div>
 
           <button
             onClick={handleNext}
-            disabled={currentIndex === maxIndex}
-            className="w-10 h-10 sm:w-12 sm:h-12 rounded-full border-2 border-gray-300 flex items-center justify-center hover:bg-gray-100 disabled:opacity-40 disabled:cursor-not-allowed transition-all"
-            aria-label="Next testimonials"
+            className="w-11 h-11 rounded-full border border-blue-100 bg-white flex items-center justify-center hover:bg-blue-50 hover:border-blue-300 transition-all shadow-sm flex-shrink-0"
+            aria-label="Next testimonial"
           >
-            <ChevronRight className="w-4 h-4 sm:w-5 sm:h-5 text-gray-600" />
+            <ChevronRight className="w-5 h-5 text-blue-600" />
           </button>
         </div>
       </div>
+
+      <style>{`
+        @keyframes testimonialFade {
+          from { opacity: 0; transform: translateY(8px); }
+          to { opacity: 1; transform: translateY(0); }
+        }
+      `}</style>
     </div>
   );
 };

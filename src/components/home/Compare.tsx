@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import { Check, Minus } from 'lucide-react';
 
 interface Feature {
   name: string;
@@ -71,28 +72,38 @@ export default function Compare() {
     }
   };
 
+  const active = categories[activeCategory];
+
   return (
-    <section className="py-20 px-4">
-      <div className="max-w-7xl mx-auto">
+    <section className="py-20 sm:py-24 px-4">
+      <div className="max-w-6xl mx-auto">
         {/* Header */}
-        <div className="mb-12">
-          <div className="inline-block bg-cyan-400 px-6 py-2 rounded-lg shadow-md transform -rotate-1">
-            <h2 className="text-3xl md:text-4xl font-black text-blue-900 uppercase tracking-tight">
-              Vyshnavi vs. The Rest
-            </h2>
+        <div className="mb-4 flex justify-center">
+          <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-cyan-50 border border-cyan-100">
+            <svg width="9" height="11" viewBox="0 0 32 40" fill="none">
+              <path d="M16 2 C22 14 28 20 28 28 C28 34.6 22.6 40 16 40 C9.4 40 4 34.6 4 28 C4 20 10 14 16 2 Z" fill="#0891b2" />
+            </svg>
+            <span className="text-[11px] font-bold uppercase tracking-[0.25em] text-cyan-700">
+              No Contest
+            </span>
           </div>
+        </div>
+        <div className="mb-12 text-center">
+          <h2 className="text-3xl md:text-5xl font-black text-blue-900 tracking-tight">
+            Vyshnavi <span className="text-cyan-500">vs.</span> The Rest
+          </h2>
         </div>
 
         {/* Category Tabs */}
-        <div className="flex flex-wrap gap-4 mb-10">
+        <div className="flex flex-wrap justify-center gap-3 mb-14">
           {(Object.keys(categories) as CategoryKey[]).map((key) => (
             <button
               key={key}
               onClick={() => setActiveCategory(key)}
-              className={`px-6 py-2 rounded-lg font-bold transition-all capitalize text-base ${
+              className={`px-6 py-2.5 rounded-full font-bold transition-all duration-300 capitalize text-sm tracking-wide border ${
                 activeCategory === key
-                  ? 'bg-[#ADD2FE] text-blue-600 shadow-lg scale-105'
-                  : 'bg-white text-blue-600 hover:bg-teal-50'
+                  ? 'bg-blue-600 text-white shadow-[0_10px_30px_-8px_rgba(37,99,235,0.5)] scale-105 border-blue-600'
+                  : 'bg-white text-blue-600 border-blue-100 hover:border-blue-300 hover:bg-blue-50'
               }`}
             >
               {categories[key].title}
@@ -100,77 +111,70 @@ export default function Compare() {
           ))}
         </div>
 
-        {/* Comparison Table - Desktop */}
-        <div className="hidden md:block bg-white rounded-2xl shadow-2xl overflow-hidden">
-          {/* Table Header */}
-          <div className="grid grid-cols-4 border-b-4 border-blue-200">
-            <div className="p-4 font-black text-blue-900 text-lg bg-blue-50">
-              {/* Empty corner */}
-            </div>
-            <div className="p-4 font-black text-blue-800 text-center text-lg bg-blue-50 border-l-2 border-blue-200">
+        {/* Three-panel split comparison */}
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-5 md:gap-0 items-stretch">
+          {/* Ghar Ka Khaana */}
+          <div className="bg-white rounded-3xl md:rounded-r-none border border-blue-50 p-6 sm:p-7 flex flex-col">
+            <h3 className="text-sm font-bold uppercase tracking-widest text-slate-400 mb-6 text-center">
               Ghar Ka Khaana
-            </div>
-            <div className="p-4 font-black text-white text-center text-lg bg-[#ADD2FE] border-l-2 border-[#ADD2FE]">
-              <div className="flex items-center justify-center gap-2">
-                <span className="text-blue-600 text-2xl">Vyshnavi</span>
-              </div>
-            </div>
-            <div className="p-4 font-black text-blue-800 text-center text-lg bg-teal-50 border-l-2 border-teal-200">
-              Junk Food
+            </h3>
+            <div className="space-y-4 flex-1">
+              {active.features.map((f, i) => (
+                <div key={i} className="flex items-start gap-3">
+                  <Minus className="w-4 h-4 text-slate-300 mt-0.5 flex-shrink-0" />
+                  <div>
+                    <p className="text-[11px] font-semibold uppercase tracking-wide text-slate-400">{f.name}</p>
+                    <p className="text-sm text-slate-600 font-medium">{f.ghar}</p>
+                  </div>
+                </div>
+              ))}
             </div>
           </div>
 
-          {/* Table Body */}
-          {categories[activeCategory].features.map((feature: Feature, index: number) => (
-            <div
-              key={index}
-              className={`grid grid-cols-4 border-b border-blue-100 ${
-                index % 2 === 0 ? 'bg-white' : 'bg-teal-25'
-              }`}
-            >
-              <div className="p-4 font-bold text-blue-900 flex items-center bg-blue-50">
-                {feature.name}
-              </div>
-              <div className="p-4 text-center text-blue-800 font-semibold flex items-center justify-center border-l-2 border-blue-100">
-                {feature.ghar}
-              </div>
-              <div className="p-4 text-center text-blue-600 font-bold flex items-center justify-center bg-[#ADD2FE] border-l-2 border-[#ADD2FE]">
-                {feature.vyshnavi}
-              </div>
-              <div className="p-4 text-center text-blue-800 font-semibold flex items-center justify-center border-l-2 border-blue-100">
-                {feature.others}
-              </div>
+          {/* Vyshnavi — elevated center panel */}
+          <div className="relative bg-gradient-to-b from-blue-600 to-blue-700 rounded-3xl p-6 sm:p-8 flex flex-col text-white shadow-[0_40px_80px_-25px_rgba(37,99,235,0.55)] md:-my-4 md:z-10">
+            <span className="absolute -top-3 left-1/2 -translate-x-1/2 text-[10px] font-bold uppercase tracking-widest bg-cyan-400 text-blue-900 px-3 py-1 rounded-full shadow">
+              Best Choice
+            </span>
+            <h3 className="text-lg font-black uppercase tracking-widest mb-6 text-center pt-2">
+              Vyshnavi
+            </h3>
+            <div className="space-y-4 flex-1">
+              {active.features.map((f, i) => (
+                <div key={i} className="flex items-start gap-3">
+                  <span className="w-4 h-4 rounded-full bg-cyan-400 flex items-center justify-center mt-0.5 flex-shrink-0">
+                    <Check className="w-2.5 h-2.5 text-blue-900" strokeWidth={3} />
+                  </span>
+                  <div>
+                    <p className="text-[11px] font-semibold uppercase tracking-wide text-blue-100">{f.name}</p>
+                    <p className="text-sm font-bold">{f.vyshnavi}</p>
+                  </div>
+                </div>
+              ))}
             </div>
-          ))}
-        </div>
+          </div>
 
-        {/* Comparison Cards - Mobile */}
-        <div className="md:hidden space-y-4">
-          {categories[activeCategory].features.map((feature: Feature, index: number) => (
-            <div key={index} className="bg-white rounded-xl shadow-lg overflow-hidden">
-              <div className="bg-blue-50 p-3 border-b-2 border-blue-200">
-                <h3 className="font-bold text-blue-900 text-lg">{feature.name}</h3>
-              </div>
-              <div className="p-4 space-y-3">
-                <div className="flex justify-between items-center p-3 bg-blue-50 rounded-lg">
-                  <span className="font-semibold text-blue-800 text-sm">Ghar Ka Khaana</span>
-                  <span className="text-blue-800 font-semibold text-sm">{feature.ghar}</span>
+          {/* Junk Food */}
+          <div className="bg-white rounded-3xl md:rounded-l-none border border-blue-50 p-6 sm:p-7 flex flex-col">
+            <h3 className="text-sm font-bold uppercase tracking-widest text-slate-400 mb-6 text-center">
+              Junk Food
+            </h3>
+            <div className="space-y-4 flex-1">
+              {active.features.map((f, i) => (
+                <div key={i} className="flex items-start gap-3">
+                  <Minus className="w-4 h-4 text-slate-300 mt-0.5 flex-shrink-0" />
+                  <div>
+                    <p className="text-[11px] font-semibold uppercase tracking-wide text-slate-400">{f.name}</p>
+                    <p className="text-sm text-slate-600 font-medium">{f.others}</p>
+                  </div>
                 </div>
-                <div className="flex justify-between items-center p-3 bg-[#ADD2FE] rounded-lg">
-                  <span className="font-bold text-blue-600 text-sm">Vyshnavi</span>
-                  <span className="text-blue-600 font-bold text-sm">{feature.vyshnavi}</span>
-                </div>
-                <div className="flex justify-between items-center p-3 bg-teal-50 rounded-lg">
-                  <span className="font-semibold text-blue-800 text-sm">Junk Food</span>
-                  <span className="text-blue-800 font-semibold text-sm">{feature.others}</span>
-                </div>
-              </div>
+              ))}
             </div>
-          ))}
+          </div>
         </div>
 
         {/* Bottom Note */}
-        <div className="mt-8 text-center">
+        <div className="mt-10 text-center">
           <p className="text-blue-700 font-semibold italic">
             Why compromise when you can have the best of both worlds? 🏠 + 🏪 = 💚
           </p>

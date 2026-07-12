@@ -3,10 +3,15 @@
  *
  * Images and gallery are read directly from item.image / item.gallery
  * as defined in vyshnaviData.ts. No local IMAGE_MAP needed.
+ *
+ * NOTE: all carousel math (getPos / animateTo / resetAutoPlay / gsap refs)
+ * is unchanged from the original — only the surrounding visual layer was
+ * elevated.
  */
 
 import React, { useEffect, useRef, useState, useCallback } from "react";
 import { gsap } from "gsap";
+import { ChevronLeft, ChevronRight, X, Sparkles } from "lucide-react";
 import { CATEGORIES, type ProductCategory, type ProductItem } from "../data/vyshnaviData";
 
 // ── Category helpers (derived from data) ─────────────────────────────────
@@ -27,7 +32,7 @@ interface PlaceholderProps { category: string; name: string }
 
 const ImagePlaceholder: React.FC<PlaceholderProps> = ({ category, name }) => (
   <div
-    className="w-64 h-80 rounded-2xl flex items-end justify-center pb-4"
+    className="w-64 h-80 rounded-[28px] flex items-end justify-center pb-4 shadow-[0_30px_60px_-25px_rgba(15,23,42,0.35)]"
     style={{ background: CATEGORY_GRADIENT[category] ?? "#f3f4f6" }}
   >
     <span className="text-xs font-semibold text-gray-500 opacity-70 text-center px-2 leading-tight">
@@ -57,7 +62,7 @@ const Portfolio: React.FC = () => {
   const singleItem = currentItems.length === 1;
   const accent = activeCategory.accentHex;
 
-  // ── Carousel helpers ──────────────────────────────────────
+  // ── Carousel helpers (unchanged math) ──────────────────────
 
   const getPos = (idx: number, current: number, total: number) => {
     const diff = (idx - current + total) % total;
@@ -148,7 +153,7 @@ const Portfolio: React.FC = () => {
     });
   };
 
-  // ── Init on category change ────────────────────────────────
+  // ── Init on category change (unchanged) ────────────────────
   useEffect(() => {
     const t = setTimeout(() => {
       currentItems.forEach((_, i) => {
@@ -183,63 +188,93 @@ const Portfolio: React.FC = () => {
 
   // ── Render ────────────────────────────────────────────────
   return (
-    <div className="relative w-full h-screen bg-gradient-to-br from-blue-50 via-white to-blue-100 overflow-hidden">
+    <div className="relative w-full h-screen bg-[#0b1220] overflow-hidden">
+      {/* Cinematic layered background */}
+      <div className="absolute inset-0 bg-gradient-to-br from-slate-950 via-slate-900 to-slate-950" />
+      <div
+        className="absolute inset-0 transition-colors duration-700"
+        style={{ background: `radial-gradient(circle at 30% 25%, ${accent}22, transparent 55%), radial-gradient(circle at 75% 75%, ${accent}18, transparent 50%)` }}
+      />
+      <div className="absolute inset-0 opacity-[0.04]" style={{ backgroundImage: "url(\"data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='60' height='60'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='2' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E\")" }} />
+      <div className="absolute inset-0 pointer-events-none" style={{ boxShadow: "inset 0 0 200px rgba(0,0,0,0.6)" }} />
+
+      {/* ── Eyebrow + product counter ── */}
+      <div className="absolute top-8 left-1/2 -translate-x-1/2 z-50 flex items-center gap-2 px-4 py-1.5 rounded-full bg-white/5 backdrop-blur-md border border-white/10">
+        <Sparkles className="w-3.5 h-3.5" style={{ color: accent }} />
+        <span className="text-[11px] font-bold uppercase tracking-[0.3em] text-white/70">
+          The Collection
+        </span>
+      </div>
+
+      {!singleItem && (
+        <div className="hidden sm:flex absolute top-8 right-8 z-50 items-center gap-2 px-3.5 py-1.5 rounded-full bg-white/5 backdrop-blur-md border border-white/10 text-white/60 text-xs font-bold tabular-nums">
+          <span style={{ color: accent }}>{String(currentIndex + 1).padStart(2, "0")}</span>
+          <span className="w-3 h-px bg-white/20" />
+          <span>{String(currentItems.length).padStart(2, "0")}</span>
+        </div>
+      )}
 
       {/* ── Category Tab Bar ── */}
-      <div className="absolute top-28 left-1/2 -translate-x-1/2 z-50 flex gap-2 flex-wrap justify-center px-4">
-        {CATEGORIES.map((cat) => (
-          <button
-            key={cat.key}
-            onClick={() => changeCategory(cat.key)}
-            className={`px-5 py-2.5 rounded-full font-semibold text-xs uppercase tracking-wider transition-all duration-300 ${
-              activeCategoryKey === cat.key
-                ? "text-white shadow-lg scale-105"
-                : "bg-white text-gray-700 hover:bg-amber-50 shadow-md"
-            }`}
-            style={activeCategoryKey === cat.key ? { backgroundColor: accent } : undefined}
-          >
-            {cat.name}
-          </button>
-        ))}
+      <div className="absolute top-20 left-1/2 -translate-x-1/2 z-50 flex gap-2 flex-wrap justify-center px-4">
+        <div className="flex gap-1.5 p-1.5 rounded-full bg-white/5 backdrop-blur-xl border border-white/10 shadow-2xl flex-wrap justify-center">
+          {CATEGORIES.map((cat) => (
+            <button
+              key={cat.key}
+              onClick={() => changeCategory(cat.key)}
+              className={`px-5 py-2.5 rounded-full font-semibold text-xs uppercase tracking-wider transition-all duration-300 ${
+                activeCategoryKey === cat.key
+                  ? "text-white shadow-lg scale-105"
+                  : "text-white/50 hover:text-white/80 hover:bg-white/5"
+              }`}
+              style={activeCategoryKey === cat.key ? { backgroundColor: accent, boxShadow: `0 8px 24px -8px ${accent}99` } : undefined}
+            >
+              {cat.name}
+            </button>
+          ))}
+        </div>
       </div>
 
       {/* ── Subtype Pill Row ── */}
       {!singleItem && (
-        <div className="absolute top-[7.5rem] left-0 right-0 z-50 flex justify-center px-6 mt-8">
-          <div
-            ref={pillsRef}
-            className="flex gap-2 overflow-x-auto pb-1 max-w-3xl scrollbar-hide"
-            style={{ scrollbarWidth: "none", msOverflowStyle: "none" }}
-          >
-            {currentItems.map((item, i) => {
-              const isActive = i === currentIndex;
-              return (
-                <button
-                  key={item.id}
-                  onClick={() => jumpTo(i)}
-                  className="flex-shrink-0 flex items-center gap-1.5 px-3 py-1.5 rounded-full text-[11px] font-semibold transition-all duration-300 whitespace-nowrap"
-                  style={
-                    isActive
-                      ? { backgroundColor: accent, color: "#fff", boxShadow: `0 2px 12px ${accent}55`, transform: "scale(1.06)" }
-                      : { backgroundColor: "rgba(255,255,255,0.85)", color: "#374151", border: "1px solid rgba(0,0,0,0.08)" }
-                  }
-                >
-                  {isActive && <span className="inline-block w-1.5 h-1.5 rounded-full bg-white opacity-80" />}
-                  {item.name}
-                  {item.tag && (
-                    <span
-                      className="inline-block text-[9px] font-bold uppercase tracking-wider px-1.5 py-0.5 rounded-full"
-                      style={{
-                        backgroundColor: isActive ? "rgba(255,255,255,0.25)" : accent,
-                        color: "#fff",
-                      }}
-                    >
-                      {item.tag === "Best Seller" ? "★" : "New"}
-                    </span>
-                  )}
-                </button>
-              );
-            })}
+        <div className="absolute top-[8.25rem] left-0 right-0 z-50 flex justify-center px-6 mt-8">
+          <div className="relative max-w-3xl">
+            <div className="absolute inset-y-0 left-0 w-8 bg-gradient-to-r from-[#0b1220] to-transparent z-10 pointer-events-none" />
+            <div className="absolute inset-y-0 right-0 w-8 bg-gradient-to-l from-[#0b1220] to-transparent z-10 pointer-events-none" />
+            <div
+              ref={pillsRef}
+              className="flex gap-2 overflow-x-auto pb-1 scrollbar-hide"
+              style={{ scrollbarWidth: "none", msOverflowStyle: "none" }}
+            >
+              {currentItems.map((item, i) => {
+                const isActive = i === currentIndex;
+                return (
+                  <button
+                    key={item.id}
+                    onClick={() => jumpTo(i)}
+                    className="flex-shrink-0 flex items-center gap-1.5 px-3.5 py-1.5 rounded-full text-[11px] font-semibold transition-all duration-300 whitespace-nowrap"
+                    style={
+                      isActive
+                        ? { backgroundColor: accent, color: "#fff", boxShadow: `0 4px 16px ${accent}66`, transform: "scale(1.06)" }
+                        : { backgroundColor: "rgba(255,255,255,0.06)", color: "rgba(255,255,255,0.55)", border: "1px solid rgba(255,255,255,0.08)" }
+                    }
+                  >
+                    {isActive && <span className="inline-block w-1.5 h-1.5 rounded-full bg-white opacity-80" />}
+                    {item.name}
+                    {item.tag && (
+                      <span
+                        className="inline-block text-[9px] font-bold uppercase tracking-wider px-1.5 py-0.5 rounded-full"
+                        style={{
+                          backgroundColor: isActive ? "rgba(255,255,255,0.25)" : accent,
+                          color: "#fff",
+                        }}
+                      >
+                        {item.tag === "Best Seller" ? "★" : "New"}
+                      </span>
+                    )}
+                  </button>
+                );
+              })}
+            </div>
           </div>
         </div>
       )}
@@ -250,61 +285,84 @@ const Portfolio: React.FC = () => {
         className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 z-0 pointer-events-none"
         style={{ opacity: 0.06 }}
       >
-        <h1 className="text-[8rem] font-black text-gray-800 whitespace-nowrap select-none">
+        <h1
+          className="text-[8rem] font-black whitespace-nowrap select-none bg-clip-text text-transparent"
+          style={{ backgroundImage: `linear-gradient(135deg, ${accent}, #ffffff)`, WebkitTextStroke: "1px rgba(255,255,255,0.08)" }}
+        >
           {current.name.toUpperCase()}
         </h1>
       </div>
 
       {/* ── Product carousel ── */}
       <div ref={containerRef} className="relative w-full h-full mt-10">
-        {currentItems.map((item, i) => (
-          <div
-            key={item.id}
-            ref={(el) => (itemsRef.current[i] = el)}
-            className="absolute opacity-0 cursor-pointer"
-            style={{ willChange: "transform, opacity" }}
-            onClick={() => jumpTo(i)}
-          >
-            {item.image ? (
-              <img
-                src={item.image}
-                alt={item.name}
-                className="w-56 h-72 object-contain drop-shadow-2xl"
-              />
-            ) : (
-              <ImagePlaceholder category={activeCategoryKey} name={item.name} />
-            )}
-          </div>
-        ))}
+        {currentItems.map((item, i) => {
+          const isActive = i === currentIndex;
+          return (
+            <div
+              key={item.id}
+              ref={(el) => (itemsRef.current[i] = el)}
+              className="absolute opacity-0 cursor-pointer"
+              style={{ willChange: "transform, opacity" }}
+              onClick={() => jumpTo(i)}
+            >
+              <div className="relative flex items-center justify-center">
+                {/* Ambient glow behind the active product */}
+                {isActive && (
+                  <div
+                    className="absolute w-72 h-72 rounded-full blur-3xl transition-colors duration-700"
+                    style={{ background: `${accent}33` }}
+                  />
+                )}
+                {/* Ground shadow ellipse for premium studio feel */}
+                {isActive && (
+                  <div className="absolute -bottom-6 w-32 h-6 rounded-full bg-black/40 blur-xl" />
+                )}
+                {item.image ? (
+                  <img
+                    src={item.image}
+                    alt={item.name}
+                    className="relative w-56 h-72 object-contain drop-shadow-2xl"
+                  />
+                ) : (
+                  <ImagePlaceholder category={activeCategoryKey} name={item.name} />
+                )}
+              </div>
+            </div>
+          );
+        })}
       </div>
 
       {/* ── Left description panel ── */}
       <div className="absolute left-6 bottom-32 z-40 max-w-xs">
-        <div className="bg-white/85 backdrop-blur-md rounded-2xl p-5 shadow-xl border border-white/60">
+        <div
+          key={current.id}
+          className="relative bg-white/[0.06] backdrop-blur-2xl rounded-[26px] p-6 shadow-2xl border border-white/10 animate-[panelFadeUp_0.5s_cubic-bezier(0.25,0.46,0.45,0.94)_both]"
+        >
+          <div className="absolute top-0 left-6 right-6 h-px bg-gradient-to-r from-transparent via-white/30 to-transparent" />
           {current.tag && (
             <span
-              className="inline-block text-[10px] font-bold uppercase tracking-widest px-2 py-0.5 rounded mb-3 text-white"
-              style={{ backgroundColor: current.tag === "Best Seller" ? "#1d4ed8" : "#16a34a" }}
+              className="inline-block text-[10px] font-bold uppercase tracking-widest px-2.5 py-1 rounded-full mb-3 text-white"
+              style={{ backgroundColor: current.tag === "Best Seller" ? accent : "#16a34a" }}
             >
               {current.tag}
             </span>
           )}
-          <h3 className="text-xl font-bold text-gray-900 mb-1">{current.name}</h3>
-          <p className="text-xs font-semibold uppercase tracking-wide mb-2" style={{ color: accent }}>
+          <h3 className="text-xl font-bold text-white mb-1 tracking-tight">{current.name}</h3>
+          <p className="text-xs font-bold uppercase tracking-wide mb-2.5" style={{ color: accent }}>
             {current.description}
           </p>
-          <p className="text-gray-600 text-sm leading-relaxed mb-3">{current.content}</p>
+          <p className="text-white/60 text-sm leading-relaxed mb-4">{current.content}</p>
           {current.variants.length > 0 && (
             <div>
-              <p className="text-[10px] font-bold uppercase tracking-widest text-gray-400 mb-1.5">
+              <p className="text-[10px] font-bold uppercase tracking-widest text-white/30 mb-2">
                 Available sizes
               </p>
               <div className="flex flex-wrap gap-1.5">
                 {current.variants.map((v, vi) => (
                   <span
                     key={vi}
-                    className="text-[10px] font-semibold border rounded px-2 py-0.5"
-                    style={{ borderColor: `${accent}40`, color: accent, backgroundColor: `${accent}0d` }}
+                    className="text-[10px] font-semibold border rounded-md px-2 py-1"
+                    style={{ borderColor: `${accent}40`, color: accent, backgroundColor: `${accent}14` }}
                   >
                     {v.size}{v.packType ? ` (${v.packType})` : ""}
                   </span>
@@ -318,43 +376,53 @@ const Portfolio: React.FC = () => {
       {/* ── Prev / Next buttons ── */}
       {!singleItem && (
         <div className="absolute left-6 bottom-8 z-40 flex gap-3">
-          <button onClick={prev} className="w-12 h-12 bg-white/90 backdrop-blur-md rounded-full shadow-xl flex items-center justify-center hover:bg-amber-50 transition-colors" aria-label="Previous product">
-            <svg className="w-5 h-5 text-gray-800" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={3} d="M15 19l-7-7 7-7" />
-            </svg>
+          <button
+            onClick={prev}
+            className="w-12 h-12 bg-white/[0.06] backdrop-blur-xl border border-white/10 rounded-full shadow-xl flex items-center justify-center hover:bg-white/10 hover:border-white/20 transition-all duration-300 hover:scale-105"
+            aria-label="Previous product"
+          >
+            <ChevronLeft className="w-5 h-5 text-white/80" strokeWidth={2.5} />
           </button>
-          <button onClick={next} className="w-12 h-12 bg-white/90 backdrop-blur-md rounded-full shadow-xl flex items-center justify-center hover:bg-amber-50 transition-colors" aria-label="Next product">
-            <svg className="w-5 h-5 text-gray-800" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={3} d="M9 5l7 7-7 7" />
-            </svg>
+          <button
+            onClick={next}
+            className="w-12 h-12 bg-white/[0.06] backdrop-blur-xl border border-white/10 rounded-full shadow-xl flex items-center justify-center hover:bg-white/10 hover:border-white/20 transition-all duration-300 hover:scale-105"
+            aria-label="Next product"
+          >
+            <ChevronRight className="w-5 h-5 text-white/80" strokeWidth={2.5} />
           </button>
         </div>
       )}
 
       {/* ── Right thumbnail rail ── */}
       {gallery.length > 0 && (
-        <div className="absolute right-6 bottom-8 z-40 flex flex-col gap-2">
+        <div className="absolute right-6 bottom-8 z-40 flex flex-col gap-2.5">
           {gallery.map((src, gi) => (
             <button
               key={gi}
               onClick={() => setSelectedThumb({ src, name: current.name })}
-              className="w-14 h-14 rounded-lg overflow-hidden shadow-lg transition-all duration-300 hover:scale-110 ring-2 ring-transparent hover:ring-blue-400"
+              className="relative w-14 h-14 rounded-2xl overflow-hidden shadow-xl transition-all duration-300 hover:scale-110 ring-2 ring-white/10 hover:ring-2 group"
+              style={{ ["--tw-ring-color" as any]: `${accent}` }}
             >
               <img src={src} alt={`${current.name} ${gi + 1}`} className="w-full h-full object-cover" />
+              <div className="absolute inset-0 bg-black/0 group-hover:bg-black/10 transition-colors" />
             </button>
           ))}
         </div>
       )}
 
-      {/* ── Dot progress ── */}
+      {/* ── Progress bar ── */}
       {!singleItem && (
         <div className="absolute bottom-8 left-1/2 -translate-x-1/2 flex gap-2 z-10">
           {currentItems.map((_, i) => (
             <button
               key={i}
               onClick={() => jumpTo(i)}
-              className="h-2 rounded-full transition-all"
-              style={{ width: i === currentIndex ? "1.75rem" : "0.5rem", backgroundColor: i === currentIndex ? accent : "#d1d5db" }}
+              className="h-1.5 rounded-full transition-all duration-500"
+              style={{
+                width: i === currentIndex ? "2.25rem" : "0.5rem",
+                backgroundColor: i === currentIndex ? accent : "rgba(255,255,255,0.15)",
+                boxShadow: i === currentIndex ? `0 0 16px ${accent}88` : "none",
+              }}
               aria-label={`Go to product ${i + 1}`}
             />
           ))}
@@ -363,20 +431,44 @@ const Portfolio: React.FC = () => {
 
       {/* ── Thumbnail lightbox modal ── */}
       {selectedThumb && (
-        <div className="fixed inset-0 z-50 bg-black/80 flex items-center justify-center p-8" onClick={() => setSelectedThumb(null)}>
-          <div className="relative max-w-3xl max-h-full" onClick={(e) => e.stopPropagation()}>
+        <div
+          className="fixed inset-0 z-50 bg-black/85 backdrop-blur-sm flex items-center justify-center p-8 animate-[lightboxFadeIn_0.25s_ease-out]"
+          onClick={() => setSelectedThumb(null)}
+        >
+          <div
+            className="relative max-w-3xl max-h-full animate-[lightboxZoomIn_0.3s_cubic-bezier(0.25,0.46,0.45,0.94)]"
+            onClick={(e) => e.stopPropagation()}
+          >
             <img src={selectedThumb.src} alt={selectedThumb.name} className="w-full h-full object-contain rounded-2xl shadow-2xl max-h-[80vh]" />
-            <button onClick={() => setSelectedThumb(null)} className="absolute top-3 right-3 w-10 h-10 bg-white rounded-full flex items-center justify-center hover:bg-gray-100 transition-colors shadow-lg" aria-label="Close">
-              <svg className="w-5 h-5 text-gray-800" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
-              </svg>
+            <button
+              onClick={() => setSelectedThumb(null)}
+              className="absolute top-3 right-3 w-10 h-10 bg-white/10 backdrop-blur-xl border border-white/20 rounded-full flex items-center justify-center hover:bg-white/20 transition-colors shadow-lg"
+              aria-label="Close"
+            >
+              <X className="w-5 h-5 text-white" />
             </button>
-            <div className="absolute bottom-3 left-1/2 -translate-x-1/2 bg-white/90 backdrop-blur-md px-5 py-2 rounded-full shadow">
-              <p className="text-gray-800 text-sm font-semibold">{selectedThumb.name}</p>
+            <div className="absolute bottom-3 left-1/2 -translate-x-1/2 bg-white/10 backdrop-blur-xl border border-white/20 px-5 py-2 rounded-full shadow">
+              <p className="text-white text-sm font-semibold">{selectedThumb.name}</p>
             </div>
           </div>
         </div>
       )}
+
+      <style>{`
+        @keyframes panelFadeUp {
+          from { opacity: 0; transform: translateY(16px); }
+          to { opacity: 1; transform: translateY(0); }
+        }
+        @keyframes lightboxFadeIn {
+          from { opacity: 0; }
+          to { opacity: 1; }
+        }
+        @keyframes lightboxZoomIn {
+          from { opacity: 0; transform: scale(0.92); }
+          to { opacity: 1; transform: scale(1); }
+        }
+        .scrollbar-hide::-webkit-scrollbar { display: none; }
+      `}</style>
     </div>
   );
 };
