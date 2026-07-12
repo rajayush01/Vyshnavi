@@ -39,7 +39,7 @@ import {
   type ProductItem,
   type ProductVariant,
 } from "../data/vyshnaviData";
-import { useCart } from "../context/CartContext";
+import { useCart } from "../context/cartContext";
 
 interface Feature {
   icon: JSX.Element;

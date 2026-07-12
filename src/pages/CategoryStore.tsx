@@ -6,7 +6,7 @@
  * Reads the category key from the route (/category/:key) and renders
  * every item in that category, driven entirely by vyshnaviData.ts.
  *
- * Cart wiring uses the shared CartContext, same as GheeStore and
+ * Cart wiring uses the shared cartContext, same as GheeStore and
  * ProductDetails, so items added here show up in the same cart everywhere.
  */
 

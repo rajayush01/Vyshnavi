@@ -12,7 +12,7 @@ import ProductDetails from './pages/ProductDetails';
 import Portfolio from './pages/Portfolio';
 import VerticalScrollAnimation from './components/VerticalScrollAnimation';
 import Profile from './pages/Profile';
-import { CartProvider } from './context/CartContext';
+import { CartProvider } from './context/cartContext';
 import CategoryStore from './pages/CategoryStore';
 
 const Home = lazy(() => import('./pages/Home'));

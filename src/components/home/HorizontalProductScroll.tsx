@@ -19,7 +19,7 @@ import {
   type ProductItem,
   type ProductCategory,
 } from "../../data/vyshnaviData";
-import { useCart } from "../../context/CartContext";
+import { useCart } from "../../context/cartContext";
 
 // ── Fallback gradients when no image exists ──────────────────────────────
 const FALLBACK_GRADIENT: Record<string, string> = {

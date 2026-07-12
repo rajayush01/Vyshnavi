@@ -1,5 +1,5 @@
 /**
- * CartContext.tsx — Vyshnavi Dairy
+ * cartContext.tsx — Vyshnavi Dairy
  *
  * Single source of truth for the shopping cart. Wrap the app once with
  * <CartProvider> (see App.tsx) and any component can call useCart() to
@@ -38,7 +38,7 @@ interface CartSlideItem {
   size: string;
 }
 
-interface CartContextValue {
+interface cartContextValue {
   cart: CartLineItem[];
   cartCount: number;
   cartTotal: number;
@@ -57,7 +57,7 @@ function makeLineId(productId: number, size: string): string {
   return `${productId}__${size}`;
 }
 
-const CartContext = createContext<CartContextValue | undefined>(undefined);
+const cartContext = createContext<cartContextValue | undefined>(undefined);
 
 // ── Provider ───────────────────────────────────────────────────────────
 export const CartProvider: React.FC<{ children: ReactNode }> = ({ children }) => {
@@ -118,7 +118,7 @@ export const CartProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
     [cart]
   );
 
-  const value: CartContextValue = {
+  const value: cartContextValue = {
     cart,
     cartCount,
     cartTotal,
@@ -133,7 +133,7 @@ export const CartProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
   };
 
   return (
-    <CartContext.Provider value={value}>
+    <cartContext.Provider value={value}>
       {children}
       {showCart && (
         <CartSlide
@@ -143,13 +143,13 @@ export const CartProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
           onUpdateQuantity={updateQuantity}
         />
       )}
-    </CartContext.Provider>
+    </cartContext.Provider>
   );
 };
 
 // ── Hook ───────────────────────────────────────────────────────────────
-export function useCart(): CartContextValue {
-  const ctx = useContext(CartContext);
+export function useCart(): cartContextValue {
+  const ctx = useContext(cartContext);
   if (!ctx) {
     throw new Error("useCart must be used within a <CartProvider>");
   }
