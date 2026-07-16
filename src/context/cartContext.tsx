@@ -1,5 +1,5 @@
 /**
- * cartContext.tsx — Vyshnavi Dairy
+ * CartContext.tsx — Vyshnavi Dairy
  *
  * Single source of truth for the shopping cart. Wrap the app once with
  * <CartProvider> (see App.tsx) and any component can call useCart() to
@@ -33,12 +33,13 @@ interface CartSlideItem {
   id: string;
   name: string;
   price: number;
+  originalPrice?: number;
   image: string;
   quantity: number;
   size: string;
 }
 
-interface cartContextValue {
+interface CartContextValue {
   cart: CartLineItem[];
   cartCount: number;
   cartTotal: number;
@@ -57,7 +58,7 @@ function makeLineId(productId: number, size: string): string {
   return `${productId}__${size}`;
 }
 
-const cartContext = createContext<cartContextValue | undefined>(undefined);
+const CartContext = createContext<CartContextValue | undefined>(undefined);
 
 // ── Provider ───────────────────────────────────────────────────────────
 export const CartProvider: React.FC<{ children: ReactNode }> = ({ children }) => {
@@ -104,13 +105,14 @@ export const CartProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
     [cart]
   );
 
-  // CartSlide expects { id, name, price, image, quantity }
+  // CartSlide expects { id, name, price, originalPrice?, image, quantity, size }
   const cartSlideItems: CartSlideItem[] = useMemo(
     () =>
       cart.map((li) => ({
         id: li.lineId,
-        name: `${li.product.name} — ${li.variant.size}`,
+        name: li.product.name,
         price: li.variant.price ?? 0,
+        originalPrice: li.variant.originalPrice,
         image: li.product.image,
         quantity: li.quantity,
         size: li.variant.size,
@@ -118,7 +120,7 @@ export const CartProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
     [cart]
   );
 
-  const value: cartContextValue = {
+  const value: CartContextValue = {
     cart,
     cartCount,
     cartTotal,
@@ -133,7 +135,7 @@ export const CartProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
   };
 
   return (
-    <cartContext.Provider value={value}>
+    <CartContext.Provider value={value}>
       {children}
       {showCart && (
         <CartSlide
@@ -143,13 +145,13 @@ export const CartProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
           onUpdateQuantity={updateQuantity}
         />
       )}
-    </cartContext.Provider>
+    </CartContext.Provider>
   );
 };
 
 // ── Hook ───────────────────────────────────────────────────────────────
-export function useCart(): cartContextValue {
-  const ctx = useContext(cartContext);
+export function useCart(): CartContextValue {
+  const ctx = useContext(CartContext);
   if (!ctx) {
     throw new Error("useCart must be used within a <CartProvider>");
   }

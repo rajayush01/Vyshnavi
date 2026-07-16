@@ -77,7 +77,7 @@ const HeroSection = () => {
       ))}
 
       {/* Vertical slide rail — right edge, desktop only */}
-      <div className="hidden lg:flex flex-col gap-3 absolute right-8 top-1/2 -translate-y-1/2 z-20">
+      {/* <div className="hidden lg:flex flex-col gap-3 absolute right-8 top-1/2 -translate-y-1/2 z-20">
         {slides.map((_, index) => (
           <button
             key={index}
@@ -99,7 +99,7 @@ const HeroSection = () => {
             )}
           </button>
         ))}
-      </div>
+      </div> */}
 
       {/* Floating glass content card — anchored bottom-left, overlapping edge */}
       <div className="absolute inset-x-0 bottom-0 z-20 px-5 sm:px-10 lg:px-16">

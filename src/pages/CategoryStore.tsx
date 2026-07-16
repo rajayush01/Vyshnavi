@@ -6,7 +6,7 @@
  * Reads the category key from the route (/category/:key) and renders
  * every item in that category, driven entirely by vyshnaviData.ts.
  *
- * Cart wiring uses the shared cartContext, same as GheeStore and
+ * Cart wiring uses the shared CartContext, same as GheeStore and
  * ProductDetails, so items added here show up in the same cart everywhere.
  */
 
@@ -180,36 +180,51 @@ const CategoryStore: React.FC = () => {
                   )}
                 </div>
 
-                <div className="flex items-center gap-2.5 mt-auto pt-4 border-t border-gray-50">
-                  <select
-                    className="flex-1 border rounded-xl px-3 py-2.5 text-sm font-medium focus:outline-none bg-gray-50 text-gray-700"
-                    style={{ borderColor: `${accent}33` }}
-                    value={activeSize}
-                    onChange={(e) =>
-                      setSelectedVariants((prev) => ({ ...prev, [product.id]: e.target.value }))
-                    }
-                    onClick={(e) => e.stopPropagation()}
-                  >
-                    {product.variants.map((v) => (
-                      <option key={v.size} value={v.size}>
-                        {v.size}
-                        {v.price ? ` — ₹${v.price.toLocaleString("en-IN")}` : ""}
-                      </option>
-                    ))}
-                  </select>
+                {category.key === "ghee" ? (
+                  <div className="flex items-center gap-2.5 mt-auto pt-4 border-t border-gray-50">
+                    <select
+                      className="flex-1 border rounded-xl px-3 py-2.5 text-sm font-medium focus:outline-none bg-gray-50 text-gray-700"
+                      style={{ borderColor: `${accent}33` }}
+                      value={activeSize}
+                      onChange={(e) =>
+                        setSelectedVariants((prev) => ({ ...prev, [product.id]: e.target.value }))
+                      }
+                      onClick={(e) => e.stopPropagation()}
+                    >
+                      {product.variants.map((v) => (
+                        <option key={v.size} value={v.size}>
+                          {v.size}
+                          {v.price ? ` — ₹${v.price.toLocaleString("en-IN")}` : ""}
+                        </option>
+                      ))}
+                    </select>
 
-                  <button
-                    onClick={(e) => {
-                      e.stopPropagation();
-                      handleAddToCart(product);
-                    }}
-                    className="flex items-center gap-1.5 text-white font-bold py-2.5 px-5 rounded-xl transition-all duration-200 text-sm whitespace-nowrap hover:-translate-y-0.5"
-                    style={{ backgroundColor: accent }}
-                  >
-                    <ShoppingCart size={15} />
-                    Add
-                  </button>
-                </div>
+                    <button
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        handleAddToCart(product);
+                      }}
+                      className="flex items-center gap-1.5 text-white font-bold py-2.5 px-5 rounded-xl transition-all duration-200 text-sm whitespace-nowrap hover:-translate-y-0.5"
+                      style={{ backgroundColor: accent }}
+                    >
+                      <ShoppingCart size={15} />
+                      Add
+                    </button>
+                  </div>
+                ) : (
+                  <div className="mt-auto pt-4 border-t border-gray-50">
+                    <button
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        navigate("/details", { state: { productId: product.id } });
+                      }}
+                      className="w-full flex items-center justify-center gap-1.5 border font-bold py-2.5 px-5 rounded-xl transition-all duration-200 text-sm hover:-translate-y-0.5"
+                      style={{ borderColor: `${accent}44`, color: accent }}
+                    >
+                      View Details
+                    </button>
+                  </div>
+                )}
               </div>
             </div>
           );

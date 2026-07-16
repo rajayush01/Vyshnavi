@@ -11,7 +11,7 @@
  */
 
 import React, { useRef, useState, useEffect, useCallback, useMemo } from "react";
-import { ShoppingCart, Zap, ChevronLeft, ChevronRight, Star } from "lucide-react";
+import { ShoppingCart, Zap, ChevronLeft, ChevronRight, Star, X, Expand } from "lucide-react";
 
 // ── Data source ──────────────────────────────────────────────────────────
 import {
@@ -84,6 +84,7 @@ const HorizontalProductScroll: React.FC<HorizontalProductScrollProps> = ({
 }) => {
   const [current, setCurrent] = useState(0);
   const [activePhoto, setActivePhoto] = useState(0);
+  const [isLightboxOpen, setIsLightboxOpen] = useState(false);
   const [justAdded, setJustAdded] = useState(false);
   const railRef = useRef<HTMLDivElement>(null);
   const { addToCart } = useCart();
@@ -100,6 +101,7 @@ const HorizontalProductScroll: React.FC<HorizontalProductScrollProps> = ({
   );
 
   const active = entries[current] ?? entries[0];
+  const gallery = active ? getGallery(active.item) : [];
 
   // ── Keyboard navigation ────────────────────────────────────────────────
   useEffect(() => {
@@ -141,14 +143,30 @@ const HorizontalProductScroll: React.FC<HorizontalProductScrollProps> = ({
   useEffect(() => {
     setJustAdded(false);
     setActivePhoto(0);
+    setIsLightboxOpen(false);
   }, [current]);
+
+  // Lightbox: Escape to close, arrow keys to browse this product's own photos, lock scroll while open
+  useEffect(() => {
+    if (!isLightboxOpen) return;
+    const handler = (e: KeyboardEvent) => {
+      if (e.key === "Escape") setIsLightboxOpen(false);
+      if (e.key === "ArrowLeft") setActivePhoto((i) => Math.max(0, i - 1));
+      if (e.key === "ArrowRight") setActivePhoto((i) => Math.min(gallery.length - 1, i + 1));
+    };
+    window.addEventListener("keydown", handler);
+    document.body.style.overflow = "hidden";
+    return () => {
+      window.removeEventListener("keydown", handler);
+      document.body.style.overflow = "";
+    };
+  }, [isLightboxOpen]); // eslint-disable-line react-hooks/exhaustive-deps
 
   const resolvedHeading = heading ?? "Our Ghee Collection";
 
   if (!active) return null;
 
   const { item, category } = active;
-  const gallery = getGallery(item);
   const img = gallery[Math.min(activePhoto, gallery.length - 1)] ?? null;
   const priceVariant = item.variants.find((v) => v.price != null);
   const cartVariant = priceVariant ?? item.variants[0];
@@ -188,6 +206,9 @@ const HorizontalProductScroll: React.FC<HorizontalProductScrollProps> = ({
         .spot-cta-primary:hover { transform: translateY(-2px); box-shadow: 0 18px 35px -12px rgba(37,99,235,0.55); }
         .spot-cta-secondary:hover { background: #f8fafc !important; border-color: #93c5fd !important; }
         .spot-arrow:hover { background: #2563eb !important; color: #fff !important; }
+        @keyframes lightboxFadeIn { from { opacity: 0; } to { opacity: 1; } }
+        @keyframes lightboxZoomIn { from { opacity: 0; transform: scale(0.94); } to { opacity: 1; transform: scale(1); } }
+        @keyframes lightboxImageFade { from { opacity: 0; transform: scale(0.98); } to { opacity: 1; transform: scale(1); } }
       `}</style>
 
       <div className="spot-wrap">
@@ -291,7 +312,17 @@ const HorizontalProductScroll: React.FC<HorizontalProductScrollProps> = ({
             )}
 
             {img ? (
-              <img src={img} alt={item.name} draggable={false} style={{ maxWidth: "72%", maxHeight: "72%", objectFit: "contain", position: "relative", zIndex: 1, filter: "drop-shadow(0 30px 30px rgba(15,23,42,0.18))" }} />
+              <button
+                type="button"
+                onClick={() => setIsLightboxOpen(true)}
+                aria-label="View full-screen image"
+                style={{ position: "relative", zIndex: 1, background: "none", border: "none", padding: 0, cursor: "zoom-in", maxWidth: "72%", maxHeight: "72%" }}
+              >
+                <img src={img} alt={item.name} draggable={false} style={{ maxWidth: "100%", maxHeight: "100%", objectFit: "contain", display: "block", filter: "drop-shadow(0 30px 30px rgba(15,23,42,0.18))" }} />
+                <span style={{ position: "absolute", bottom: -6, right: -6, width: 34, height: 34, borderRadius: "50%", background: "rgba(255,255,255,0.95)", display: "flex", alignItems: "center", justifyContent: "center", boxShadow: "0 8px 18px -8px rgba(0,0,0,0.35)", color: "#2563eb" }}>
+                  <Expand size={14} />
+                </span>
+              </button>
             ) : (
               <span style={{ fontSize: 14, color: "#6b7280", fontWeight: 600, position: "relative", zIndex: 1 }}>{item.name}</span>
             )}
@@ -430,6 +461,66 @@ const HorizontalProductScroll: React.FC<HorizontalProductScrollProps> = ({
           {current + 1} / {entries.length}
         </p>
       </div>
+
+      {/* Full-screen image lightbox */}
+      {isLightboxOpen && gallery.length > 0 && (
+        <div
+          onClick={() => setIsLightboxOpen(false)}
+          style={{ position: "fixed", inset: 0, zIndex: 100, background: "rgba(2,6,23,0.9)", backdropFilter: "blur(6px)", display: "flex", alignItems: "center", justifyContent: "center", padding: "1rem", animation: "lightboxFadeIn 0.25s ease-out" }}
+        >
+          <div
+            onClick={(e) => e.stopPropagation()}
+            style={{ position: "relative", width: "100%", height: "100%", maxWidth: 900, maxHeight: "85vh", display: "flex", alignItems: "center", justifyContent: "center", animation: "lightboxZoomIn 0.3s cubic-bezier(0.25,0.46,0.45,0.94)" }}
+          >
+            <img
+              key={activePhoto}
+              src={gallery[Math.min(activePhoto, gallery.length - 1)]}
+              alt={item.name}
+              style={{ maxWidth: "100%", maxHeight: "100%", objectFit: "contain", filter: "drop-shadow(0 30px 60px rgba(0,0,0,0.5))", animation: "lightboxImageFade 0.35s ease-out" }}
+            />
+
+            <button
+              onClick={() => setIsLightboxOpen(false)}
+              aria-label="Close full-screen image"
+              style={{ position: "absolute", top: -4, right: -4, width: 44, height: 44, borderRadius: "50%", background: "rgba(255,255,255,0.1)", backdropFilter: "blur(10px)", border: "1px solid rgba(255,255,255,0.2)", display: "flex", alignItems: "center", justifyContent: "center", cursor: "pointer" }}
+            >
+              <X size={20} color="#fff" />
+            </button>
+
+            {gallery.length > 1 && (
+              <>
+                <button
+                  onClick={() => setActivePhoto((i) => Math.max(0, i - 1))}
+                  disabled={activePhoto === 0}
+                  aria-label="Previous photo"
+                  style={{ position: "absolute", left: 4, top: "50%", transform: "translateY(-50%)", width: 44, height: 44, borderRadius: "50%", background: "rgba(255,255,255,0.1)", backdropFilter: "blur(10px)", border: "1px solid rgba(255,255,255,0.2)", display: "flex", alignItems: "center", justifyContent: "center", cursor: activePhoto === 0 ? "default" : "pointer", opacity: activePhoto === 0 ? 0.3 : 1 }}
+                >
+                  <ChevronLeft size={20} color="#fff" />
+                </button>
+                <button
+                  onClick={() => setActivePhoto((i) => Math.min(gallery.length - 1, i + 1))}
+                  disabled={activePhoto === gallery.length - 1}
+                  aria-label="Next photo"
+                  style={{ position: "absolute", right: 4, top: "50%", transform: "translateY(-50%)", width: 44, height: 44, borderRadius: "50%", background: "rgba(255,255,255,0.1)", backdropFilter: "blur(10px)", border: "1px solid rgba(255,255,255,0.2)", display: "flex", alignItems: "center", justifyContent: "center", cursor: activePhoto === gallery.length - 1 ? "default" : "pointer", opacity: activePhoto === gallery.length - 1 ? 0.3 : 1 }}
+                >
+                  <ChevronRight size={20} color="#fff" />
+                </button>
+
+                <div style={{ position: "absolute", bottom: -32, left: "50%", transform: "translateX(-50%)", display: "flex", gap: 8 }}>
+                  {gallery.map((_, gi) => (
+                    <button
+                      key={gi}
+                      onClick={() => setActivePhoto(gi)}
+                      aria-label={`View photo ${gi + 1}`}
+                      style={{ height: 6, borderRadius: 6, width: gi === activePhoto ? 24 : 6, background: gi === activePhoto ? "#2563eb" : "rgba(255,255,255,0.35)", border: "none", cursor: "pointer", transition: "all 0.25s ease" }}
+                    />
+                  ))}
+                </div>
+              </>
+            )}
+          </div>
+        </div>
+      )}
     </section>
   );
 };

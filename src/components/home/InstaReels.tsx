@@ -1,5 +1,5 @@
 import React, { useState, useRef, useEffect } from 'react';
-import { Heart, MessageCircle, VolumeX, Volume2 } from 'lucide-react';
+import { Heart, MessageCircle, VolumeX, Volume2, ChevronLeft, ChevronRight } from 'lucide-react';
 
 const SAMPLE_VIDEOS = [
   {
@@ -73,15 +73,16 @@ const SAMPLE_VIDEOS = [
   },
   {
     id: 6,
-    url: 'https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/ForBiggerBlazes.mp4',
-    thumbnail: 'https://images.unsplash.com/photo-1549060279-7e168fcee0c2?w=400&h=600&fit=crop',
-    username: 'health_lifestyle',
-    caption: 'Best wellness deals 🌟',
-    likes: '31.7K',
-    comments: '2.1K',
-    avatar: 'https://i.pravatar.cc/150?img=3',
+    url: 'https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/BigBuckBunny.mp4',
+    thumbnail: 'https://images.unsplash.com/photo-1517836357463-d25dfeac3438?w=400&h=600&fit=crop',
+    username: 'gym_essentials',
+    caption: 'Power up your gains 💯',
+    likes: '42.1K',
+    comments: '3.4K',
+    avatar: 'https://i.pravatar.cc/150?img=4',
     products: [
-      { id: 6, name: 'Peanut Butter Crunch', price: '₹769', originalPrice: '₹899', image: 'https://images.unsplash.com/photo-1517673400267-0251440c45dc?w=200&h=200&fit=crop' }
+      { id: 7, name: 'Mass Gainer Pro', price: '₹3,299', originalPrice: '₹3,999', image: 'https://images.unsplash.com/photo-1579722821273-0f6c7d44362f?w=200&h=200&fit=crop' },
+      { id: 8, name: 'Creatine Blend', price: '₹1,499', originalPrice: '₹1,899', image: 'https://images.unsplash.com/photo-1590779033100-9f60a05a013d?w=200&h=200&fit=crop' }
     ]
   },
 ];
@@ -89,6 +90,7 @@ const SAMPLE_VIDEOS = [
 export default function InstaReelsGrid() {
   const [muted, setMuted] = useState(true);
   const videoRefs = useRef<{ [key: number]: HTMLVideoElement | null }>({});
+  const railRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
     Object.values(videoRefs.current).forEach(video => {
@@ -103,6 +105,14 @@ export default function InstaReelsGrid() {
   const toggleMute = (e: React.MouseEvent) => {
     e.stopPropagation();
     setMuted(!muted);
+  };
+
+  const scrollByCard = (direction: 1 | -1) => {
+    const rail = railRef.current;
+    if (!rail) return;
+    const card = rail.firstElementChild as HTMLElement | null;
+    const step = (card?.offsetWidth ?? 220) + 16;
+    rail.scrollBy({ left: step * direction, behavior: "smooth" });
   };
 
   return (
@@ -122,11 +132,29 @@ export default function InstaReelsGrid() {
               Fresh, In Motion
             </h2>
           </div>
-          <p className="text-sm text-slate-500 hidden sm:block">Swipe to explore →</p>
+          <div className="hidden sm:flex items-center gap-2">
+            <button
+              onClick={() => scrollByCard(-1)}
+              aria-label="Scroll reels left"
+              className="w-11 h-11 rounded-full border border-blue-100 bg-white flex items-center justify-center hover:bg-blue-50 hover:border-blue-300 transition-all shadow-sm"
+            >
+              <ChevronLeft className="w-5 h-5 text-blue-600" />
+            </button>
+            <button
+              onClick={() => scrollByCard(1)}
+              aria-label="Scroll reels right"
+              className="w-11 h-11 rounded-full border border-blue-100 bg-white flex items-center justify-center hover:bg-blue-50 hover:border-blue-300 transition-all shadow-sm"
+            >
+              <ChevronRight className="w-5 h-5 text-blue-600" />
+            </button>
+          </div>
         </div>
 
         {/* Horizontal scroll-snap rail */}
-        <div className="flex gap-4 overflow-x-auto pb-4 snap-x snap-mandatory scrollbar-hide -mx-6 px-6">
+        <div
+          ref={railRef}
+          className="flex gap-4 overflow-x-auto pb-4 snap-x snap-mandatory scrollbar-hide -mx-6 px-6"
+        >
           {SAMPLE_VIDEOS.map((video) => (
             <div
               key={video.id}

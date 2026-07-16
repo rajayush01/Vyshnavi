@@ -61,7 +61,7 @@ export default function AlsoAvailableSection() {
                   <path d="M20 0 C9 0 0 9 0 20 C0 35 20 50 20 50 C20 50 40 35 40 20 C40 9 31 0 20 0 Z" fill="#FC8019" />
                   <circle cx="20" cy="18" r="8" fill="white" />
                 </g>
-                <text x="65" y="48" fontFamily="Arial, sans-serif" fontSize="32" fontWeight="bold" fill="#FC8019" letterSpacing="2">SWIGGY</text>
+                <text x="55" y="48" fontFamily="Arial, sans-serif" fontSize="32" fontWeight="bold" fill="#FC8019" letterSpacing="2">SWIGGY</text>
               </svg>
               <span className="opacity-0 group-hover:opacity-100 group-hover:translate-x-1 transition-all duration-300 text-orange-500 text-xl">→</span>
             </a>

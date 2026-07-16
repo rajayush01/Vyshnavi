@@ -11,6 +11,11 @@
  *  - Variants in the current data set don't carry price yet, so price UI
  *    gracefully degrades to a "Price on Request" state instead of showing
  *    fabricated numbers.
+ *  - Product Description now sits full-width below the two-column layout.
+ *  - Reviews section added at the end: summary + rating breakdown, a
+ *    "write a review" form (name, star rating, text, photo upload), and
+ *    a review list. Review photos open in the same full-screen lightbox
+ *    used for the product gallery.
  */
 
 import React, { useEffect, useMemo, useState } from "react";
@@ -32,6 +37,7 @@ import {
   ChevronLeft,
   ChevronRight,
   Expand,
+  Camera,
 } from "lucide-react";
 import {
   getProductById,
@@ -47,6 +53,15 @@ interface Feature {
   subtitle: string;
 }
 
+interface ProductReview {
+  id: string;
+  name: string;
+  rating: number;
+  date: string;
+  text: string;
+  photos: string[];
+}
+
 const DEFAULT_PRODUCT_ID = 601; // Cow Ghee — flagship item, used when no id is passed in
 
 const FALLBACK_GRADIENT = "linear-gradient(135deg,#fef3c7,#fffbeb)";
@@ -56,6 +71,59 @@ const features: Feature[] = [
   { icon: <Headphones className="w-8 h-8" />, title: "360° Customer", subtitle: "Support" },
   { icon: <Package className="w-8 h-8" />, title: "Up to 30 Days", subtitle: "Return" },
   { icon: <FileCheck className="w-8 h-8" />, title: "70+ Quality", subtitle: "Checks" },
+];
+
+// Seed reviews so the section shows something meaningful out of the box.
+// These are placeholder / demo entries — swap for real review data whenever
+// a reviews API/backend is wired up.
+const SEED_REVIEWS: ProductReview[] = [
+  {
+    id: "r1",
+    name: "Anita Sharma",
+    rating: 5,
+    date: "2 weeks ago",
+    text: "The aroma is incredible — reminds me of the ghee my grandmother used to make. A little goes a long way and it's clearly not adulterated.",
+    photos: [
+      "https://picsum.photos/seed/ghee-review-1/400/400",
+      "https://picsum.photos/seed/ghee-review-2/400/400",
+    ],
+  },
+  {
+    id: "r2",
+    name: "Rohit Verma",
+    rating: 4,
+    date: "1 month ago",
+    text: "Great texture and taste, granulates nicely at room temperature which I've read is a sign of purity. Packaging could be sturdier for shipping.",
+    photos: ["https://picsum.photos/seed/ghee-review-3/400/400"],
+  },
+  {
+    id: "r3",
+    name: "Priya Nair",
+    rating: 5,
+    date: "1 month ago",
+    text: "Ordered the 1 liter jar for Diwali sweets and it made all the difference. Will be my go-to from now on.",
+    photos: [],
+  },
+  {
+    id: "r4",
+    name: "Karthik Iyer",
+    rating: 3,
+    date: "2 months ago",
+    text: "Good quality overall, though I expected a slightly stronger aroma at this price point. Still better than most store-bought options.",
+    photos: ["https://picsum.photos/seed/ghee-review-4/400/400"],
+  },
+  {
+    id: "r5",
+    name: "Meera Joshi",
+    rating: 5,
+    date: "3 months ago",
+    text: "Been buying this for six months now. Consistent quality every single time and my kids love the taste in their daily roti.",
+    photos: [
+      "https://picsum.photos/seed/ghee-review-5/400/400",
+      "https://picsum.photos/seed/ghee-review-6/400/400",
+      "https://picsum.photos/seed/ghee-review-7/400/400",
+    ],
+  },
 ];
 
 const A2GheeProduct: React.FC = () => {
@@ -82,7 +150,20 @@ const A2GheeProduct: React.FC = () => {
   );
   const [quantity, setQuantity] = useState<number>(1);
   const [selectedImage, setSelectedImage] = useState<number>(0);
+
+  // Generalized lightbox — can display the product gallery OR a review's
+  // photos, whichever was clicked. `lightboxImages` holds whichever array
+  // is currently active; `lightboxIndex` is the position within it.
   const [isLightboxOpen, setIsLightboxOpen] = useState<boolean>(false);
+  const [lightboxImages, setLightboxImages] = useState<string[]>([]);
+  const [lightboxIndex, setLightboxIndex] = useState<number>(0);
+
+  const openLightbox = (imgs: string[], index: number) => {
+    if (imgs.length === 0) return;
+    setLightboxImages(imgs);
+    setLightboxIndex(index);
+    setIsLightboxOpen(true);
+  };
 
   // Reset variant + image selection whenever the product itself changes
   useEffect(() => {
@@ -112,8 +193,9 @@ const A2GheeProduct: React.FC = () => {
 
     const handler = (e: KeyboardEvent) => {
       if (e.key === "Escape") setIsLightboxOpen(false);
-      if (e.key === "ArrowLeft") setSelectedImage((i) => Math.max(0, i - 1));
-      if (e.key === "ArrowRight") setSelectedImage((i) => Math.min(images.length - 1, i + 1));
+      if (e.key === "ArrowLeft") setLightboxIndex((i) => Math.max(0, i - 1));
+      if (e.key === "ArrowRight")
+        setLightboxIndex((i) => Math.min(lightboxImages.length - 1, i + 1));
     };
     window.addEventListener("keydown", handler);
     document.body.style.overflow = "hidden";
@@ -122,12 +204,64 @@ const A2GheeProduct: React.FC = () => {
       window.removeEventListener("keydown", handler);
       document.body.style.overflow = "";
     };
-  }, [isLightboxOpen, images.length]);
+  }, [isLightboxOpen, lightboxImages.length]);
 
   const hasPrice = !!selectedVariant?.price;
 
   // Cross-sell: another item from the same category, data-driven
   const crossSell = category?.items.find((p) => p.id !== product.id);
+
+  // ── Reviews state ────────────────────────────────────────────────────
+  const [reviews, setReviews] = useState<ProductReview[]>(SEED_REVIEWS);
+  const [reviewName, setReviewName] = useState("");
+  const [reviewText, setReviewText] = useState("");
+  const [reviewRating, setReviewRating] = useState(5);
+  const [reviewHoverRating, setReviewHoverRating] = useState(0);
+  const [reviewPhotoFiles, setReviewPhotoFiles] = useState<{ file: File; url: string }[]>([]);
+
+  const averageRating = useMemo(() => {
+    if (reviews.length === 0) return 0;
+    return reviews.reduce((sum, r) => sum + r.rating, 0) / reviews.length;
+  }, [reviews]);
+
+  const ratingBreakdown = useMemo(() => {
+    const counts = [0, 0, 0, 0, 0]; // index 0 = 1★ ... index 4 = 5★
+    reviews.forEach((r) => {
+      counts[r.rating - 1] += 1;
+    });
+    return counts;
+  }, [reviews]);
+
+  const handleReviewPhotoSelect = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const files = Array.from(e.target.files ?? []);
+    const withUrls = files.map((file) => ({ file, url: URL.createObjectURL(file) }));
+    setReviewPhotoFiles((prev) => [...prev, ...withUrls]);
+    e.target.value = "";
+  };
+
+  const removeReviewPhoto = (url: string) => {
+    setReviewPhotoFiles((prev) => prev.filter((p) => p.url !== url));
+  };
+
+  const handleSubmitReview = (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!reviewName.trim() || !reviewText.trim()) return;
+
+    const newReview: ProductReview = {
+      id: `r-${Date.now()}`,
+      name: reviewName.trim(),
+      rating: reviewRating,
+      date: "Just now",
+      text: reviewText.trim(),
+      photos: reviewPhotoFiles.map((p) => p.url),
+    };
+
+    setReviews((prev) => [newReview, ...prev]);
+    setReviewName("");
+    setReviewText("");
+    setReviewRating(5);
+    setReviewPhotoFiles([]);
+  };
 
   return (
     <div className="min-h-screen bg-gradient-to-b from-amber-50/50 via-white to-white">
@@ -150,7 +284,7 @@ const A2GheeProduct: React.FC = () => {
               {images.length > 0 ? (
                 <button
                   type="button"
-                  onClick={() => setIsLightboxOpen(true)}
+                  onClick={() => openLightbox(images, selectedImage)}
                   className="group relative w-full h-full cursor-zoom-in"
                   aria-label="View full-screen image"
                 >
@@ -217,20 +351,6 @@ const A2GheeProduct: React.FC = () => {
             <p className="text-xs text-amber-700/80 font-bold uppercase tracking-widest leading-relaxed">
               {product.description}
             </p>
-
-            {/* Rating */}
-            {/* {product.rating && (
-              <div className="flex items-center gap-2">
-                <div className="flex text-amber-400">
-                  {[...Array(5)].map((_, i) => (
-                    <Star key={i} className="w-4 h-4 sm:w-5 sm:h-5" fill="currentColor" strokeWidth={0} />
-                  ))}
-                </div>
-                <span className="text-xs sm:text-sm text-gray-500 font-medium">
-                  {product.rating} · {product.reviews ?? 0} reviews
-                </span>
-              </div>
-            )} */}
 
             {/* Price */}
             {hasPrice ? (
@@ -302,7 +422,7 @@ const A2GheeProduct: React.FC = () => {
             </div>
 
             {/* Quantity Selector and Action Buttons */}
-            <div className="flex flex-col items-center gap-4">
+            <div className="flex flex-row items-center gap-4">
               <div className="flex items-center bg-amber-50 rounded-2xl border border-amber-100">
                 <button
                   onClick={() => setQuantity(Math.max(1, quantity - 1))}
@@ -372,16 +492,8 @@ const A2GheeProduct: React.FC = () => {
               </div>
             )}
 
-            {/* Product Description Section */}
-            <div className="border-t border-amber-100 pt-5 sm:pt-6">
-              <h2 className="text-lg sm:text-xl font-black mb-3 sm:mb-4 tracking-tight text-gray-900">
-                Product Description
-              </h2>
-              <p className="text-gray-600 text-sm leading-relaxed">{product.content}</p>
-            </div>
-
             {/* Features Grid */}
-            <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-6 pt-4 sm:pt-6 pb-6 sm:pb-8">
+            <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-6 pt-4 sm:pt-6 pb-2">
               {features.map((feature, idx) => (
                 <div key={idx} className="flex flex-col items-center text-center">
                   <div className="w-14 h-14 rounded-2xl bg-amber-50 border border-amber-100 flex items-center justify-center text-amber-600 mb-3">
@@ -394,10 +506,206 @@ const A2GheeProduct: React.FC = () => {
             </div>
           </div>
         </div>
+
+        {/* Product Description — full width, below the two-column layout */}
+        <div className="border-t border-amber-100 pt-8 mt-8">
+          <h2 className="text-xl sm:text-2xl font-black mb-4 tracking-tight text-gray-900">
+            Product Description
+          </h2>
+          <p className="text-gray-600 text-sm sm:text-base leading-relaxed max-w-3xl">
+            {product.content}
+          </p>
+        </div>
+
+        {/* Reviews — full width, at the very end of the page */}
+        <div className="border-t border-amber-100 pt-8 mt-8">
+          <h2 className="text-xl sm:text-2xl font-black mb-6 tracking-tight text-gray-900">
+            Customer Reviews
+          </h2>
+
+          {/* Summary */}
+          <div className="flex flex-col sm:flex-row gap-8 sm:gap-12 mb-8 pb-8 border-b border-amber-100">
+            <div className="flex flex-col items-center sm:items-start flex-shrink-0">
+              <span className="text-5xl font-black text-gray-900">{averageRating.toFixed(1)}</span>
+              <div className="flex text-amber-400 my-1.5">
+                {[...Array(5)].map((_, i) => (
+                  <Star
+                    key={i}
+                    className="w-4 h-4"
+                    fill={i < Math.round(averageRating) ? "currentColor" : "none"}
+                    strokeWidth={i < Math.round(averageRating) ? 0 : 1.5}
+                  />
+                ))}
+              </div>
+              <span className="text-xs text-gray-500 font-medium">{reviews.length} reviews</span>
+            </div>
+
+            <div className="flex-1 max-w-sm space-y-1.5">
+              {[5, 4, 3, 2, 1].map((star) => {
+                const count = ratingBreakdown[star - 1];
+                const pct = reviews.length ? (count / reviews.length) * 100 : 0;
+                return (
+                  <div key={star} className="flex items-center gap-2.5 text-xs">
+                    <span className="w-3 text-gray-500 font-medium">{star}</span>
+                    <Star className="w-3 h-3 text-amber-400 flex-shrink-0" fill="currentColor" strokeWidth={0} />
+                    <div className="flex-1 h-1.5 rounded-full bg-amber-50 overflow-hidden">
+                      <div className="h-full rounded-full bg-amber-400" style={{ width: `${pct}%` }} />
+                    </div>
+                    <span className="w-6 text-right text-gray-400">{count}</span>
+                  </div>
+                );
+              })}
+            </div>
+          </div>
+
+          {/* Write a review */}
+          <form
+            onSubmit={handleSubmitReview}
+            className="mb-10 p-5 sm:p-6 rounded-2xl bg-amber-50/50 border border-amber-100"
+          >
+            <h3 className="text-base font-bold text-gray-900 mb-4">Write a Review</h3>
+
+            <div className="mb-4">
+              <label className="block text-xs font-semibold text-gray-600 mb-1.5">Your Rating</label>
+              <div className="flex gap-1">
+                {[1, 2, 3, 4, 5].map((star) => (
+                  <button
+                    key={star}
+                    type="button"
+                    onClick={() => setReviewRating(star)}
+                    onMouseEnter={() => setReviewHoverRating(star)}
+                    onMouseLeave={() => setReviewHoverRating(0)}
+                    className="p-0.5"
+                    aria-label={`Rate ${star} stars`}
+                  >
+                    <Star
+                      className="w-6 h-6 text-amber-400 transition-transform hover:scale-110"
+                      fill={star <= (reviewHoverRating || reviewRating) ? "currentColor" : "none"}
+                      strokeWidth={star <= (reviewHoverRating || reviewRating) ? 0 : 1.5}
+                    />
+                  </button>
+                ))}
+              </div>
+            </div>
+
+            <div className="mb-4">
+              <label className="block text-xs font-semibold text-gray-600 mb-1.5">Name</label>
+              <input
+                type="text"
+                value={reviewName}
+                onChange={(e) => setReviewName(e.target.value)}
+                placeholder="Your name"
+                className="w-full sm:max-w-sm px-3.5 py-2.5 rounded-xl border border-amber-100 bg-white text-sm focus:outline-none focus:ring-2 focus:ring-amber-300"
+                required
+              />
+            </div>
+
+            <div className="mb-4">
+              <label className="block text-xs font-semibold text-gray-600 mb-1.5">Your Review</label>
+              <textarea
+                value={reviewText}
+                onChange={(e) => setReviewText(e.target.value)}
+                placeholder="Share your experience with this product..."
+                rows={3}
+                className="w-full px-3.5 py-2.5 rounded-xl border border-amber-100 bg-white text-sm resize-none focus:outline-none focus:ring-2 focus:ring-amber-300"
+                required
+              />
+            </div>
+
+            <div className="mb-5">
+              <label className="block text-xs font-semibold text-gray-600 mb-1.5">Add Photos</label>
+              <div className="flex flex-wrap gap-2.5">
+                {reviewPhotoFiles.map((p) => (
+                  <div
+                    key={p.url}
+                    className="relative w-16 h-16 rounded-xl overflow-hidden border border-amber-100 group"
+                  >
+                    <img src={p.url} alt="Upload preview" className="w-full h-full object-cover" />
+                    <button
+                      type="button"
+                      onClick={() => removeReviewPhoto(p.url)}
+                      className="absolute inset-0 bg-black/50 opacity-0 group-hover:opacity-100 flex items-center justify-center transition-opacity"
+                      aria-label="Remove photo"
+                    >
+                      <X className="w-4 h-4 text-white" />
+                    </button>
+                  </div>
+                ))}
+                <label className="w-16 h-16 rounded-xl border-2 border-dashed border-amber-200 flex items-center justify-center cursor-pointer hover:border-amber-400 hover:bg-amber-50 transition-colors">
+                  <Camera className="w-5 h-5 text-amber-500" />
+                  <input
+                    type="file"
+                    accept="image/*"
+                    multiple
+                    onChange={handleReviewPhotoSelect}
+                    className="hidden"
+                  />
+                </label>
+              </div>
+            </div>
+
+            <button
+              type="submit"
+              className="bg-gradient-to-r from-amber-500 to-amber-600 text-white px-6 py-2.5 rounded-full text-sm font-bold shadow-[0_10px_25px_-10px_rgba(217,119,6,0.55)] hover:shadow-[0_15px_30px_-8px_rgba(217,119,6,0.7)] hover:-translate-y-0.5 transition-all duration-200"
+            >
+              Post Review
+            </button>
+          </form>
+
+          {/* Review list */}
+          <div className="space-y-6">
+            {reviews.map((review) => (
+              <div key={review.id} className="pb-6 border-b border-amber-50 last:border-b-0">
+                <div className="flex items-start gap-3 mb-2.5">
+                  <div className="w-10 h-10 rounded-full bg-amber-100 text-amber-700 font-bold flex items-center justify-center flex-shrink-0 text-sm">
+                    {review.name.charAt(0).toUpperCase()}
+                  </div>
+                  <div className="flex-1 min-w-0">
+                    <div className="flex flex-wrap items-center gap-2">
+                      <span className="font-bold text-sm text-gray-900">{review.name}</span>
+                      <span className="text-xs text-gray-400">· {review.date}</span>
+                    </div>
+                    <div className="flex text-amber-400 mt-1">
+                      {[...Array(5)].map((_, i) => (
+                        <Star
+                          key={i}
+                          className="w-3.5 h-3.5"
+                          fill={i < review.rating ? "currentColor" : "none"}
+                          strokeWidth={i < review.rating ? 0 : 1.5}
+                        />
+                      ))}
+                    </div>
+                  </div>
+                </div>
+
+                <p className="text-sm text-gray-600 leading-relaxed mb-3">{review.text}</p>
+
+                {review.photos.length > 0 && (
+                  <div className="flex flex-wrap gap-2.5">
+                    {review.photos.map((photo, idx) => (
+                      <button
+                        key={idx}
+                        type="button"
+                        onClick={() => openLightbox(review.photos, idx)}
+                        className="w-16 h-16 sm:w-20 sm:h-20 rounded-xl overflow-hidden border border-amber-100 hover:border-amber-300 transition-colors"
+                      >
+                        <img
+                          src={photo}
+                          alt={`${review.name} review photo ${idx + 1}`}
+                          className="w-full h-full object-cover"
+                        />
+                      </button>
+                    ))}
+                  </div>
+                )}
+              </div>
+            ))}
+          </div>
+        </div>
       </div>
 
-      {/* Full-screen image lightbox */}
-      {isLightboxOpen && images.length > 0 && (
+      {/* Full-screen image lightbox — shared by the product gallery and review photos */}
+      {isLightboxOpen && lightboxImages.length > 0 && (
         <div
           className="fixed inset-0 z-[70] bg-slate-950/90 backdrop-blur-md flex items-center justify-center p-4 sm:p-10 animate-[lightboxFadeIn_0.25s_ease-out]"
           onClick={() => setIsLightboxOpen(false)}
@@ -407,9 +715,9 @@ const A2GheeProduct: React.FC = () => {
             onClick={(e) => e.stopPropagation()}
           >
             <img
-              key={selectedImage}
-              src={images[Math.min(selectedImage, images.length - 1)]}
-              alt={product.name}
+              key={lightboxIndex}
+              src={lightboxImages[Math.min(lightboxIndex, lightboxImages.length - 1)]}
+              alt="Full screen view"
               className="max-w-full max-h-full object-contain drop-shadow-2xl animate-[lightboxImageFade_0.35s_ease-out]"
             />
 
@@ -422,20 +730,20 @@ const A2GheeProduct: React.FC = () => {
               <X className="w-5 h-5 text-white" />
             </button>
 
-            {/* Prev / Next, only when the variant has more than one shot */}
-            {images.length > 1 && (
+            {/* Prev / Next, only when there's more than one shot */}
+            {lightboxImages.length > 1 && (
               <>
                 <button
-                  onClick={() => setSelectedImage((i) => Math.max(0, i - 1))}
-                  disabled={selectedImage === 0}
+                  onClick={() => setLightboxIndex((i) => Math.max(0, i - 1))}
+                  disabled={lightboxIndex === 0}
                   className="absolute left-1 sm:-left-4 top-1/2 -translate-y-1/2 w-11 h-11 bg-white/10 backdrop-blur-xl border border-white/20 rounded-full flex items-center justify-center hover:bg-white/20 transition-all disabled:opacity-30 disabled:pointer-events-none"
                   aria-label="Previous image"
                 >
                   <ChevronLeft className="w-5 h-5 text-white" />
                 </button>
                 <button
-                  onClick={() => setSelectedImage((i) => Math.min(images.length - 1, i + 1))}
-                  disabled={selectedImage === images.length - 1}
+                  onClick={() => setLightboxIndex((i) => Math.min(lightboxImages.length - 1, i + 1))}
+                  disabled={lightboxIndex === lightboxImages.length - 1}
                   className="absolute right-1 sm:-right-4 top-1/2 -translate-y-1/2 w-11 h-11 bg-white/10 backdrop-blur-xl border border-white/20 rounded-full flex items-center justify-center hover:bg-white/20 transition-all disabled:opacity-30 disabled:pointer-events-none"
                   aria-label="Next image"
                 >
@@ -444,14 +752,14 @@ const A2GheeProduct: React.FC = () => {
 
                 {/* Thumbnail dots */}
                 <div className="absolute -bottom-3 sm:bottom-4 left-1/2 -translate-x-1/2 flex gap-2">
-                  {images.map((_, idx) => (
+                  {lightboxImages.map((_, idx) => (
                     <button
                       key={idx}
-                      onClick={() => setSelectedImage(idx)}
+                      onClick={() => setLightboxIndex(idx)}
                       className="h-1.5 rounded-full transition-all duration-300"
                       style={{
-                        width: idx === selectedImage ? 24 : 6,
-                        backgroundColor: idx === selectedImage ? "#f59e0b" : "rgba(255,255,255,0.35)",
+                        width: idx === lightboxIndex ? 24 : 6,
+                        backgroundColor: idx === lightboxIndex ? "#f59e0b" : "rgba(255,255,255,0.35)",
                       }}
                       aria-label={`View image ${idx + 1}`}
                     />

@@ -11,8 +11,9 @@
 
 import React, { useEffect, useRef, useState, useCallback } from "react";
 import { gsap } from "gsap";
-import { ChevronLeft, ChevronRight, X, Sparkles } from "lucide-react";
+import { ChevronLeft, ChevronRight, X, Sparkles, ShoppingCart } from "lucide-react";
 import { CATEGORIES, type ProductCategory, type ProductItem } from "../data/vyshnaviData";
+import { useCart } from "../context/cartContext";
 
 // ── Category helpers (derived from data) ─────────────────────────────────
 
@@ -49,6 +50,9 @@ const Portfolio: React.FC = () => {
   const [activeCategoryKey, setActiveCategoryKey] = useState<string>(CATEGORIES[0].key);
   const [currentIndex, setCurrentIndex]           = useState<number>(0);
   const [selectedThumb, setSelectedThumb]         = useState<SelectedThumb | null>(null);
+  const [justAdded, setJustAdded]                 = useState<boolean>(false);
+
+  const { addToCart } = useCart();
 
   const itemsRef     = useRef<(HTMLDivElement | null)[]>([]);
   const autoPlayRef  = useRef<ReturnType<typeof setInterval> | null>(null);
@@ -141,6 +145,12 @@ const Portfolio: React.FC = () => {
     resetAutoPlay();
   };
 
+  const scrollByPill = (direction: 1 | -1) => {
+    const rail = pillsRef.current;
+    if (!rail) return;
+    rail.scrollBy({ left: 180 * direction, behavior: "smooth" });
+  };
+
   const changeCategory = (key: string) => {
     if (!containerRef.current) return;
     gsap.to(containerRef.current, {
@@ -185,6 +195,24 @@ const Portfolio: React.FC = () => {
   // Read image and gallery directly from the data item
   const gallery    = current.gallery.length > 0 ? current.gallery : (current.image ? [current.image] : []);
   const primaryImg = current.image;
+
+  // Reset the "added" confirmation whenever the featured product changes
+  useEffect(() => {
+    setJustAdded(false);
+  }, [currentIndex, activeCategoryKey]);
+
+  // Ghee is the only category wired to real cart/checkout so far — pick a
+  // sensible variant to add (priced one if available, else the first).
+  const isGhee = activeCategoryKey === "ghee";
+  const cartVariant = isGhee
+    ? current.variants.find((v) => v.price != null) ?? current.variants[0]
+    : undefined;
+
+  const handleAddToCart = () => {
+    if (!cartVariant) return;
+    addToCart(current, cartVariant, 1);
+    setJustAdded(true);
+  };
 
   // ── Render ────────────────────────────────────────────────
   return (
@@ -236,7 +264,15 @@ const Portfolio: React.FC = () => {
 
       {/* ── Subtype Pill Row ── */}
       {!singleItem && (
-        <div className="absolute top-[8.25rem] left-0 right-0 z-50 flex justify-center px-6 mt-8">
+        <div className="absolute top-[8.25rem] left-0 right-0 z-50 flex items-center justify-center gap-2 px-6 mt-8">
+          <button
+            onClick={() => scrollByPill(-1)}
+            aria-label="Scroll varieties left"
+            className="hidden sm:flex flex-shrink-0 w-8 h-8 rounded-full bg-white/[0.06] backdrop-blur-xl border border-white/10 items-center justify-center hover:bg-white/10 hover:border-white/20 transition-all"
+          >
+            <ChevronLeft className="w-3.5 h-3.5 text-white/70" />
+          </button>
+
           <div className="relative max-w-3xl">
             <div className="absolute inset-y-0 left-0 w-8 bg-gradient-to-r from-[#0b1220] to-transparent z-10 pointer-events-none" />
             <div className="absolute inset-y-0 right-0 w-8 bg-gradient-to-l from-[#0b1220] to-transparent z-10 pointer-events-none" />
@@ -276,6 +312,14 @@ const Portfolio: React.FC = () => {
               })}
             </div>
           </div>
+
+          <button
+            onClick={() => scrollByPill(1)}
+            aria-label="Scroll varieties right"
+            className="hidden sm:flex flex-shrink-0 w-8 h-8 rounded-full bg-white/[0.06] backdrop-blur-xl border border-white/10 items-center justify-center hover:bg-white/10 hover:border-white/20 transition-all"
+          >
+            <ChevronRight className="w-3.5 h-3.5 text-white/70" />
+          </button>
         </div>
       )}
 
@@ -369,6 +413,20 @@ const Portfolio: React.FC = () => {
                 ))}
               </div>
             </div>
+          )}
+
+          {isGhee && cartVariant && (
+            <button
+              onClick={handleAddToCart}
+              className="mt-5 w-full flex items-center justify-center gap-2 text-white font-bold text-sm py-3 rounded-2xl transition-all duration-300 hover:-translate-y-0.5"
+              style={{
+                backgroundColor: justAdded ? "#16a34a" : accent,
+                boxShadow: `0 15px 30px -14px ${justAdded ? "#16a34a" : accent}aa`,
+              }}
+            >
+              <ShoppingCart size={16} />
+              {justAdded ? "Added to cart" : "Add to cart"}
+            </button>
           )}
         </div>
       </div>
