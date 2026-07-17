@@ -11,7 +11,11 @@
  *  - Variants in the current data set don't carry price yet, so price UI
  *    gracefully degrades to a "Price on Request" state instead of showing
  *    fabricated numbers.
- *  - Product Description now sits full-width below the two-column layout.
+ *  - Product Description is now a tabbed section (Description, Ingredients,
+ *    Nutrition Info, How to Use & Store) sitting full-width below the
+ *    two-column layout. Only the Description tab is backed by real data
+ *    (product.content) right now — the other three are placeholder copy
+ *    until vyshnaviData.ts grows matching fields.
  *  - Reviews section added at the end: summary + rating breakdown, a
  *    "write a review" form (name, star rating, text, photo upload), and
  *    a review list. Review photos open in the same full-screen lightbox
@@ -62,6 +66,8 @@ interface ProductReview {
   photos: string[];
 }
 
+type DescTab = "description" | "ingredients" | "nutrition" | "usage";
+
 const DEFAULT_PRODUCT_ID = 601; // Cow Ghee — flagship item, used when no id is passed in
 
 const FALLBACK_GRADIENT = "linear-gradient(135deg,#fef3c7,#fffbeb)";
@@ -71,6 +77,13 @@ const features: Feature[] = [
   { icon: <Headphones className="w-8 h-8" />, title: "360° Customer", subtitle: "Support" },
   { icon: <Package className="w-8 h-8" />, title: "Up to 30 Days", subtitle: "Return" },
   { icon: <FileCheck className="w-8 h-8" />, title: "70+ Quality", subtitle: "Checks" },
+];
+
+const DESC_TABS: { key: DescTab; label: string }[] = [
+  { key: "description", label: "Description" },
+  { key: "ingredients", label: "Ingredients" },
+  { key: "nutrition", label: "Nutrition Info" },
+  { key: "usage", label: "How to Use & Store" },
 ];
 
 // Seed reviews so the section shows something meaningful out of the box.
@@ -158,6 +171,9 @@ const A2GheeProduct: React.FC = () => {
   const [lightboxImages, setLightboxImages] = useState<string[]>([]);
   const [lightboxIndex, setLightboxIndex] = useState<number>(0);
 
+  // Which tab is active in the Product Description section
+  const [activeDescTab, setActiveDescTab] = useState<DescTab>("description");
+
   const openLightbox = (imgs: string[], index: number) => {
     if (imgs.length === 0) return;
     setLightboxImages(imgs);
@@ -170,6 +186,7 @@ const A2GheeProduct: React.FC = () => {
     setSelectedVariantSize(product.variants[0]?.size ?? "");
     setSelectedImage(0);
     setQuantity(1);
+    setActiveDescTab("description");
   }, [product.id]); // eslint-disable-line react-hooks/exhaustive-deps
 
   const selectedVariant: ProductVariant =
@@ -507,14 +524,99 @@ const A2GheeProduct: React.FC = () => {
           </div>
         </div>
 
-        {/* Product Description — full width, below the two-column layout */}
+        {/* Product Description — full width, tabbed, below the two-column layout */}
         <div className="border-t border-amber-100 pt-8 mt-8">
-          <h2 className="text-xl sm:text-2xl font-black mb-4 tracking-tight text-gray-900">
-            Product Description
-          </h2>
-          <p className="text-gray-600 text-sm sm:text-base leading-relaxed max-w-3xl">
-            {product.content}
-          </p>
+          {/* Tab bar */}
+          <div className="flex gap-1 sm:gap-2 mb-6 overflow-x-auto border-b border-amber-100">
+            {DESC_TABS.map((tab) => {
+              const isActive = activeDescTab === tab.key;
+              return (
+                <button
+                  key={tab.key}
+                  onClick={() => setActiveDescTab(tab.key)}
+                  className={`relative px-4 sm:px-5 py-3 text-xs sm:text-sm font-bold whitespace-nowrap transition-colors ${
+                    isActive ? "text-amber-700" : "text-gray-400 hover:text-amber-600"
+                  }`}
+                >
+                  {tab.label}
+                  {isActive && (
+                    <span className="absolute bottom-0 left-0 right-0 h-0.5 rounded-full bg-gradient-to-r from-amber-500 to-amber-600" />
+                  )}
+                </button>
+              );
+            })}
+          </div>
+
+          {/* Tab content */}
+          <div className="max-w-3xl">
+            {activeDescTab === "description" && (
+              <div>
+                <h2 className="text-xl sm:text-2xl font-black mb-4 tracking-tight text-gray-900">
+                  Product Description
+                </h2>
+                <p className="text-gray-600 text-sm sm:text-base leading-relaxed">
+                  {product.content}
+                </p>
+              </div>
+            )}
+
+            {activeDescTab === "ingredients" && (
+              <div>
+                <h2 className="text-xl sm:text-2xl font-black mb-4 tracking-tight text-gray-900">
+                  Ingredients
+                </h2>
+                <p className="text-gray-600 text-sm sm:text-base leading-relaxed mb-4">
+                  100% pure, farm-sourced {product.name}. No additives, preservatives, or
+                  artificial colors — just milk, traditionally churned the old-fashioned way.
+                </p>
+                <ul className="list-disc list-inside text-sm text-gray-600 space-y-1.5">
+                  <li>Fresh cow/buffalo milk (as applicable)</li>
+                  <li>No hydrogenated fats or vanaspati</li>
+                  <li>No added preservatives</li>
+                </ul>
+              </div>
+            )}
+
+            {activeDescTab === "nutrition" && (
+              <div>
+                <h2 className="text-xl sm:text-2xl font-black mb-4 tracking-tight text-gray-900">
+                  Nutrition Info
+                </h2>
+                <p className="text-gray-600 text-sm sm:text-base leading-relaxed mb-5">
+                  Approximate values per 100g serving. Actual values may vary slightly by batch.
+                </p>
+                <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
+                  {[
+                    { label: "Energy", value: "898 kcal" },
+                    { label: "Total Fat", value: "99.8 g" },
+                    { label: "Saturated Fat", value: "62 g" },
+                    { label: "Cholesterol", value: "256 mg" },
+                  ].map((n) => (
+                    <div key={n.label} className="p-3.5 rounded-xl bg-amber-50 border border-amber-100 text-center">
+                      <div className="text-sm font-black text-gray-900">{n.value}</div>
+                      <div className="text-[11px] text-amber-700 font-semibold uppercase tracking-wide mt-1">
+                        {n.label}
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            )}
+
+            {activeDescTab === "usage" && (
+              <div>
+                <h2 className="text-xl sm:text-2xl font-black mb-4 tracking-tight text-gray-900">
+                  How to Use &amp; Store
+                </h2>
+                <ul className="list-disc list-inside text-sm text-gray-600 space-y-2 leading-relaxed">
+                  <li>Use as a substitute for cooking oil or butter in everyday cooking, or drizzle over rice, roti, and dals.</li>
+                  <li>Store in a cool, dry place away from direct sunlight; refrigeration isn't required.</li>
+                  <li>Always use a clean, dry spoon to scoop — moisture can affect shelf life.</li>
+                  <li>Granulation at room temperature is normal and a sign of purity, not spoilage.</li>
+                </ul>
+              </div>
+            )}
+          </div>
         </div>
 
         {/* Reviews — full width, at the very end of the page */}

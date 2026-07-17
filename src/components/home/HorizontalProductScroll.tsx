@@ -57,19 +57,19 @@ function getGallery(item: ProductItem): string[] {
 // ── Decorative dairy illustrations (background ambience) ─────────────────
 const StageDecorations: React.FC = () => (
   <>
-    <svg className="spot-deco spot-float-slow" style={{ position: "absolute", top: 24, left: "3%", width: 68, height: 68, opacity: 0.35, pointerEvents: "none", zIndex: 0 }} viewBox="0 0 64 64" fill="none">
+    {/* <svg className="spot-deco spot-float-slow" style={{ position: "absolute", top: 24, left: "3%", width: 68, height: 68, opacity: 0.35, pointerEvents: "none", zIndex: 0 }} viewBox="0 0 64 64" fill="none">
       <path d="M16 20 L38 20 L36 44 Q36 50 27 50 Q18 50 18 44 Z" fill="#ffffff" stroke="#3b82f6" strokeWidth="2" />
       <path d="M38 24 Q50 26 48 34 Q46 40 38 38" fill="none" stroke="#3b82f6" strokeWidth="2" />
       <path d="M48 34 Q52 40 50 48" stroke="#93c5fd" strokeWidth="2.5" strokeLinecap="round" opacity="0.8" />
       <rect x="14" y="14" width="26" height="6" rx="2" fill="#dbeafe" stroke="#3b82f6" strokeWidth="1.5" />
-    </svg>
-    <svg className="spot-deco spot-float" style={{ position: "absolute", top: 30, right: "4%", width: 52, height: 52, opacity: 0.35, pointerEvents: "none", zIndex: 0 }} viewBox="0 0 64 64" fill="none">
+    </svg> */}
+    {/* <svg className="spot-deco spot-float" style={{ position: "absolute", top: 30, right: "4%", width: 52, height: 52, opacity: 0.35, pointerEvents: "none", zIndex: 0 }} viewBox="0 0 64 64" fill="none">
       <path d="M32 50 C20 50 14 42 16 34 C10 32 10 22 18 20 C18 12 28 8 34 14 C42 10 50 18 46 26 C54 28 52 40 44 42 C44 48 38 50 32 50 Z" fill="#ffffff" stroke="#a5b4fc" strokeWidth="1.8" />
-    </svg>
-    <svg className="spot-deco spot-float-slow" style={{ position: "absolute", bottom: 22, right: "5%", width: 42, height: 50, opacity: 0.3, pointerEvents: "none", zIndex: 0 }} viewBox="0 0 64 64" fill="none">
+    </svg> */}
+    {/* <svg className="spot-deco spot-float-slow" style={{ position: "absolute", bottom: 22, right: "5%", width: 42, height: 50, opacity: 0.3, pointerEvents: "none", zIndex: 0 }} viewBox="0 0 64 64" fill="none">
       <rect x="26" y="6" width="12" height="8" rx="2" fill="#d97706" />
       <path d="M18 16 L46 16 L50 44 Q50 52 32 52 Q14 52 14 44 Z" fill="#fbbf24" stroke="#b45309" strokeWidth="2" />
-    </svg>
+    </svg> */}
     <style>{`
       @keyframes spotFloat { 0%,100% { transform: translateY(0px);} 50% { transform: translateY(-10px);} }
       @keyframes spotFloatSlow { 0%,100% { transform: translateY(0px);} 50% { transform: translateY(-14px);} }
@@ -86,6 +86,7 @@ const HorizontalProductScroll: React.FC<HorizontalProductScrollProps> = ({
   const [activePhoto, setActivePhoto] = useState(0);
   const [isLightboxOpen, setIsLightboxOpen] = useState(false);
   const [justAdded, setJustAdded] = useState(false);
+  const [selectedVariantIndex, setSelectedVariantIndex] = useState(0);
   const railRef = useRef<HTMLDivElement>(null);
   const { addToCart } = useCart();
 
@@ -139,11 +140,13 @@ const HorizontalProductScroll: React.FC<HorizontalProductScrollProps> = ({
     }
   }, [current]);
 
-  // Reset the "added" confirmation and photo index whenever the featured product changes
+  // Reset the "added" confirmation, photo index, and selected size whenever
+  // the featured product changes
   useEffect(() => {
     setJustAdded(false);
     setActivePhoto(0);
     setIsLightboxOpen(false);
+    setSelectedVariantIndex(0);
   }, [current]);
 
   // Lightbox: Escape to close, arrow keys to browse this product's own photos, lock scroll while open
@@ -168,8 +171,12 @@ const HorizontalProductScroll: React.FC<HorizontalProductScrollProps> = ({
 
   const { item, category } = active;
   const img = gallery[Math.min(activePhoto, gallery.length - 1)] ?? null;
-  const priceVariant = item.variants.find((v) => v.price != null);
-  const cartVariant = priceVariant ?? item.variants[0];
+
+  // The variant the shopper has picked via the size boxes below drives both
+  // the price panel and what gets added to the cart.
+  const selectedVariant =
+    item.variants[selectedVariantIndex] ?? item.variants[0];
+  const cartVariant = selectedVariant;
 
   const handleAddToCart = () => {
     if (!cartVariant) return;
@@ -206,6 +213,8 @@ const HorizontalProductScroll: React.FC<HorizontalProductScrollProps> = ({
         .spot-cta-primary:hover { transform: translateY(-2px); box-shadow: 0 18px 35px -12px rgba(37,99,235,0.55); }
         .spot-cta-secondary:hover { background: #f8fafc !important; border-color: #93c5fd !important; }
         .spot-arrow:hover { background: #2563eb !important; color: #fff !important; }
+        .spot-variant-box { transition: all 0.2s ease; cursor: pointer; }
+        .spot-variant-box:hover { transform: translateY(-2px); border-color: #fbbf24 !important; }
         @keyframes lightboxFadeIn { from { opacity: 0; } to { opacity: 1; } }
         @keyframes lightboxZoomIn { from { opacity: 0; transform: scale(0.94); } to { opacity: 1; transform: scale(1); } }
         @keyframes lightboxImageFade { from { opacity: 0; transform: scale(0.98); } to { opacity: 1; transform: scale(1); } }
@@ -388,39 +397,64 @@ const HorizontalProductScroll: React.FC<HorizontalProductScrollProps> = ({
               {item.description}
             </p>
 
-            {/* Variant chips */}
+            {/* Size / price boxes — pick a size to update the price & cart */}
             {item.variants.length > 0 && (
-              <div style={{ display: "flex", flexWrap: "wrap", gap: 7, marginBottom: 22 }}>
-                {item.variants.slice(0, 5).map((v, i) => (
-                  <span key={i} style={{ fontSize: 12, fontWeight: 600, border: "1px solid #dbeafe", background: "#eff6ff", borderRadius: 8, padding: "5px 12px", color: "#1d4ed8" }}>
-                    {v.size}
-                  </span>
-                ))}
-                {item.variants.length > 5 && (
-                  <span style={{ fontSize: 12, color: "#2563eb", fontWeight: 700, alignSelf: "center" }}>
-                    +{item.variants.length - 5} more
-                  </span>
-                )}
+              <div style={{ display: "flex", flexWrap: "wrap", gap: 10, marginBottom: 22 }}>
+                {item.variants.map((v, i) => {
+                  const isSelected = i === selectedVariantIndex;
+                  return (
+                    <button
+                      key={i}
+                      type="button"
+                      onClick={() => setSelectedVariantIndex(i)}
+                      className="spot-variant-box"
+                      aria-pressed={isSelected}
+                      style={{
+                        minWidth: 108,
+                        textAlign: "left",
+                        padding: "12px 16px",
+                        borderRadius: 16,
+                        border: isSelected ? "2px solid #f59e0b" : "1.5px solid #e5e7eb",
+                        background: isSelected ? "#fffbeb" : "#fff",
+                        boxShadow: isSelected
+                          ? "0 10px 25px -12px rgba(245,158,11,0.45)"
+                          : "0 2px 6px -2px rgba(15,23,42,0.06)",
+                      }}
+                    >
+                      <div style={{ fontSize: 15, fontWeight: 800, color: "#0f172a", lineHeight: 1.2 }}>
+                        {v.size}
+                      </div>
+                      {v.packType && (
+                        <div style={{ fontSize: 10, fontWeight: 700, letterSpacing: "0.08em", textTransform: "uppercase", color: "#94a3b8", margin: "3px 0 6px" }}>
+                          {v.packType}
+                        </div>
+                      )}
+                      <div style={{ fontSize: 14.5, fontWeight: 700, color: "#0f172a", marginTop: v.packType ? 0 : 6 }}>
+                        {v.price != null ? `₹${v.price.toLocaleString("en-IN")}` : "On request"}
+                      </div>
+                    </button>
+                  );
+                })}
               </div>
             )}
 
             {/* Price */}
             <div style={{ marginBottom: 24, paddingBottom: 24, borderBottom: "1px solid rgba(37,99,235,0.1)" }}>
-              {priceVariant ? (
+              {selectedVariant?.price != null ? (
                 <>
                   <div style={{ display: "flex", alignItems: "baseline", gap: 12 }}>
                     <span style={{ fontSize: 34, fontWeight: 800, color: "#0f172a", letterSpacing: "-0.02em" }}>
-                      ₹{priceVariant.price!.toLocaleString("en-IN")}
+                      ₹{selectedVariant.price.toLocaleString("en-IN")}
                     </span>
-                    {priceVariant.originalPrice && (
+                    {selectedVariant.originalPrice && (
                       <span style={{ fontSize: 16, color: "#94a3b8", textDecoration: "line-through" }}>
-                        ₹{priceVariant.originalPrice.toLocaleString("en-IN")}
+                        ₹{selectedVariant.originalPrice.toLocaleString("en-IN")}
                       </span>
                     )}
                   </div>
-                  {priceVariant.discount && (
+                  {selectedVariant.discount && (
                     <p style={{ fontSize: 12.5, color: "#16a34a", fontWeight: 700, margin: "6px 0 0" }}>
-                      {priceVariant.discount}
+                      {selectedVariant.discount}
                     </p>
                   )}
                 </>

@@ -53,20 +53,20 @@ const GheeStore: React.FC = () => {
   return (
     <div className="relative min-h-screen bg-gradient-to-b from-amber-50/60 via-blue-50/40 to-blue-50 overflow-hidden">
       {/* Decorative dairy/ghee illustrations */}
-      <svg className="hidden md:block absolute top-32 left-[3%] w-16 h-16 opacity-40 animate-float-slow pointer-events-none z-0" viewBox="0 0 64 64" fill="none">
+      {/* <svg className="hidden md:block absolute top-32 left-[3%] w-16 h-16 opacity-40 animate-float-slow pointer-events-none z-0" viewBox="0 0 64 64" fill="none">
         <path d="M18 26 Q18 20 32 20 Q46 20 46 26 L44 50 Q44 56 32 56 Q20 56 20 50 Z" fill="#fef3c7" stroke="#d97706" strokeWidth="2" />
         <ellipse cx="32" cy="26" rx="14" ry="5" fill="#fde68a" stroke="#d97706" strokeWidth="2" />
         <path d="M24 20 Q24 12 32 12 Q40 12 40 20" stroke="#d97706" strokeWidth="2" fill="none" />
-      </svg>
+      </svg> */}
       <svg className="hidden md:block absolute top-1/4 right-[3%] w-14 h-14 opacity-40 animate-float pointer-events-none z-0" viewBox="0 0 64 64" fill="none">
         <path d="M32 6 C40 22 50 30 50 42 C50 52 42 58 32 58 C22 58 14 52 14 42 C14 30 24 22 32 6 Z" fill="#ffffff" stroke="#60a5fa" strokeWidth="2" />
         <ellipse cx="27" cy="40" rx="4" ry="6" fill="#bfdbfe" opacity="0.7" />
       </svg>
-      <svg className="hidden md:block absolute bottom-40 left-[4%] w-12 h-12 opacity-40 animate-float pointer-events-none z-0" viewBox="0 0 64 64" fill="none">
+      {/* <svg className="hidden md:block absolute bottom-40 left-[4%] w-12 h-12 opacity-40 animate-float pointer-events-none z-0" viewBox="0 0 64 64" fill="none">
         <path d="M10 40 Q32 52 54 40 Q50 48 32 48 Q14 48 10 40 Z" fill="#fbbf24" stroke="#b45309" strokeWidth="2" />
         <ellipse cx="32" cy="38" rx="22" ry="6" fill="#fde68a" stroke="#b45309" strokeWidth="2" />
         <path d="M32 30 C34 24 30 20 32 14 C34 20 38 24 32 30 Z" fill="#f97316" />
-      </svg>
+      </svg> */}
       <svg className="hidden md:block absolute bottom-16 right-[5%] w-14 h-14 opacity-40 animate-float-slow pointer-events-none z-0" viewBox="0 0 64 64" fill="none">
         <path d="M12 52 C12 30 30 12 52 12 C52 34 34 52 12 52 Z" fill="#bbf7d0" stroke="#16a34a" strokeWidth="2" />
         <path d="M14 50 C24 40 34 30 50 14" stroke="#16a34a" strokeWidth="1.5" />

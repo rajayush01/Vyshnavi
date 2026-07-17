@@ -69,10 +69,10 @@ const DairyProductShowcase: React.FC = () => {
         <circle cx="40" cy="32" r="1.5" fill="#fbbf24" />
         <circle cx="22" cy="40" r="1.5" fill="#fbbf24" />
       </svg>
-      <svg className="hidden md:block absolute bottom-8 right-[4%] w-12 h-12 opacity-50 animate-float-slow pointer-events-none" viewBox="0 0 64 64" fill="none">
+      {/* <svg className="hidden md:block absolute bottom-8 right-[4%] w-12 h-12 opacity-50 animate-float-slow pointer-events-none" viewBox="0 0 64 64" fill="none">
         <rect x="12" y="24" width="40" height="24" rx="3" fill="#fef3c7" stroke="#f59e0b" strokeWidth="2" />
         <rect x="12" y="24" width="40" height="6" fill="#fde68a" />
-      </svg>
+      </svg> */}
 
       <div className="relative">
         {/* Eyebrow + heading */}

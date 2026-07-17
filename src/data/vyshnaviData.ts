@@ -135,7 +135,7 @@ export interface ProductVariant {
   packType?: string;
   images?: string[];
 }
-
+ 
 export interface ProductItem {
   id: number;
   name: string;
@@ -148,7 +148,7 @@ export interface ProductItem {
   rating?: number;
   reviews?: number;
 }
-
+ 
 export interface ProductCategory {
   key: string;
   name: string;
@@ -158,11 +158,11 @@ export interface ProductCategory {
   subtitle: string;
   items: ProductItem[];
 }
-
+ 
 const PH = ""; // still used for products with genuinely no asset yet
-
+ 
 // --------------- CATEGORY DATA ---------------
-
+ 
 export const CATEGORIES: ProductCategory[] = [
   {
     key: "milk",
@@ -179,7 +179,7 @@ export const CATEGORIES: ProductCategory[] = [
         description: "Premium full-cream",
         content:
           "Mahagold is our flagship full-cream milk, rich in natural fat and brimming with farm-fresh flavour. Sourced from hand-selected herds and chilled within hours of milking.",
-        variants: [{ size: "500 ml", packType: "pouch" }],
+        variants: [{ size: "500 ml", packType: "pouch", price: 34 }],
         gallery: [m1, m2, m3, m4],
         tag: "Best Seller",
         rating: 4.9,
@@ -192,7 +192,7 @@ export const CATEGORIES: ProductCategory[] = [
         description: "Superior standardised",
         content:
           "Standardised to consistent fat levels so every sip delivers the same creamy taste your family depends on. Perfect for tea, coffee, and everyday cooking.",
-        variants: [{ size: "500 ml", packType: "pouch" }],
+        variants: [{ size: "500 ml", packType: "pouch", price: 28 }],
         gallery: [],
         rating: 4.8,
         reviews: 198,
@@ -205,8 +205,8 @@ export const CATEGORIES: ProductCategory[] = [
         content:
           "Available in handy 125 ml and 500 ml packs, Gold Plus is ideal for on-the-go freshness without compromising on nutrition.",
         variants: [
-          { size: "125 ml", packType: "pouch" },
-          { size: "500 ml", packType: "pouch" },
+          { size: "125 ml", packType: "pouch", price: 8 },
+          { size: "500 ml", packType: "pouch", price: 26 },
         ],
         gallery: [],
       },
@@ -217,7 +217,7 @@ export const CATEGORIES: ProductCategory[] = [
         description: "Everyday goodness",
         content:
           "A trusted household staple with balanced fat content and a naturally sweet flavour profile. Gold Milk is the everyday choice for millions of families.",
-        variants: [{ size: "500 ml", packType: "pouch" }],
+        variants: [{ size: "500 ml", packType: "pouch", price: 25 }],
         gallery: [],
       },
       {
@@ -228,8 +228,8 @@ export const CATEGORIES: ProductCategory[] = [
         content:
           "Standardised for uniform fat and SNF levels. Available in two pack sizes to suit both small households and larger families.",
         variants: [
-          { size: "500 ml", packType: "pouch" },
-          { size: "1000 ml", packType: "pouch" },
+          { size: "500 ml", packType: "pouch", price: 27 },
+          { size: "1000 ml", packType: "pouch", price: 53 },
         ],
         gallery: [],
       },
@@ -241,9 +241,9 @@ export const CATEGORIES: ProductCategory[] = [
         content:
           "Toned for a lighter feel while retaining full nutritional value. Taaza is the go-to choice for health-conscious households who want freshness without heaviness.",
         variants: [
-          { size: "145 ml", packType: "pouch" },
-          { size: "500 ml", packType: "pouch" },
-          { size: "1000 ml", packType: "pouch" },
+          { size: "145 ml", packType: "pouch", price: 8 },
+          { size: "500 ml", packType: "pouch", price: 24 },
+          { size: "1000 ml", packType: "pouch", price: 47 },
         ],
         gallery: [t1, t2, t3, t4],
       },
@@ -254,7 +254,7 @@ export const CATEGORIES: ProductCategory[] = [
         description: "Fuel your day",
         content:
           "Fortified toned milk designed for active lifestyles. Lower fat, same great taste — the smart choice before or after your workout.",
-        variants: [{ size: "500 ml", packType: "pouch" }],
+        variants: [{ size: "500 ml", packType: "pouch", price: 25 }],
         gallery: [],
       },
       {
@@ -265,8 +265,8 @@ export const CATEGORIES: ProductCategory[] = [
         content:
           "Double-toned for the lowest fat content in our milk range. Ideal for calorie-watchers and those on medically advised low-fat diets.",
         variants: [
-          { size: "165 ml", packType: "pouch" },
-          { size: "450 ml", packType: "pouch" },
+          { size: "165 ml", packType: "pouch", price: 8 },
+          { size: "450 ml", packType: "pouch", price: 20 },
         ],
         gallery: [d1, d2, d3, d4],
       },
@@ -278,15 +278,15 @@ export const CATEGORIES: ProductCategory[] = [
         content:
           "Pure, unadulterated cow milk with its characteristic golden tinge and naturally occurring A2 proteins. Closest to what leaves the udder.",
         variants: [
-          { size: "140 ml", packType: "pouch" },
-          { size: "500 ml", packType: "pouch" },
+          { size: "140 ml", packType: "pouch", price: 10 },
+          { size: "500 ml", packType: "pouch", price: 32 },
         ],
         gallery: [],
         tag: "New Launch",
       },
     ],
   },
-
+ 
   {
     key: "curd",
     name: "Curd",
@@ -303,15 +303,15 @@ export const CATEGORIES: ProductCategory[] = [
         content:
           "Set fresh every morning from our own toned milk. Rich in live probiotics, it supports gut health and makes the creamiest lassi or raita.",
         variants: [
-          { size: "80 g", packType: "pouch" },
-          { size: "120 g", packType: "pouch" },
-          { size: "170 g", packType: "pouch" },
-          { size: "100 g", packType: "cup" },
-          { size: "450 g", packType: "pouch" },
-          { size: "900 g", packType: "pouch" },
-          { size: "1 kg", packType: "bucket" },
-          { size: "5 kg", packType: "bucket" },
-          { size: "10 kg", packType: "bucket" },
+          { size: "80 g", packType: "pouch", price: 10 },
+          { size: "120 g", packType: "pouch", price: 15 },
+          { size: "170 g", packType: "pouch", price: 20 },
+          { size: "100 g", packType: "cup", price: 12 },
+          { size: "450 g", packType: "pouch", price: 45 },
+          { size: "900 g", packType: "pouch", price: 85 },
+          { size: "1 kg", packType: "bucket", price: 95 },
+          { size: "5 kg", packType: "bucket", price: 460 },
+          { size: "10 kg", packType: "bucket", price: 900 },
         ],
         gallery: [m1, m2, m3],
         tag: "Best Seller",
@@ -326,10 +326,10 @@ export const CATEGORIES: ProductCategory[] = [
         content:
           "All the probiotic benefit of our classic curd, made from double-toned milk for a lighter texture and lower calorie count. Perfect for diet-conscious families.",
         variants: [
-          { size: "450 g", packType: "pouch" },
-          { size: "900 g", packType: "pouch" },
-          { size: "5 kg", packType: "bucket" },
-          { size: "10 kg", packType: "bucket" },
+          { size: "450 g", packType: "pouch", price: 40 },
+          { size: "900 g", packType: "pouch", price: 75 },
+          { size: "5 kg", packType: "bucket", price: 400 },
+          { size: "10 kg", packType: "bucket", price: 780 },
         ],
         gallery: [m2],
       },
@@ -340,12 +340,12 @@ export const CATEGORIES: ProductCategory[] = [
         description: "Thick & wholesome",
         content:
           "Set from standardised milk for a consistently rich texture. A reliable staple for everyday meals — thick enough to cut with a spoon.",
-        variants: [{ size: "Multiple sizes", packType: "bucket" }],
+        variants: [{ size: "Multiple sizes", packType: "bucket", price: 90, perUnit: "starting from" }],
         gallery: [m3],
       },
     ],
   },
-
+ 
   {
     key: "beverages",
     name: "Beverages",
@@ -361,7 +361,7 @@ export const CATEGORIES: ProductCategory[] = [
         description: "Cooling classic",
         content:
           "Traditionally churned and lightly spiced, our buttermilk is the ultimate summer cooler. Packed with electrolytes and live cultures to refresh and restore.",
-        variants: [{ size: "180 ml", packType: "pouch" }],
+        variants: [{ size: "180 ml", packType: "pouch", price: 10 }],
         gallery: [buttermilk1, buttermilk2, buttermilk3, buttermilk4],
         tag: "Best Seller",
         rating: 4.7,
@@ -375,8 +375,8 @@ export const CATEGORIES: ProductCategory[] = [
         content:
           "Thick, cold, and sweetened with real vanilla. Our Vanilla Lassi is a dessert disguised as a drink — perfect with or after a meal.",
         variants: [
-          { size: "180 ml", packType: "pouch" },
-          { size: "200 ml", packType: "glass" },
+          { size: "180 ml", packType: "pouch", price: 20 },
+          { size: "200 ml", packType: "glass", price: 25 },
         ],
         gallery: [lassi1,lassi2,lassi3,lassi4],
       },
@@ -387,7 +387,7 @@ export const CATEGORIES: ProductCategory[] = [
         description: "Tropical delight",
         content:
           "Made with Alphonso mango pulp blended into thick curd. A seasonal favourite that's available year-round thanks to our cold-chain technology.",
-        variants: [{ size: "200 ml", packType: "glass" }],
+        variants: [{ size: "200 ml", packType: "glass", price: 30 }],
         gallery: [lassi1,lassi2,lassi3,lassi4],
         tag: "New Launch",
       },
@@ -398,7 +398,7 @@ export const CATEGORIES: ProductCategory[] = [
         description: "Nutty & nourishing",
         content:
           "Premium Badam Milk enriched with saffron and cardamom. Each bottle is a traditional recipe made modern — indulgent, yet wholesome.",
-        variants: [{ size: "200 ml", packType: "glass" }],
+        variants: [{ size: "200 ml", packType: "glass", price: 35 }],
         gallery: [m4],
         tag: "Best Seller",
         rating: 4.9,
@@ -411,7 +411,7 @@ export const CATEGORIES: ProductCategory[] = [
         description: "Everyday almond boost",
         content:
           "Classic almond-flavoured milk with real almond pieces. An everyday energy boost that children and adults love equally.",
-        variants: [{ size: "200 ml", packType: "glass" }],
+        variants: [{ size: "200 ml", packType: "glass", price: 25 }],
         gallery: [m4],
       },
       {
@@ -421,7 +421,7 @@ export const CATEGORIES: ProductCategory[] = [
         description: "Rich cocoa pleasure",
         content:
           "Real cocoa blended with fresh whole milk. No artificial colours, no synthetic flavours — just pure chocolate bliss in a bottle.",
-        variants: [{ size: "200 ml", packType: "glass" }],
+        variants: [{ size: "200 ml", packType: "glass", price: 25 }],
         gallery: [m4],
       },
       {
@@ -431,7 +431,7 @@ export const CATEGORIES: ProductCategory[] = [
         description: "Tropical freshness",
         content:
           "A unique tropical twist — pineapple essence meets the creaminess of fresh milk. Surprising, refreshing, and unmistakably Vyshnavi.",
-        variants: [{ size: "200 ml", packType: "glass" }],
+        variants: [{ size: "200 ml", packType: "glass", price: 25 }],
         gallery: [],
       },
       {
@@ -441,12 +441,12 @@ export const CATEGORIES: ProductCategory[] = [
         description: "Luxuriously green",
         content:
           "Pistachio-flavoured milk with a distinctly rich and nutty character. A premium pick for those who appreciate the finer flavours of dairy.",
-        variants: [{ size: "200 ml", packType: "glass" }],
+        variants: [{ size: "200 ml", packType: "glass", price: 35 }],
         gallery: [],
       },
     ],
   },
-
+ 
   {
     key: "paneer",
     name: "Paneer",
@@ -462,7 +462,11 @@ export const CATEGORIES: ProductCategory[] = [
         description: "Velvety & rich",
         content:
           "Full-fat malai paneer pressed from fresh whole milk. Holds shape during cooking, soaks up masalas beautifully, and melts in the mouth. The chef's first choice.",
-        variants: [{ size: "200 g" }, { size: "500 g" }, { size: "1000 g" }],
+        variants: [
+          { size: "200 g", price: 90 },
+          { size: "500 g", price: 220 },
+          { size: "1000 g", price: 420 },
+        ],
         gallery: [],
         tag: "Best Seller",
         rating: 4.9,
@@ -475,13 +479,16 @@ export const CATEGORIES: ProductCategory[] = [
         description: "Guilt-free protein",
         content:
           "All the protein of traditional paneer, at a fraction of the fat. Made from toned milk and cold-pressed for a firm, satisfying texture.",
-        variants: [{ size: "200 g" }, { size: "1000 g" }],
+        variants: [
+          { size: "200 g", price: 80 },
+          { size: "1000 g", price: 380 },
+        ],
         gallery: [],
         tag: "New Launch",
       },
     ],
   },
-
+ 
   {
     key: "butter",
     name: "Butter",
@@ -497,7 +504,7 @@ export const CATEGORIES: ProductCategory[] = [
         description: "Table-ready gold",
         content:
           "Slow-churned from fresh cream. Spreads effortlessly straight from the fridge and brings a rich, grassy flavour to everything from toast to tadka.",
-        variants: [{ size: "200 g" }],
+        variants: [{ size: "200 g", price: 120 }],
         gallery: [m1],
         tag: "Best Seller",
         rating: 4.8,
@@ -510,12 +517,12 @@ export const CATEGORIES: ProductCategory[] = [
         description: "Baker's favourite",
         content:
           "The go-to for avid bakers and professional kitchens. 500 g of the same premium churned butter in a value pack that lasts.",
-        variants: [{ size: "500 g" }],
+        variants: [{ size: "500 g", price: 290 }],
         gallery: [m1],
       },
     ],
   },
-
+ 
   {
   key: "ghee",
   name: "Ghee",
@@ -533,12 +540,12 @@ export const CATEGORIES: ProductCategory[] = [
       content:
         "Made from the milk of indigenous desi cows via the traditional bilona method. Rich in A2 beta-casein proteins, butyric acid, and a divine aroma that fills the kitchen.",
       variants: [
-        { size: "50 ml",     packType: "pouch", images: [cowghee50ml1, cowghee50ml2, cowghee50ml3, cowghee50ml4, cowghee50ml5] },
-        { size: "100 ml",   packType: "jar",   images: [cowghee100ml1, cowghee100ml2, cowghee100ml3, cowghee100ml4, cowghee100ml5] },
-        { size: "200 ml",   packType: "jar",   images: [cowghee200ml1, cowghee200ml2, cowghee200ml3, cowghee200ml4, cowghee200ml5] },
-        { size: "500 ml",   packType: "jar",   images: [cowghee500ml1, cowghee500ml2, cowghee500ml3, cowghee500ml4, cowghee500ml5] },
-        { size: "1 liter",  packType: "jar",   images: [cowghee1lt1, cowghee1lt2, cowghee1lt3, cowghee1lt4, cowghee1lt5] },
-        { size: "5 liters", packType: "jar",   images: [cowghee5lt1, cowghee5lt2, cowghee5lt3, cowghee5lt4, cowghee5lt5] },
+        { size: "50 ml",     packType: "pouch", price: 95,   images: [cowghee50ml1, cowghee50ml2, cowghee50ml3, cowghee50ml4, cowghee50ml5] },
+        { size: "100 ml",   packType: "jar",   price: 165,  images: [cowghee100ml1, cowghee100ml2, cowghee100ml3, cowghee100ml4, cowghee100ml5] },
+        { size: "200 ml",   packType: "jar",   price: 315,  images: [cowghee200ml1, cowghee200ml2, cowghee200ml3, cowghee200ml4, cowghee200ml5] },
+        { size: "500 ml",   packType: "jar",   price: 730,  images: [cowghee500ml1, cowghee500ml2, cowghee500ml3, cowghee500ml4, cowghee500ml5] },
+        { size: "1 liter",  packType: "jar",   price: 1380, images: [cowghee1lt1, cowghee1lt2, cowghee1lt3, cowghee1lt4, cowghee1lt5] },
+        { size: "5 liters", packType: "jar",   price: 6650, images: [cowghee5lt1, cowghee5lt2, cowghee5lt3, cowghee5lt4, cowghee5lt5] },
       ],
        gallery: [
         cowghee1lt1,
@@ -560,10 +567,10 @@ export const CATEGORIES: ProductCategory[] = [
       content:
         "Crafted from buffalo cream, this ghee has a higher fat content and a deeply rich, nutty aroma. Ideal for festive cooking and traditional sweets.",
       variants: [
-        { size: "200 ml",   packType: "jar", images: [bfghee200ml1, bfghee200ml2, bfghee200ml3, bfghee200ml4] },
-        { size: "500 ml",   packType: "jar", images: [bfghee500ml1, bfghee500ml2, bfghee500ml3, bfghee500ml4] },
-        { size: "1 liter",  packType: "jar", images: [bfghee1lt1, bfghee1lt2, bfghee1lt3, bfghee1lt4] },
-        { size: "5 liters", packType: "jar", images: [bfghee5lt1, bfghee5lt2, bfghee5lt3, bfghee5lt4] },
+        { size: "200 ml",   packType: "jar", price: 285,  images: [bfghee200ml1, bfghee200ml2, bfghee200ml3, bfghee200ml4] },
+        { size: "500 ml",   packType: "jar", price: 660,  images: [bfghee500ml1, bfghee500ml2, bfghee500ml3, bfghee500ml4] },
+        { size: "1 liter",  packType: "jar", price: 1230, images: [bfghee1lt1, bfghee1lt2, bfghee1lt3, bfghee1lt4] },
+        { size: "5 liters", packType: "jar", price: 5900, images: [bfghee5lt1, bfghee5lt2, bfghee5lt3, bfghee5lt4] },
       ],
       gallery: [
         bfghee1lt1,
@@ -582,19 +589,19 @@ export const CATEGORIES: ProductCategory[] = [
       content:
         "Our master blenders' finest — a curated mix of cow and buffalo ghee for a balanced flavour profile that elevates both everyday meals and festive preparations.",
       variants: [
-        { size: "5 ml",     packType: "pouch", images: [] },
-        { size: "100 ml",   packType: "jar",   images: [] },
-        { size: "200 ml",   packType: "jar",   images: [] },
-        { size: "500 ml",   packType: "jar",   images: [] },
-        { size: "1 liter",  packType: "jar",   images: [] },
-        { size: "5 liters", packType: "jar",   images: [] },
+        { size: "5 ml",     packType: "pouch", price: 15,   images: [] },
+        { size: "100 ml",   packType: "jar",   price: 175,  images: [] },
+        { size: "200 ml",   packType: "jar",   price: 335,  images: [] },
+        { size: "500 ml",   packType: "jar",   price: 770,  images: [] },
+        { size: "1 liter",  packType: "jar",   price: 1450, images: [] },
+        { size: "5 liters", packType: "jar",   price: 6950, images: [] },
       ],
       gallery: [],
       tag: "New Launch",
     },
   ],
 },
-
+ 
   {
     key: "sweets",
     name: "Sweets",
@@ -610,7 +617,10 @@ export const CATEGORIES: ProductCategory[] = [
         description: "Slow-simmered silk",
         content:
           "Rich condensed milk dessert simmered for hours with saffron, cardamom, and crushed nuts. A festive classic, made fresh every batch — never from concentrate.",
-        variants: [{ size: "250 g" }, { size: "500 g" }],
+        variants: [
+          { size: "250 g", price: 130 },
+          { size: "500 g", price: 250 },
+        ],
         gallery: [],
         tag: "Best Seller",
         rating: 4.9,
@@ -623,7 +633,10 @@ export const CATEGORIES: ProductCategory[] = [
         description: "Mawa magic",
         content:
           "Pure evaporated milk solids, traditionally called mawa. The building block of Indian sweets — used in halwa, barfis, and gulab jamun. Fresh, never frozen.",
-        variants: [{ size: "200 g" }, { size: "500 g" }],
+        variants: [
+          { size: "200 g", price: 120 },
+          { size: "500 g", price: 280 },
+        ],
         gallery: [],
       },
       {
@@ -633,7 +646,10 @@ export const CATEGORIES: ProductCategory[] = [
         description: "Melt-in-mouth rounds",
         content:
           "Soft, cardamom-scented milk pedas made from fresh khova. Each piece is hand-shaped and lightly dusted with pistachio for a celebratory finish.",
-        variants: [{ size: "250 g" }, { size: "500 g" }],
+        variants: [
+          { size: "250 g", price: 190 },
+          { size: "500 g", price: 360 },
+        ],
         gallery: [],
       },
       {
@@ -643,27 +659,30 @@ export const CATEGORIES: ProductCategory[] = [
         description: "Grainy & indulgent",
         content:
           "The iconic Ajmeri-style kalakand with a distinctive coarse-grained texture. Made from fresh chhena and cooked down with sugar and rose water until perfectly set.",
-        variants: [{ size: "250 g" }, { size: "500 g" }],
+        variants: [
+          { size: "250 g", price: 200 },
+          { size: "500 g", price: 380 },
+        ],
         gallery: [],
         tag: "New Launch",
       },
     ],
   },
 ];
-
+ 
 // --------------- LOOKUP HELPERS ---------------
-
+ 
 export const getCategoryByKey = (key: string): ProductCategory | undefined =>
   CATEGORIES.find((c) => c.key === key);
-
+ 
 export const getAllProducts = (): ProductItem[] =>
   CATEGORIES.flatMap((c) => c.items);
-
+ 
 export const getProductById = (id: number): ProductItem | undefined =>
   getAllProducts().find((p) => p.id === id);
-
+ 
 export const CATEGORY_KEYS = CATEGORIES.map((c) => c.key);
-
+ 
 export const CATEGORY_LABEL: Record<string, string> = Object.fromEntries(
   CATEGORIES.map((c) => [c.key, c.name])
 );

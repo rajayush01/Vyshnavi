@@ -2,6 +2,7 @@
 import React from 'react';
 import { Leaf, Sparkles, Package, Heart, ShieldCheck } from 'lucide-react';
 import "../../fonts.css";
+import cow from "../../assets/cow.png"
 
 export default function WhyMe() {
   const features = [
@@ -44,14 +45,19 @@ export default function WhyMe() {
         <rect x="22" y="30" width="20" height="10" fill="#dbeafe" />
         <rect x="24" y="6" width="16" height="4" rx="1" fill="#3b82f6" />
       </svg>
-      <svg className="hidden md:block absolute bottom-8 right-[6%] w-20 h-20 opacity-70 animate-float" viewBox="0 0 64 64" fill="none">
+      {/* <svg className="hidden md:block absolute bottom-8 right-[6%] w-20 h-20 opacity-70 animate-float" viewBox="0 0 64 64" fill="none">
         <ellipse cx="32" cy="38" rx="22" ry="14" fill="#ffffff" stroke="#ef4444" strokeWidth="2" />
         <circle cx="16" cy="30" r="3" fill="#ef4444" />
         <circle cx="30" cy="26" r="3" fill="#ef4444" />
         <circle cx="42" cy="32" r="2.5" fill="#ef4444" />
         <circle cx="22" cy="42" r="2" fill="#ef4444" />
         <ellipse cx="14" cy="38" rx="6" ry="8" fill="#ffffff" stroke="#ef4444" strokeWidth="2" />
-      </svg>
+      </svg> */}
+      <img
+        src={cow}
+        alt="Cow"
+        className="hidden md:block absolute bottom-5 right-[6%] w-36 lg:w-52 object-contain opacity-90 animate-float pointer-events-none select-none drop-shadow-2xl"
+      />
 
       <div className="relative max-w-7xl mx-auto">
         {/* Eyebrow */}

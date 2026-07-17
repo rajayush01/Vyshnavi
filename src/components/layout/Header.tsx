@@ -10,19 +10,27 @@ type Action =
   | { type: "navigate"; target: string };
 
 const NAV_ITEMS: { key: string; label: string; action: Action }[] = [
-  { key: "home", label: "Home", action: { type: "scroll", target: "hero-section" } },
+  { key: "home", label: "Home", action: { type: "navigate", target: "/" } },
   { key: "ghee", label: "Ghee", action: { type: "navigate", target: "/ghee" } },
   { key: "about", label: "About Us", action: { type: "navigate", target: "/about" } },
   { key: "portfolio", label: "Portfolio", action: { type: "navigate", target: "/portfolio" } },
   { key: "contact", label: "Contact Us", action: { type: "navigate", target: "/contact-us" } },
 ];
 
+// Maps the current URL path to the matching nav key, defaulting to "home"
+const getActiveTabFromPath = (pathname: string): string => {
+  const match = NAV_ITEMS.find(
+    (item) => item.action.type === "navigate" && item.action.target === pathname
+  );
+  return match ? match.key : "home";
+};
+
 const Header: React.FC = () => {
   const { cartCount, toggleCart } = useCart();
   const location = useLocation();
   const isPortfolio = location.pathname.startsWith("/portfolio");
   const [scrolled, setScrolled] = useState<boolean>(false);
-  const [activeTab, setActiveTab] = useState<string>("home");
+  const [activeTab, setActiveTab] = useState<string>(() => getActiveTabFromPath(location.pathname));
   const [isMenuOpen, setIsMenuOpen] = useState<boolean>(false);
 
   useEffect(() => {
@@ -32,6 +40,10 @@ const Header: React.FC = () => {
     window.addEventListener("scroll", handleScroll);
     return () => window.removeEventListener("scroll", handleScroll);
   }, []);
+
+  useEffect(() => {
+    setActiveTab(getActiveTabFromPath(location.pathname));
+  }, [location.pathname]);
 
   // Lock body scroll while the mobile drawer is open
   useEffect(() => {
