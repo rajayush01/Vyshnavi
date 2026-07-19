@@ -57,19 +57,6 @@ function getGallery(item: ProductItem): string[] {
 // ── Decorative dairy illustrations (background ambience) ─────────────────
 const StageDecorations: React.FC = () => (
   <>
-    {/* <svg className="spot-deco spot-float-slow" style={{ position: "absolute", top: 24, left: "3%", width: 68, height: 68, opacity: 0.35, pointerEvents: "none", zIndex: 0 }} viewBox="0 0 64 64" fill="none">
-      <path d="M16 20 L38 20 L36 44 Q36 50 27 50 Q18 50 18 44 Z" fill="#ffffff" stroke="#3b82f6" strokeWidth="2" />
-      <path d="M38 24 Q50 26 48 34 Q46 40 38 38" fill="none" stroke="#3b82f6" strokeWidth="2" />
-      <path d="M48 34 Q52 40 50 48" stroke="#93c5fd" strokeWidth="2.5" strokeLinecap="round" opacity="0.8" />
-      <rect x="14" y="14" width="26" height="6" rx="2" fill="#dbeafe" stroke="#3b82f6" strokeWidth="1.5" />
-    </svg> */}
-    {/* <svg className="spot-deco spot-float" style={{ position: "absolute", top: 30, right: "4%", width: 52, height: 52, opacity: 0.35, pointerEvents: "none", zIndex: 0 }} viewBox="0 0 64 64" fill="none">
-      <path d="M32 50 C20 50 14 42 16 34 C10 32 10 22 18 20 C18 12 28 8 34 14 C42 10 50 18 46 26 C54 28 52 40 44 42 C44 48 38 50 32 50 Z" fill="#ffffff" stroke="#a5b4fc" strokeWidth="1.8" />
-    </svg> */}
-    {/* <svg className="spot-deco spot-float-slow" style={{ position: "absolute", bottom: 22, right: "5%", width: 42, height: 50, opacity: 0.3, pointerEvents: "none", zIndex: 0 }} viewBox="0 0 64 64" fill="none">
-      <rect x="26" y="6" width="12" height="8" rx="2" fill="#d97706" />
-      <path d="M18 16 L46 16 L50 44 Q50 52 32 52 Q14 52 14 44 Z" fill="#fbbf24" stroke="#b45309" strokeWidth="2" />
-    </svg> */}
     <style>{`
       @keyframes spotFloat { 0%,100% { transform: translateY(0px);} 50% { transform: translateY(-10px);} }
       @keyframes spotFloatSlow { 0%,100% { transform: translateY(0px);} 50% { transform: translateY(-14px);} }
@@ -213,6 +200,7 @@ const HorizontalProductScroll: React.FC<HorizontalProductScrollProps> = ({
         .spot-cta-primary:hover { transform: translateY(-2px); box-shadow: 0 18px 35px -12px rgba(37,99,235,0.55); }
         .spot-cta-secondary:hover { background: #f8fafc !important; border-color: #93c5fd !important; }
         .spot-arrow:hover { background: #2563eb !important; color: #fff !important; }
+        .spot-thumb-arrow:hover { background: #2563eb !important; color: #fff !important; }
         .spot-variant-box { transition: all 0.2s ease; cursor: pointer; }
         .spot-variant-box:hover { transform: translateY(-2px); border-color: #fbbf24 !important; }
         @keyframes lightboxFadeIn { from { opacity: 0; } to { opacity: 1; } }
@@ -358,15 +346,43 @@ const HorizontalProductScroll: React.FC<HorizontalProductScrollProps> = ({
 
             {/* This product's own photo strip — 3–4 shots pulled from its variants */}
             {gallery.length > 1 && (
-              <div style={{ position: "absolute", bottom: 16, left: "50%", transform: "translateX(-50%)", display: "flex", gap: 8, zIndex: 2 }}>
+              <div style={{ position: "absolute", bottom: 16, left: "50%", transform: "translateX(-50%)", display: "flex", alignItems: "center", gap: 8, zIndex: 2 }}>
+                <button
+                  className="spot-thumb-arrow"
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    setActivePhoto((i) => (i - 1 + gallery.length) % gallery.length);
+                  }}
+                  aria-label={`Previous photo of ${item.name}`}
+                  style={{
+                    width: 26,
+                    height: 26,
+                    flexShrink: 0,
+                    borderRadius: "50%",
+                    border: "none",
+                    background: "rgba(255,255,255,0.9)",
+                    display: "flex",
+                    alignItems: "center",
+                    justifyContent: "center",
+                    cursor: "pointer",
+                    boxShadow: "0 4px 10px -4px rgba(15,23,42,0.35)",
+                  }}
+                >
+                  <ChevronLeft size={14} />
+                </button>
+
                 {gallery.map((src, gi) => (
                   <button
                     key={gi}
-                    onClick={() => setActivePhoto(gi)}
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      setActivePhoto(gi);
+                    }}
                     aria-label={`View photo ${gi + 1} of ${item.name}`}
                     style={{
                       width: 40,
                       height: 40,
+                      flexShrink: 0,
                       borderRadius: 10,
                       overflow: "hidden",
                       padding: 0,
@@ -381,6 +397,30 @@ const HorizontalProductScroll: React.FC<HorizontalProductScrollProps> = ({
                     <img src={src} alt="" draggable={false} style={{ width: "100%", height: "100%", objectFit: "cover" }} />
                   </button>
                 ))}
+
+                <button
+                  className="spot-thumb-arrow"
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    setActivePhoto((i) => (i + 1) % gallery.length);
+                  }}
+                  aria-label={`Next photo of ${item.name}`}
+                  style={{
+                    width: 26,
+                    height: 26,
+                    flexShrink: 0,
+                    borderRadius: "50%",
+                    border: "none",
+                    background: "rgba(255,255,255,0.9)",
+                    display: "flex",
+                    alignItems: "center",
+                    justifyContent: "center",
+                    cursor: "pointer",
+                    boxShadow: "0 4px 10px -4px rgba(15,23,42,0.35)",
+                  }}
+                >
+                  <ChevronRight size={14} />
+                </button>
               </div>
             )}
           </div>

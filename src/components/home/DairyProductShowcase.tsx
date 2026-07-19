@@ -2,16 +2,17 @@
  * DairyProductShowcase.tsx — Vyshnavi Dairy
  *
  * Category showcase: one card per product category (Milk, Curd, Beverages,
- * Paneer, Butter, Ghee, Sweets), each with a representative image, a live
- * item count, and a "Shop Category" button that routes to the full listing
- * for that category — /ghee for Ghee (its own bespoke page), and
+ * Paneer, Butter, Ghee, Sweets), each with a representative image (now
+ * cyclable via next/previous arrows through all images in that category),
+ * a live item count, and a "Shop Category" button that routes to the full
+ * listing for that category — /ghee for Ghee (its own bespoke page), and
  * /category/:key for everything else.
  *
  * Fully driven by CATEGORIES from vyshnaviData.ts.
  */
 
-import React, { useRef } from "react";
-import { useNavigate } from "react-router-dom";
+import React, { useRef, useState } from "react";
+import { useNavigate, type NavigateFunction } from "react-router-dom";
 import { ArrowRight, ChevronLeft, ChevronRight } from "lucide-react";
 
 // ── Data source ──────────────────────────────────────────────────────────
@@ -32,11 +33,132 @@ function categoryHref(category: ProductCategory): string {
   return category.key === "ghee" ? "/ghee" : `/category/${category.key}`;
 }
 
-// Pick a representative image: first item in the category that actually has one
-function representativeImage(category: ProductCategory): string | null {
-  const withImage = category.items.find((i) => !!i.image);
-  return withImage?.image ?? null;
+// All images available for a category (one per item that actually has one)
+function categoryImages(category: ProductCategory): string[] {
+  return category.items
+    .map((i) => i.image)
+    .filter((img): img is string => !!img);
 }
+
+// ── Individual category card (owns its own image-cycling state) ──────────
+interface CategoryCardProps {
+  category: ProductCategory;
+  navigate: NavigateFunction;
+}
+
+const CategoryCard: React.FC<CategoryCardProps> = ({ category, navigate }) => {
+  const images = categoryImages(category);
+  const href = categoryHref(category);
+  const [imgIndex, setImgIndex] = useState(0);
+
+  const hasMultipleImages = images.length > 1;
+  const activeImage = images.length > 0 ? images[imgIndex] : null;
+
+  const showPrev = (e: React.MouseEvent) => {
+    e.stopPropagation();
+    setImgIndex((prev) => (prev - 1 + images.length) % images.length);
+  };
+
+  const showNext = (e: React.MouseEvent) => {
+    e.stopPropagation();
+    setImgIndex((prev) => (prev + 1) % images.length);
+  };
+
+  return (
+    <div
+      onClick={() => navigate(href)}
+      className={`${category.color} group relative rounded-3xl overflow-hidden border border-white/60 shadow-[0_15px_40px_-20px_rgba(15,23,42,0.35)] hover:shadow-[0_30px_60px_-20px_rgba(37,99,235,0.35)] transition-all duration-500 ease-out hover:-translate-y-1.5 cursor-pointer flex flex-col flex-shrink-0 w-[80%] sm:w-[340px] snap-start`}
+    >
+      {/* Subtle corner milk-drop watermark */}
+      <svg className="absolute top-3 right-3 w-6 h-6 opacity-20 pointer-events-none z-10" viewBox="0 0 64 64" fill="none">
+        <path d="M32 10 C38 22 46 28 46 38 C46 46 40 51 32 51 C24 51 18 46 18 38 C18 28 26 22 32 10 Z" fill="#ffffff" />
+      </svg>
+
+      {/* Image */}
+      <div className="relative h-52 sm:h-56 flex items-center justify-center overflow-hidden">
+        <div className="absolute w-2/3 h-2/3 rounded-full bg-white/40 blur-2xl" />
+        {activeImage ? (
+          <img
+            key={activeImage}
+            src={activeImage}
+            alt={`${category.name} ${imgIndex + 1}`}
+            className="relative h-40 sm:h-44 object-contain drop-shadow-lg transition-transform duration-500 group-hover:scale-105 animate-fade-in"
+          />
+        ) : (
+          <div
+            className="relative w-36 h-36 rounded-2xl flex items-center justify-center opacity-70"
+            style={{ background: FALLBACK_GRADIENT[category.key] ?? "#e5e7eb" }}
+          >
+            <span className="text-xs text-gray-500 font-semibold text-center px-3">
+              {category.name}
+            </span>
+          </div>
+        )}
+
+        {/* Item count badge */}
+        <span className="absolute top-4 left-4 text-[10px] font-bold uppercase tracking-widest px-2.5 py-1 rounded-full bg-white/85 backdrop-blur-sm text-gray-700 shadow-sm">
+          {category.items.length} item{category.items.length !== 1 ? "s" : ""}
+        </span>
+
+        {/* Image prev / next arrows — only when there's more than one image */}
+        {hasMultipleImages && (
+          <>
+            <button
+              onClick={showPrev}
+              aria-label={`Previous ${category.name} image`}
+              className="absolute left-2.5 top-1/2 -translate-y-1/2 w-8 h-8 rounded-full bg-white/85 backdrop-blur-sm shadow-sm flex items-center justify-center text-gray-700 opacity-0 group-hover:opacity-100 hover:bg-white transition-all duration-300 z-20"
+            >
+              <ChevronLeft className="w-4 h-4" />
+            </button>
+            <button
+              onClick={showNext}
+              aria-label={`Next ${category.name} image`}
+              className="absolute right-2.5 top-1/2 -translate-y-1/2 w-8 h-8 rounded-full bg-white/85 backdrop-blur-sm shadow-sm flex items-center justify-center text-gray-700 opacity-0 group-hover:opacity-100 hover:bg-white transition-all duration-300 z-20"
+            >
+              <ChevronRight className="w-4 h-4" />
+            </button>
+
+            {/* Dot indicators */}
+            <div className="absolute bottom-3 left-1/2 -translate-x-1/2 flex items-center gap-1.5 z-20">
+              {images.map((_, i) => (
+                <span
+                  key={i}
+                  className={`h-1.5 rounded-full transition-all duration-300 ${
+                    i === imgIndex ? "w-4 bg-white" : "w-1.5 bg-white/60"
+                  }`}
+                />
+              ))}
+            </div>
+          </>
+        )}
+      </div>
+
+      {/* Text block */}
+      <div className="p-6 sm:p-7 flex flex-col flex-grow">
+        <p className="text-[10px] font-black uppercase tracking-[0.2em] text-gray-400 mb-1.5">
+          {category.tagline}
+        </p>
+        <h3 className="text-2xl font-bold text-gray-900 mb-2 leading-tight tracking-tight">
+          {category.name}
+        </h3>
+        <p className="text-gray-600 text-sm mb-6 leading-relaxed">
+          {category.subtitle}
+        </p>
+
+        <button
+          onClick={(e) => {
+            e.stopPropagation();
+            navigate(href);
+          }}
+          className="mt-auto inline-flex items-center justify-center gap-2 bg-white/90 hover:bg-white text-gray-900 font-bold text-sm py-3 rounded-xl shadow-sm hover:shadow-md transition-all duration-300 group/btn"
+        >
+          Shop {category.name}
+          <ArrowRight className="w-4 h-4 transition-transform duration-300 group-hover/btn:translate-x-1" />
+        </button>
+      </div>
+    </div>
+  );
+};
 
 const DairyProductShowcase: React.FC = () => {
   const navigate = useNavigate();
@@ -69,10 +191,6 @@ const DairyProductShowcase: React.FC = () => {
         <circle cx="40" cy="32" r="1.5" fill="#fbbf24" />
         <circle cx="22" cy="40" r="1.5" fill="#fbbf24" />
       </svg>
-      {/* <svg className="hidden md:block absolute bottom-8 right-[4%] w-12 h-12 opacity-50 animate-float-slow pointer-events-none" viewBox="0 0 64 64" fill="none">
-        <rect x="12" y="24" width="40" height="24" rx="3" fill="#fef3c7" stroke="#f59e0b" strokeWidth="2" />
-        <rect x="12" y="24" width="40" height="6" fill="#fde68a" />
-      </svg> */}
 
       <div className="relative">
         {/* Eyebrow + heading */}
@@ -118,73 +236,9 @@ const DairyProductShowcase: React.FC = () => {
             ref={railRef}
             className="flex gap-6 sm:gap-7 overflow-x-auto pb-4 snap-x snap-mandatory scrollbar-hide scroll-smooth"
           >
-          {CATEGORIES.map((category) => {
-            const img = representativeImage(category);
-            const href = categoryHref(category);
-
-            return (
-              <div
-                key={category.key}
-                onClick={() => navigate(href)}
-                className={`${category.color} group relative rounded-3xl overflow-hidden border border-white/60 shadow-[0_15px_40px_-20px_rgba(15,23,42,0.35)] hover:shadow-[0_30px_60px_-20px_rgba(37,99,235,0.35)] transition-all duration-500 ease-out hover:-translate-y-1.5 cursor-pointer flex flex-col flex-shrink-0 w-[80%] sm:w-[340px] snap-start`}
-              >
-                {/* Subtle corner milk-drop watermark */}
-                <svg className="absolute top-3 right-3 w-6 h-6 opacity-20 pointer-events-none z-10" viewBox="0 0 64 64" fill="none">
-                  <path d="M32 10 C38 22 46 28 46 38 C46 46 40 51 32 51 C24 51 18 46 18 38 C18 28 26 22 32 10 Z" fill="#ffffff" />
-                </svg>
-
-                {/* Image */}
-                <div className="relative h-52 sm:h-56 flex items-center justify-center overflow-hidden">
-                  <div className="absolute w-2/3 h-2/3 rounded-full bg-white/40 blur-2xl" />
-                  {img ? (
-                    <img
-                      src={img}
-                      alt={category.name}
-                      className="relative h-40 sm:h-44 object-contain drop-shadow-lg transition-transform duration-500 group-hover:scale-105"
-                    />
-                  ) : (
-                    <div
-                      className="relative w-36 h-36 rounded-2xl flex items-center justify-center opacity-70"
-                      style={{ background: FALLBACK_GRADIENT[category.key] ?? "#e5e7eb" }}
-                    >
-                      <span className="text-xs text-gray-500 font-semibold text-center px-3">
-                        {category.name}
-                      </span>
-                    </div>
-                  )}
-
-                  {/* Item count badge */}
-                  <span className="absolute top-4 left-4 text-[10px] font-bold uppercase tracking-widest px-2.5 py-1 rounded-full bg-white/85 backdrop-blur-sm text-gray-700 shadow-sm">
-                    {category.items.length} item{category.items.length !== 1 ? "s" : ""}
-                  </span>
-                </div>
-
-                {/* Text block */}
-                <div className="p-6 sm:p-7 flex flex-col flex-grow">
-                  <p className="text-[10px] font-black uppercase tracking-[0.2em] text-gray-400 mb-1.5">
-                    {category.tagline}
-                  </p>
-                  <h3 className="text-2xl font-bold text-gray-900 mb-2 leading-tight tracking-tight">
-                    {category.name}
-                  </h3>
-                  <p className="text-gray-600 text-sm mb-6 leading-relaxed">
-                    {category.subtitle}
-                  </p>
-
-                  <button
-                    onClick={(e) => {
-                      e.stopPropagation();
-                      navigate(href);
-                    }}
-                    className="mt-auto inline-flex items-center justify-center gap-2 bg-white/90 hover:bg-white text-gray-900 font-bold text-sm py-3 rounded-xl shadow-sm hover:shadow-md transition-all duration-300 group/btn"
-                  >
-                    Shop {category.name}
-                    <ArrowRight className="w-4 h-4 transition-transform duration-300 group-hover/btn:translate-x-1" />
-                  </button>
-                </div>
-              </div>
-            );
-          })}
+            {CATEGORIES.map((category) => (
+              <CategoryCard key={category.key} category={category} navigate={navigate} />
+            ))}
           </div>
         </div>
       </div>
@@ -195,8 +249,13 @@ const DairyProductShowcase: React.FC = () => {
           0%, 100% { transform: translateY(0px); }
           50% { transform: translateY(-10px); }
         }
+        @keyframes fadeIn {
+          0% { opacity: 0; transform: scale(0.96); }
+          100% { opacity: 1; transform: scale(1); }
+        }
         .animate-float { animation: floatUpDown 5s ease-in-out infinite; }
         .animate-float-slow { animation: floatUpDown 7s ease-in-out infinite; }
+        .animate-fade-in { animation: fadeIn 0.35s ease-out; }
         .scrollbar-hide::-webkit-scrollbar { display: none; }
         .scrollbar-hide { scrollbar-width: none; -ms-overflow-style: none; }
       `}</style>
