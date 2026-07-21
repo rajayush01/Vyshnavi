@@ -11,13 +11,14 @@
  */
 
 import React, { useRef, useState, useEffect, useCallback, useMemo } from "react";
-import { ShoppingCart, Zap, ChevronLeft, ChevronRight, Star, X, Expand } from "lucide-react";
+import { ShoppingCart, Zap, ChevronLeft, ChevronRight, Star, X, Expand, Minus, Plus } from "lucide-react";
 
 // ── Data source ──────────────────────────────────────────────────────────
 import {
   CATEGORIES,
   type ProductItem,
   type ProductCategory,
+  type ProductVariant,
 } from "../../data/vyshnaviData";
 import { useCart } from "../../context/cartContext";
 
@@ -41,9 +42,20 @@ interface HorizontalProductScrollProps {
   heading?: string;
 }
 
-// Collect up to 4 unique photos for a product across all its variants, so
-// the spotlight can offer a small gallery instead of a single static shot.
-function getGallery(item: ProductItem): string[] {
+// Photos for the currently selected variant. If that variant has its own
+// images, those are what the spotlight shows — so clicking a different
+// size box swaps the whole gallery to that size's photos. Only falls back
+// to the old "merge every variant's photos" behaviour when the selected
+// variant has no images of its own (or there are no variants at all).
+function getGallery(item: ProductItem, variant?: ProductVariant): string[] {
+  if (variant?.images && variant.images.length > 0) {
+    const unique: string[] = [];
+    variant.images.forEach((src) => {
+      if (src && !unique.includes(src)) unique.push(src);
+    });
+    if (unique.length > 0) return unique.slice(0, 5);
+  }
+
   const all: string[] = [];
   if (item.image) all.push(item.image);
   item.variants.forEach((v) => {
@@ -76,6 +88,8 @@ const HorizontalProductScroll: React.FC<HorizontalProductScrollProps> = ({
   const [selectedVariantIndex, setSelectedVariantIndex] = useState(0);
   const railRef = useRef<HTMLDivElement>(null);
   const { addToCart } = useCart();
+  const [quantity, setQuantity] = useState<number>(1);
+  
 
   // ── This showcase is dedicated to Ghee only ─────────────────────────────
   const gheeCategory = useMemo(
@@ -89,7 +103,13 @@ const HorizontalProductScroll: React.FC<HorizontalProductScrollProps> = ({
   );
 
   const active = entries[current] ?? entries[0];
-  const gallery = active ? getGallery(active.item) : [];
+
+  // The variant the shopper has picked via the size boxes below drives the
+  // gallery shown up top, the price panel, and what gets added to the cart.
+  const activeSelectedVariant = active
+    ? active.item.variants[selectedVariantIndex] ?? active.item.variants[0]
+    : undefined;
+  const gallery = active ? getGallery(active.item, activeSelectedVariant) : [];
 
   // ── Keyboard navigation ────────────────────────────────────────────────
   useEffect(() => {
@@ -134,7 +154,17 @@ const HorizontalProductScroll: React.FC<HorizontalProductScrollProps> = ({
     setActivePhoto(0);
     setIsLightboxOpen(false);
     setSelectedVariantIndex(0);
+    setQuantity(1);
   }, [current]);
+
+  // Whenever the shopper picks a different size, jump the gallery back to
+  // that size's first photo (and close the lightbox if it was open) —
+  // otherwise activePhoto could point past the end of a shorter gallery.
+  useEffect(() => {
+    setActivePhoto(0);
+    setIsLightboxOpen(false);
+    setQuantity(1);
+  }, [selectedVariantIndex]);
 
   // Lightbox: Escape to close, arrow keys to browse this product's own photos, lock scroll while open
   useEffect(() => {
@@ -159,15 +189,12 @@ const HorizontalProductScroll: React.FC<HorizontalProductScrollProps> = ({
   const { item, category } = active;
   const img = gallery[Math.min(activePhoto, gallery.length - 1)] ?? null;
 
-  // The variant the shopper has picked via the size boxes below drives both
-  // the price panel and what gets added to the cart.
-  const selectedVariant =
-    item.variants[selectedVariantIndex] ?? item.variants[0];
+  const selectedVariant = activeSelectedVariant ?? item.variants[0];
   const cartVariant = selectedVariant;
 
   const handleAddToCart = () => {
     if (!cartVariant) return;
-    addToCart(item, cartVariant, 1);
+    addToCart(item, cartVariant, quantity);
     setJustAdded(true);
   };
 
@@ -202,7 +229,7 @@ const HorizontalProductScroll: React.FC<HorizontalProductScrollProps> = ({
         .spot-arrow:hover { background: #2563eb !important; color: #fff !important; }
         .spot-thumb-arrow:hover { background: #2563eb !important; color: #fff !important; }
         .spot-variant-box { transition: all 0.2s ease; cursor: pointer; }
-        .spot-variant-box:hover { transform: translateY(-2px); border-color: #fbbf24 !important; }
+        .spot-variant-box:hover { transform: translateY(-2px); border-color: #92400e !important; }
         @keyframes lightboxFadeIn { from { opacity: 0; } to { opacity: 1; } }
         @keyframes lightboxZoomIn { from { opacity: 0; transform: scale(0.94); } to { opacity: 1; transform: scale(1); } }
         @keyframes lightboxImageFade { from { opacity: 0; transform: scale(0.98); } to { opacity: 1; transform: scale(1); } }
@@ -344,7 +371,7 @@ const HorizontalProductScroll: React.FC<HorizontalProductScrollProps> = ({
               <ChevronRight size={18} />
             </button>
 
-            {/* This product's own photo strip — 3–4 shots pulled from its variants */}
+            {/* This variant's own photo strip — up to 5 shots pulled from the selected size */}
             {gallery.length > 1 && (
               <div style={{ position: "absolute", bottom: 16, left: "50%", transform: "translateX(-50%)", display: "flex", alignItems: "center", gap: 8, zIndex: 2 }}>
                 <button
@@ -437,7 +464,7 @@ const HorizontalProductScroll: React.FC<HorizontalProductScrollProps> = ({
               {item.description}
             </p>
 
-            {/* Size / price boxes — pick a size to update the price & cart */}
+            {/* Size / price boxes — pick a size to update the price, gallery & cart */}
             {item.variants.length > 0 && (
               <div style={{ display: "flex", flexWrap: "wrap", gap: 10, marginBottom: 22 }}>
                 {item.variants.map((v, i) => {
@@ -454,22 +481,17 @@ const HorizontalProductScroll: React.FC<HorizontalProductScrollProps> = ({
                         textAlign: "left",
                         padding: "12px 16px",
                         borderRadius: 16,
-                        border: isSelected ? "2px solid #f59e0b" : "1.5px solid #e5e7eb",
-                        background: isSelected ? "#fffbeb" : "#fff",
+                        border: isSelected ? "2px solid #92400e" : "1.5px solid #d6bfa3",
+                        background: isSelected ? "#92400e" : "#fff",
                         boxShadow: isSelected
-                          ? "0 10px 25px -12px rgba(245,158,11,0.45)"
+                          ? "0 10px 25px -12px rgba(146,64,14,0.45)"
                           : "0 2px 6px -2px rgba(15,23,42,0.06)",
                       }}
                     >
-                      <div style={{ fontSize: 15, fontWeight: 800, color: "#0f172a", lineHeight: 1.2 }}>
-                        {v.size}
+                      <div style={{ fontSize: 15, fontWeight: 700, color: isSelected ? "#fff" : "#92400e", lineHeight: 1.2 }}>
+                        {v.size}{v.packType ? ` (${v.packType})` : ""}
                       </div>
-                      {v.packType && (
-                        <div style={{ fontSize: 10, fontWeight: 700, letterSpacing: "0.08em", textTransform: "uppercase", color: "#94a3b8", margin: "3px 0 6px" }}>
-                          {v.packType}
-                        </div>
-                      )}
-                      <div style={{ fontSize: 14.5, fontWeight: 700, color: "#0f172a", marginTop: v.packType ? 0 : 6 }}>
+                      <div style={{ fontSize: 17, fontWeight: 700, color: isSelected ? "#fff" : "#92400e", marginTop: 4 }}>
                         {v.price != null ? `₹${v.price.toLocaleString("en-IN")}` : "On request"}
                       </div>
                     </button>
@@ -505,6 +527,21 @@ const HorizontalProductScroll: React.FC<HorizontalProductScrollProps> = ({
 
             {/* CTAs */}
             <div style={{ display: "flex", gap: 12 }}>
+              <div className="flex items-center bg-amber-50 rounded-2xl border border-amber-100">
+                              <button
+                                onClick={() => setQuantity(Math.max(1, quantity - 1))}
+                                className="p-3 hover:bg-amber-100 rounded-l-2xl transition-colors"
+                              >
+                                <Minus className="w-4 h-4 sm:w-5 sm:h-5 text-amber-700" />
+                              </button>
+                              <span className="px-5 sm:px-6 font-bold text-sm sm:text-base text-gray-900">{quantity}</span>
+                              <button
+                                onClick={() => setQuantity(quantity + 1)}
+                                className="p-3 hover:bg-amber-100 rounded-r-2xl transition-colors"
+                              >
+                                <Plus className="w-4 h-4 sm:w-5 sm:h-5 text-amber-700" />
+                              </button>
+                            </div>
               <button
                 className="spot-cta-primary"
                 onClick={handleAddToCart}

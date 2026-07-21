@@ -4,15 +4,23 @@
  * Images and gallery are read directly from item.image / item.gallery
  * as defined in vyshnaviData.ts. No local IMAGE_MAP needed.
  *
+ * GHEE SPECIAL CASE:
+ * Ghee items (Cow Ghee / Buffalo Ghee) have no single "item.image" that
+ * makes sense across all pack sizes — each variant (5ml, 100ml, 200ml,
+ * 500ml, 1L, 5L…) has its own photo set in `variant.images`. So for the
+ * "ghee" category we flatten variants into individual carousel cards
+ * instead of showing one card per item. Every other category behaves
+ * exactly as before.
+ *
  * NOTE: all carousel math (getPos / animateTo / resetAutoPlay / gsap refs)
  * is unchanged from the original — only the surrounding visual layer was
  * elevated.
  */
 
-import React, { useEffect, useRef, useState, useCallback } from "react";
+import React, { useEffect, useRef, useState, useCallback, useMemo } from "react";
 import { gsap } from "gsap";
 import { ChevronLeft, ChevronRight, X, Sparkles, ShoppingCart } from "lucide-react";
-import { CATEGORIES, type ProductCategory, type ProductItem } from "../data/vyshnaviData";
+import { CATEGORIES, type ProductCategory, type ProductItem, type ProductVariant } from "../data/vyshnaviData";
 import { useCart } from "../context/cartContext";
 
 // ── Category helpers (derived from data) ─────────────────────────────────
@@ -44,6 +52,20 @@ const ImagePlaceholder: React.FC<PlaceholderProps> = ({ category, name }) => (
 
 interface SelectedThumb { src: string; name: string }
 
+// A single carousel-displayable entity. For most categories this maps
+// 1:1 to a ProductItem. For "ghee" it maps 1:1 to a variant of an item.
+interface DisplayItem {
+  id: string | number;
+  name: string;
+  image: string;
+  gallery: string[];
+  description: string;
+  content: string;
+  tag?: "Best Seller" | "New Launch";
+  variant?: ProductVariant;   // set when this card represents one specific pack size
+  sourceItem: ProductItem;    // the underlying item (for cart / "available sizes")
+}
+
 // ── Main component ────────────────────────────────────────────────────────
 
 const Portfolio: React.FC = () => {
@@ -51,6 +73,9 @@ const Portfolio: React.FC = () => {
   const [currentIndex, setCurrentIndex]           = useState<number>(0);
   const [selectedThumb, setSelectedThumb]         = useState<SelectedThumb | null>(null);
   const [justAdded, setJustAdded]                 = useState<boolean>(false);
+  // Which ghee item (Cow Ghee / Buffalo Ghee) is selected — only relevant
+  // when activeCategoryKey === "ghee". null = default to the first item.
+  const [activeGheeItemId, setActiveGheeItemId]   = useState<number | null>(null);
 
   const { addToCart } = useCart();
 
@@ -62,7 +87,46 @@ const Portfolio: React.FC = () => {
 
   const activeCategory: ProductCategory =
     CATEGORIES.find((c) => c.key === activeCategoryKey) ?? CATEGORIES[0];
-  const currentItems: ProductItem[] = activeCategory.items;
+
+  const isGhee = activeCategoryKey === "ghee";
+
+  // Cow Ghee / Buffalo Ghee — the two selectable ghee "tabs". Falls back to
+  // the first item until the user picks one explicitly.
+  const selectedGheeItem: ProductItem | undefined = isGhee
+    ? activeCategory.items.find((it) => it.id === activeGheeItemId) ?? activeCategory.items[0]
+    : undefined;
+
+  // Ghee shows the variants of ONE selected item (Cow or Buffalo) as its own
+  // cards; every other category stays item-level.
+  const displayItems: DisplayItem[] = useMemo(() => {
+    if (isGhee) {
+      if (!selectedGheeItem) return [];
+      return selectedGheeItem.variants.map((v, vi) => ({
+        id: `${selectedGheeItem.id}-${vi}`,
+        name: `${selectedGheeItem.name} — ${v.size}`,
+        image: v.images?.[0] ?? selectedGheeItem.image,
+        gallery: v.images && v.images.length > 0 ? v.images : (selectedGheeItem.image ? [selectedGheeItem.image] : []),
+        description: selectedGheeItem.description,
+        content: selectedGheeItem.content,
+        tag: selectedGheeItem.tag,
+        variant: v,
+        sourceItem: selectedGheeItem,
+      }));
+    }
+    return activeCategory.items.map((item) => ({
+      id: item.id,
+      name: item.name,
+      image: item.image,
+      gallery: item.gallery,
+      description: item.description,
+      content: item.content,
+      tag: item.tag,
+      variant: undefined,
+      sourceItem: item,
+    }));
+  }, [activeCategory, isGhee, selectedGheeItem]);
+
+  const currentItems = displayItems;
   const singleItem = currentItems.length === 1;
   const accent = activeCategory.accentHex;
 
@@ -157,13 +221,27 @@ const Portfolio: React.FC = () => {
       opacity: 0, duration: 0.25,
       onComplete: () => {
         setActiveCategoryKey(key);
+        setActiveGheeItemId(null); // reset to default (first) ghee item on re-entry
         setCurrentIndex(0);
         gsap.to(containerRef.current, { opacity: 1, duration: 0.25 });
       },
     });
   };
 
-  // ── Init on category change (unchanged) ────────────────────
+  // Switch between Cow Ghee / Buffalo Ghee tabs
+  const changeGheeItem = (id: number) => {
+    if (!containerRef.current || id === selectedGheeItem?.id) return;
+    gsap.to(containerRef.current, {
+      opacity: 0, duration: 0.25,
+      onComplete: () => {
+        setActiveGheeItemId(id);
+        setCurrentIndex(0);
+        gsap.to(containerRef.current, { opacity: 1, duration: 0.25 });
+      },
+    });
+  };
+
+  // ── Init on category (or ghee item) change ──────────────────
   useEffect(() => {
     const t = setTimeout(() => {
       currentItems.forEach((_, i) => {
@@ -189,28 +267,23 @@ const Portfolio: React.FC = () => {
       clearTimeout(t);
       if (autoPlayRef.current) clearInterval(autoPlayRef.current);
     };
-  }, [activeCategoryKey]); // eslint-disable-line react-hooks/exhaustive-deps
+  }, [activeCategoryKey, selectedGheeItem?.id]); // eslint-disable-line react-hooks/exhaustive-deps
 
   const current = currentItems[currentIndex];
-  // Read image and gallery directly from the data item
   const gallery    = current.gallery.length > 0 ? current.gallery : (current.image ? [current.image] : []);
-  const primaryImg = current.image;
 
-  // Reset the "added" confirmation whenever the featured product changes
+  // Reset the "added" confirmation whenever the featured card changes
   useEffect(() => {
     setJustAdded(false);
   }, [currentIndex, activeCategoryKey]);
 
-  // Ghee is the only category wired to real cart/checkout so far — pick a
-  // sensible variant to add (priced one if available, else the first).
-  const isGhee = activeCategoryKey === "ghee";
-  const cartVariant = isGhee
-    ? current.variants.find((v) => v.price != null) ?? current.variants[0]
-    : undefined;
+  // Ghee cards ARE a specific variant already, so the variant to add is
+  // simply the one attached to the current card.
+  const cartVariant = isGhee ? current.variant : undefined;
 
   const handleAddToCart = () => {
     if (!cartVariant) return;
-    addToCart(current, cartVariant, 1);
+    addToCart(current.sourceItem, cartVariant, 1);
     setJustAdded(true);
   };
 
@@ -243,7 +316,7 @@ const Portfolio: React.FC = () => {
       )}
 
       {/* ── Category Tab Bar ── */}
-      <div className="absolute top-20 left-1/2 -translate-x-1/2 z-50 flex gap-2 flex-wrap justify-center px-4">
+      <div className="absolute w-full top-20 left-1/2 -translate-x-1/2 z-50 flex gap-2 flex-wrap justify-center px-4">
         <div className="flex gap-1.5 p-1.5 rounded-full bg-white/5 backdrop-blur-xl border border-white/10 shadow-2xl flex-wrap justify-center">
           {CATEGORIES.map((cat) => (
             <button
@@ -262,9 +335,34 @@ const Portfolio: React.FC = () => {
         </div>
       </div>
 
-      {/* ── Subtype Pill Row ── */}
+      {/* ── Ghee Type Tabs (Cow / Buffalo) ── */}
+      {isGhee && activeCategory.items.length > 1 && (
+        <div className="absolute top-[8.25rem] left-1/2 -translate-x-1/2 z-50 flex gap-2 mt-5">
+          {activeCategory.items.map((item) => {
+            const isActive = item.id === selectedGheeItem?.id;
+            return (
+              <button
+                key={item.id}
+                onClick={() => changeGheeItem(item.id)}
+                className={`px-4 py-1.5 rounded-full text-xs font-bold uppercase tracking-wider transition-all duration-300 border ${
+                  isActive ? "text-white scale-105" : "text-white/50 hover:text-white/80 border-white/10 hover:bg-white/5"
+                }`}
+                style={
+                  isActive
+                    ? { backgroundColor: accent, borderColor: accent, boxShadow: `0 8px 20px -8px ${accent}99` }
+                    : { backgroundColor: "rgba(255,255,255,0.03)" }
+                }
+              >
+                {item.name}
+              </button>
+            );
+          })}
+        </div>
+      )}
+
+      {/* ── Subtype / Variant Pill Row ── */}
       {!singleItem && (
-        <div className="absolute top-[8.25rem] left-0 right-0 z-50 flex items-center justify-center gap-2 px-6 mt-8">
+        <div className={`absolute ${isGhee ? "top-[10.75rem]" : "top-[8.25rem]"} left-0 right-0 z-50 flex items-center justify-center gap-2 px-6 mt-8`}>
           <button
             onClick={() => scrollByPill(-1)}
             aria-label="Scroll varieties left"
@@ -295,7 +393,7 @@ const Portfolio: React.FC = () => {
                     }
                   >
                     {isActive && <span className="inline-block w-1.5 h-1.5 rounded-full bg-white opacity-80" />}
-                    {item.name}
+                    {isGhee && item.variant ? item.variant.size : item.name}
                     {item.tag && (
                       <span
                         className="inline-block text-[9px] font-bold uppercase tracking-wider px-1.5 py-0.5 rounded-full"
@@ -333,12 +431,12 @@ const Portfolio: React.FC = () => {
           className="text-[8rem] font-black whitespace-nowrap select-none bg-clip-text text-transparent"
           style={{ backgroundImage: `linear-gradient(135deg, ${accent}, #ffffff)`, WebkitTextStroke: "1px rgba(255,255,255,0.08)" }}
         >
-          {current.name.toUpperCase()}
+          {current.sourceItem.name.toUpperCase()}
         </h1>
       </div>
 
       {/* ── Product carousel ── */}
-      <div ref={containerRef} className="relative w-full h-full mt-10">
+      <div ref={containerRef} className={`relative w-full h-full ${isGhee ? "mt-16" : "mt-10"}`}>
         {currentItems.map((item, i) => {
           const isActive = i === currentIndex;
           return (
@@ -391,42 +489,65 @@ const Portfolio: React.FC = () => {
               {current.tag}
             </span>
           )}
-          <h3 className="text-xl font-bold text-white mb-1 tracking-tight">{current.name}</h3>
+          <h3 className="text-xl font-bold text-white mb-1 tracking-tight">
+            {current.sourceItem.name}
+            {current.variant && (
+              <span className="ml-2 text-sm font-semibold" style={{ color: accent }}>
+                {current.variant.size}
+              </span>
+            )}
+          </h3>
           <p className="text-xs font-bold uppercase tracking-wide mb-2.5" style={{ color: accent }}>
             {current.description}
           </p>
           <p className="text-white/60 text-sm leading-relaxed mb-4">{current.content}</p>
-          {current.variants.length > 0 && (
+
+          {current.sourceItem.variants.length > 0 && (
             <div>
               <p className="text-[10px] font-bold uppercase tracking-widest text-white/30 mb-2">
                 Available sizes
               </p>
               <div className="flex flex-wrap gap-1.5">
-                {current.variants.map((v, vi) => (
-                  <span
-                    key={vi}
-                    className="text-[10px] font-semibold border rounded-md px-2 py-1"
-                    style={{ borderColor: `${accent}40`, color: accent, backgroundColor: `${accent}14` }}
-                  >
-                    {v.size}{v.packType ? ` (${v.packType})` : ""}
-                  </span>
-                ))}
+                {current.sourceItem.variants.map((v, vi) => {
+                  const isSelected = current.variant?.size === v.size;
+                  return (
+                    <span
+                      key={vi}
+                      className="text-[10px] font-semibold border rounded-md px-2 py-1"
+                      style={
+                        isSelected
+                          ? { borderColor: accent, color: "#fff", backgroundColor: accent }
+                          : { borderColor: `${accent}40`, color: accent, backgroundColor: `${accent}14` }
+                      }
+                    >
+                      {v.size}{v.packType ? ` (${v.packType})` : ""}
+                    </span>
+                  );
+                })}
               </div>
             </div>
           )}
 
           {isGhee && cartVariant && (
-            <button
-              onClick={handleAddToCart}
-              className="mt-5 w-full flex items-center justify-center gap-2 text-white font-bold text-sm py-3 rounded-2xl transition-all duration-300 hover:-translate-y-0.5"
-              style={{
-                backgroundColor: justAdded ? "#16a34a" : accent,
-                boxShadow: `0 15px 30px -14px ${justAdded ? "#16a34a" : accent}aa`,
-              }}
-            >
-              <ShoppingCart size={16} />
-              {justAdded ? "Added to cart" : "Add to cart"}
-            </button>
+            <>
+              {cartVariant.price != null && (
+                <p className="mt-4 text-lg font-bold text-white">
+                  ₹{cartVariant.price}
+                  {cartVariant.perUnit && <span className="text-white/40 text-xs font-medium"> / {cartVariant.perUnit}</span>}
+                </p>
+              )}
+              <button
+                onClick={handleAddToCart}
+                className="mt-3 w-full flex items-center justify-center gap-2 text-white font-bold text-sm py-3 rounded-2xl transition-all duration-300 hover:-translate-y-0.5"
+                style={{
+                  backgroundColor: justAdded ? "#16a34a" : accent,
+                  boxShadow: `0 15px 30px -14px ${justAdded ? "#16a34a" : accent}aa`,
+                }}
+              >
+                <ShoppingCart size={16} />
+                {justAdded ? "Added to cart" : "Add to cart"}
+              </button>
+            </>
           )}
         </div>
       </div>

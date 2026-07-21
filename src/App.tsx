@@ -14,6 +14,7 @@ import VerticalScrollAnimation from './components/VerticalScrollAnimation';
 import Profile from './pages/Profile';
 import { CartProvider } from './context/cartContext';
 import CategoryStore from './pages/CategoryStore';
+import ScrollToTop from './components/ui/ScrollToTop';
 
 const Home = lazy(() => import('./pages/Home'));
 
@@ -61,6 +62,7 @@ function App() {
 					</div>
 				}
 			>
+				<ScrollToTop/>
 				<Routes>
 					<Route
 						path="/"

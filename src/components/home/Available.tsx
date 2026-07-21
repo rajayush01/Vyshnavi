@@ -5,7 +5,7 @@ export default function AlsoAvailableSection() {
   return (
     <div className="relative w-full overflow-hidden bg-[#e0f2fe] py-20 sm:py-24 px-4">
       {/* Decorative dairy illustrations */}
-      <svg className="hidden md:block absolute top-8 left-[6%] w-16 h-16 opacity-60 animate-float-slow" viewBox="0 0 64 64" fill="none">
+      {/* <svg className="hidden md:block absolute top-8 left-[6%] w-16 h-16 opacity-60 animate-float-slow" viewBox="0 0 64 64" fill="none">
         <path d="M32 6 C40 22 50 30 50 42 C50 52 42 58 32 58 C22 58 14 52 14 42 C14 30 24 22 32 6 Z" fill="#ffffff" stroke="#60a5fa" strokeWidth="2" />
         <ellipse cx="27" cy="40" rx="4" ry="6" fill="#bfdbfe" opacity="0.7" />
       </svg>
@@ -13,7 +13,7 @@ export default function AlsoAvailableSection() {
         <path d="M20 24 L44 24 L41 56 L23 56 Z" fill="#ffffff" stroke="#3b82f6" strokeWidth="2" />
         <path d="M24 24 L20 14 L44 14 L40 24 Z" fill="#dbeafe" stroke="#3b82f6" strokeWidth="2" />
         <rect x="27" y="8" width="10" height="6" rx="2" fill="#3b82f6" />
-      </svg>
+      </svg> */}
 
       <div className="relative max-w-4xl mx-auto">
         {/* Header */}
