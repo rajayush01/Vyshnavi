@@ -626,7 +626,7 @@ export const CATEGORIES: ProductCategory[] = [
       {
         id: 602,
         name: "Buffalo Ghee",
-        image: "",
+        image: "https://pub-5910ba650a5b4f4ba76486d5a3630c49.r2.dev/vaishnavi-data/BG2m1.png",
         description: "Bold & buttery",
         content:
           "Crafted from buffalo cream, this ghee has a higher fat content and a deeply rich, nutty aroma. Ideal for festive cooking and traditional sweets.",
