@@ -20,9 +20,12 @@ const NAV_ITEMS: { key: string; label: string; action: Action }[] = [
 // Maps the current URL path to the matching nav key, defaulting to "home"
 const getActiveTabFromPath = (pathname: string): string => {
   const match = NAV_ITEMS.find(
-    (item) => item.action.type === "navigate" && item.action.target === pathname
+    (item) =>
+      item.action.type === "navigate" &&
+      item.action.target === pathname
   );
-  return match ? match.key : "home";
+
+  return match ? match.key : "";
 };
 
 const Header: React.FC = () => {

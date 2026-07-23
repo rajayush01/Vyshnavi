@@ -223,9 +223,10 @@ const Portfolio: React.FC = () => {
   };
 
   const scrollByPill = (direction: 1 | -1) => {
-    const rail = pillsRef.current;
-    if (!rail) return;
-    rail.scrollBy({ left: 180 * direction, behavior: "smooth" });
+    const nextIndex =
+      (currentIndex + direction + currentItems.length) % currentItems.length;
+
+    jumpTo(nextIndex);
   };
 
   const changeCategory = (key: string) => {
@@ -678,7 +679,7 @@ const Portfolio: React.FC = () => {
                 every other category stays on the plain white overlay. */}
             <div
               className="rounded-2xl shadow-2xl overflow-hidden flex items-center justify-center"
-              style={{ backgroundColor: activeCategoryKey === "milk" ? "#036AAD" : "transparent" }}
+              style={{ backgroundColor: activeCategoryKey === "milk" ? "#99BFEB" : "#99BFEB" }}
             >
               <img
                 src={gallery[selectedThumb.index]}

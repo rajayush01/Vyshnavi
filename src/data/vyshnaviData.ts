@@ -46,7 +46,6 @@ export interface ProductCategory {
   items: ProductItem[];
 }
 
-const PH = ""; // still used for products with genuinely no asset yet
 
 // --------------- CATEGORY DATA ---------------
 

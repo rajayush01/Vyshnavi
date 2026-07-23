@@ -92,20 +92,36 @@ type DescTab = "description" | "ingredients" | "nutrition" | "usage";
 const DEFAULT_PRODUCT_ID = 601; // Cow Ghee — flagship item, used when no id is passed in
 
 const FALLBACK_GRADIENT: Record<string, string> = {
-  milk:      "linear-gradient(135deg,#dbeafe,#eff6ff)",
-  curd:      "linear-gradient(135deg,#dcfce7,#f0fdf4)",
+  milk: "linear-gradient(135deg,#dbeafe,#eff6ff)",
+  curd: "linear-gradient(135deg,#dcfce7,#f0fdf4)",
   beverages: "linear-gradient(135deg,#f3e8ff,#faf5ff)",
-  paneer:    "linear-gradient(135deg,#ffedd5,#fff7ed)",
-  butter:    "linear-gradient(135deg,#fefce8,#fffef0)",
-  ghee:      "linear-gradient(135deg,#fef3c7,#fffbeb)",
-  sweets:    "linear-gradient(135deg,#fdf2f8,#fff5fa)",
+  paneer: "linear-gradient(135deg,#ffedd5,#fff7ed)",
+  butter: "linear-gradient(135deg,#fefce8,#fffef0)",
+  ghee: "linear-gradient(135deg,#fef3c7,#fffbeb)",
+  sweets: "linear-gradient(135deg,#fdf2f8,#fff5fa)",
 };
 
 const features: Feature[] = [
-  { icon: <Truck className="w-8 h-8" />, title: "Free Shipping on", subtitle: "Orders Above ₹499" },
-  { icon: <Headphones className="w-8 h-8" />, title: "360° Customer", subtitle: "Support" },
-  { icon: <Package className="w-8 h-8" />, title: "Up to 30 Days", subtitle: "Return" },
-  { icon: <FileCheck className="w-8 h-8" />, title: "70+ Quality", subtitle: "Checks" },
+  {
+    icon: <Truck className="w-8 h-8" />,
+    title: "Free Shipping on",
+    subtitle: "Orders Above ₹499",
+  },
+  {
+    icon: <Headphones className="w-8 h-8" />,
+    title: "360° Customer",
+    subtitle: "Support",
+  },
+  {
+    icon: <Package className="w-8 h-8" />,
+    title: "Up to 30 Days",
+    subtitle: "Return",
+  },
+  {
+    icon: <FileCheck className="w-8 h-8" />,
+    title: "70+ Quality",
+    subtitle: "Checks",
+  },
 ];
 
 const DESC_TABS: { key: DescTab; label: string }[] = [
@@ -177,7 +193,8 @@ const ProductDetails: React.FC = () => {
   // ── Resolve which product to show ──────────────────────────────────────
   const resolvedId = useMemo(() => {
     const fromParams = params.id ? Number(params.id) : undefined;
-    const fromState = (location.state as { productId?: number } | null)?.productId;
+    const fromState = (location.state as { productId?: number } | null)
+      ?.productId;
     return fromParams ?? fromState ?? DEFAULT_PRODUCT_ID;
   }, [params.id, location.state]);
 
@@ -191,12 +208,15 @@ const ProductDetails: React.FC = () => {
   // product. Falls back to the first category only if something is
   // badly out of sync with the data.
   const category: ProductCategory =
-    CATEGORIES.find((c) => c.items.some((it) => it.id === product.id)) ?? CATEGORIES[0];
+    CATEGORIES.find((c) => c.items.some((it) => it.id === product.id)) ??
+    CATEGORIES[0];
   const accent = category.accentHex;
-  const fallbackGradient = FALLBACK_GRADIENT[category.key] ?? "linear-gradient(135deg,#f3f4f6,#fafafa)";
+  const fallbackGradient =
+    FALLBACK_GRADIENT[category.key] ??
+    "linear-gradient(135deg,#f3f4f6,#fafafa)";
 
   const [selectedVariantSize, setSelectedVariantSize] = useState<string>(
-    product.variants[0]?.size ?? ""
+    product.variants[0]?.size ?? "",
   );
   const [quantity, setQuantity] = useState<number>(1);
   const [selectedImage, setSelectedImage] = useState<number>(0);
@@ -227,7 +247,8 @@ const ProductDetails: React.FC = () => {
   }, [product.id]); // eslint-disable-line react-hooks/exhaustive-deps
 
   const selectedVariant: ProductVariant =
-    product.variants.find((v) => v.size === selectedVariantSize) ?? product.variants[0];
+    product.variants.find((v) => v.size === selectedVariantSize) ??
+    product.variants[0];
 
   // Reset image index whenever the variant's own gallery changes
   useEffect(() => {
@@ -249,15 +270,17 @@ const ProductDetails: React.FC = () => {
     selectedVariant?.images && selectedVariant.images.length > 0
       ? selectedVariant.images
       : product.gallery && product.gallery.length > 0
-      ? product.gallery
-      : product.image
-      ? [product.image]
-      : [];
+        ? product.gallery
+        : product.image
+          ? [product.image]
+          : [];
 
   // Whether this product's images are per-variant (true) or shared across
   // all sizes (false) — used only to decide if picking a different size
   // should also reset which thumbnail is active.
-  const hasPerVariantImages = !!(selectedVariant?.images && selectedVariant.images.length > 0);
+  const hasPerVariantImages = !!(
+    selectedVariant?.images && selectedVariant.images.length > 0
+  );
 
   // Lightbox: Escape to close, arrow keys to browse, lock body scroll while open
   useEffect(() => {
@@ -289,7 +312,9 @@ const ProductDetails: React.FC = () => {
   const [reviewText, setReviewText] = useState("");
   const [reviewRating, setReviewRating] = useState(5);
   const [reviewHoverRating, setReviewHoverRating] = useState(0);
-  const [reviewPhotoFiles, setReviewPhotoFiles] = useState<{ file: File; url: string }[]>([]);
+  const [reviewPhotoFiles, setReviewPhotoFiles] = useState<
+    { file: File; url: string }[]
+  >([]);
 
   const averageRating = useMemo(() => {
     if (reviews.length === 0) return 0;
@@ -306,7 +331,10 @@ const ProductDetails: React.FC = () => {
 
   const handleReviewPhotoSelect = (e: React.ChangeEvent<HTMLInputElement>) => {
     const files = Array.from(e.target.files ?? []);
-    const withUrls = files.map((file) => ({ file, url: URL.createObjectURL(file) }));
+    const withUrls = files.map((file) => ({
+      file,
+      url: URL.createObjectURL(file),
+    }));
     setReviewPhotoFiles((prev) => [...prev, ...withUrls]);
     e.target.value = "";
   };
@@ -336,7 +364,12 @@ const ProductDetails: React.FC = () => {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-b from-white via-white to-white" style={{ backgroundImage: `linear-gradient(to bottom, ${accent}0d, #ffffff, #ffffff)` }}>
+    <div
+      className="min-h-screen bg-gradient-to-b from-white via-white to-white"
+      style={{
+        backgroundImage: `linear-gradient(to bottom, ${accent}0d, #ffffff, #ffffff)`,
+      }}
+    >
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6 lg:py-8 mt-16 sm:mt-20 lg:mt-28">
         {/* Eyebrow / breadcrumb */}
         <div className="flex items-center justify-between mb-6 sm:mb-8">
@@ -345,8 +378,10 @@ const ProductDetails: React.FC = () => {
             className="group inline-flex items-center gap-2 rounded-full border border-slate-200 bg-white px-4 py-2 text-sm font-medium text-slate-700 shadow-sm transition-all duration-300 hover:shadow-md"
             style={{ ["--hover-color" as any]: accent }}
             onMouseEnter={(e) => {
-              (e.currentTarget as HTMLElement).style.borderColor = `${accent}66`;
-              (e.currentTarget as HTMLElement).style.backgroundColor = `${accent}0d`;
+              (e.currentTarget as HTMLElement).style.borderColor =
+                `${accent}66`;
+              (e.currentTarget as HTMLElement).style.backgroundColor =
+                `${accent}0d`;
               (e.currentTarget as HTMLElement).style.color = accent;
             }}
             onMouseLeave={(e) => {
@@ -359,10 +394,15 @@ const ProductDetails: React.FC = () => {
             Back
           </button>
 
-          <div className="flex items-center gap-2">
+          {/* <div className="flex items-center gap-2">
             <span
               className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-[11px] font-bold uppercase tracking-widest"
-              style={{ backgroundColor: `${accent}14`, borderColor: `${accent}33`, color: accent, borderWidth: 1 }}
+              style={{
+                backgroundColor: `${accent}14`,
+                borderColor: `${accent}33`,
+                color: accent,
+                borderWidth: 1,
+              }}
             >
               <Sparkles className="w-3 h-3" />
               {category.tagline}
@@ -373,7 +413,7 @@ const ProductDetails: React.FC = () => {
             <span className="text-xs font-medium text-slate-400">
               {category.name}
             </span>
-          </div>
+          </div> */}
         </div>
 
         <div className="grid lg:grid-cols-2 gap-8 lg:gap-12">
@@ -381,7 +421,10 @@ const ProductDetails: React.FC = () => {
           <div className="lg:sticky lg:top-8 h-fit space-y-4">
             <div
               className="relative rounded-[28px] overflow-hidden aspect-square flex items-center justify-center border shadow-[0_30px_70px_-30px_rgba(15,23,42,0.25)]"
-              style={{ background: fallbackGradient, borderColor: `${accent}22` }}
+              style={{
+                background: fallbackGradient,
+                borderColor: `${accent}22`,
+              }}
             >
               <div
                 className="absolute w-2/3 h-2/3 rounded-full blur-3xl"
@@ -399,6 +442,38 @@ const ProductDetails: React.FC = () => {
                     alt={product.name}
                     className="relative object-contain w-full h-full p-8 sm:p-10 lg:p-12 drop-shadow-xl transition-transform duration-500 group-hover:scale-105"
                   />
+
+                  {/* Previous */}
+                  {images.length > 1 && (
+                    <button
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        setSelectedImage((prev) =>
+                          prev === 0 ? images.length - 1 : prev - 1,
+                        );
+                      }}
+                      className="absolute left-4 top-1/2 -translate-y-1/2 w-11 h-11 rounded-full bg-white/80 backdrop-blur-md shadow-lg border border-white/50 flex items-center justify-center hover:scale-105 transition-all"
+                      aria-label="Previous Image"
+                    >
+                      <ChevronLeft className="w-5 h-5 text-slate-700" />
+                    </button>
+                  )}
+
+                  {/* Next */}
+                  {images.length > 1 && (
+                    <button
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        setSelectedImage((prev) =>
+                          prev === images.length - 1 ? 0 : prev + 1,
+                        );
+                      }}
+                      className="absolute right-4 top-1/2 -translate-y-1/2 w-11 h-11 rounded-full bg-white/80 backdrop-blur-md shadow-lg border border-white/50 flex items-center justify-center hover:scale-105 transition-all"
+                      aria-label="Next Image"
+                    >
+                      <ChevronRight className="w-5 h-5 text-slate-700" />
+                    </button>
+                  )}
                   <span
                     className="absolute bottom-4 right-4 w-10 h-10 rounded-full bg-white/90 backdrop-blur-sm border flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity duration-300 shadow-lg"
                     style={{ borderColor: `${accent}33`, color: accent }}
@@ -418,7 +493,10 @@ const ProductDetails: React.FC = () => {
               {product.tag && (
                 <span
                   className="absolute top-5 left-5 text-[10px] font-bold uppercase tracking-widest text-white px-3 py-1.5 rounded-full shadow-lg"
-                  style={{ backgroundColor: product.tag === "Best Seller" ? "#2563eb" : "#16a34a" }}
+                  style={{
+                    backgroundColor:
+                      product.tag === "Best Seller" ? "#2563eb" : "#16a34a",
+                  }}
                 >
                   {product.tag}
                 </span>
@@ -439,11 +517,19 @@ const ProductDetails: React.FC = () => {
                     className={`min-w-16 h-16 sm:min-w-20 sm:h-20 rounded-xl border-2 flex-shrink-0 overflow-hidden transition-all duration-200`}
                     style={{
                       backgroundColor: `${accent}0d`,
-                      borderColor: selectedImage === idx ? accent : "transparent",
-                      boxShadow: selectedImage === idx ? `0 8px 20px -10px ${accent}80` : "none",
+                      borderColor:
+                        selectedImage === idx ? accent : "transparent",
+                      boxShadow:
+                        selectedImage === idx
+                          ? `0 8px 20px -10px ${accent}80`
+                          : "none",
                     }}
                   >
-                    <img src={img} alt={`View ${idx + 1}`} className="w-full h-full object-cover" />
+                    <img
+                      src={img}
+                      alt={`View ${idx + 1}`}
+                      className="w-full h-full object-cover"
+                    />
                   </button>
                 ))}
               </div>
@@ -463,7 +549,10 @@ const ProductDetails: React.FC = () => {
             </div>
 
             {/* Product tagline */}
-            <p className="text-xs font-bold uppercase tracking-widest leading-relaxed" style={{ color: `${accent}cc` }}>
+            <p
+              className="text-xs font-bold uppercase tracking-widest leading-relaxed"
+              style={{ color: `${accent}cc` }}
+            >
               {product.description}
             </p>
 
@@ -480,14 +569,20 @@ const ProductDetails: React.FC = () => {
                     </span>
                   )}
                 </div>
-                <p className="text-xs text-gray-500">MRP (Incl. of all taxes)</p>
+                <p className="text-xs text-gray-500">
+                  MRP (Incl. of all taxes)
+                </p>
 
                 {selectedVariant.discount && (
                   <div
                     className="relative inline-block text-white px-4 py-2 rounded-full text-xs sm:text-sm font-bold overflow-hidden shadow-[0_10px_25px_-8px_rgba(0,0,0,0.35)]"
-                    style={{ background: `linear-gradient(90deg, ${accent}, ${accent}cc)` }}
+                    style={{
+                      background: `linear-gradient(90deg, ${accent}, ${accent}cc)`,
+                    }}
                   >
-                    <span className="relative z-10">{selectedVariant.discount} on this size</span>
+                    <span className="relative z-10">
+                      {selectedVariant.discount} on this size
+                    </span>
                     <span className="absolute inset-0 bg-gradient-to-r from-transparent via-white/40 to-transparent -translate-x-full animate-[shine_2s_linear_infinite]" />
                   </div>
                 )}
@@ -495,17 +590,24 @@ const ProductDetails: React.FC = () => {
             ) : (
               <div
                 className="inline-flex items-center gap-2 px-4 py-2.5 rounded-2xl border text-sm font-semibold"
-                style={{ backgroundColor: `${accent}0d`, borderColor: `${accent}33`, color: accent }}
+                style={{
+                  backgroundColor: `${accent}0d`,
+                  borderColor: `${accent}33`,
+                  color: accent,
+                }}
               >
                 <Sparkles className="w-4 h-4" />
-                Price on request — our team will confirm availability for this size
+                Price on request — our team will confirm availability for this
+                size
               </div>
             )}
 
             {/* Variant Selection */}
             {product.variants.length > 0 && (
               <div>
-                <h3 className="text-base sm:text-lg font-bold text-gray-900 mb-3 tracking-tight">Select Size</h3>
+                <h3 className="text-base sm:text-lg font-bold text-gray-900 mb-3 tracking-tight">
+                  Select Size
+                </h3>
                 <div className="grid grid-cols-2 sm:grid-cols-3 gap-2.5 sm:gap-3">
                   {product.variants.map((variant) => {
                     const isActive = selectedVariantSize === variant.size;
@@ -517,10 +619,14 @@ const ProductDetails: React.FC = () => {
                         style={{
                           borderColor: isActive ? accent : "#f1f5f9",
                           backgroundColor: isActive ? `${accent}0d` : "#ffffff",
-                          boxShadow: isActive ? `0 10px 25px -12px ${accent}80` : "none",
+                          boxShadow: isActive
+                            ? `0 10px 25px -12px ${accent}80`
+                            : "none",
                         }}
                       >
-                        <div className="font-bold text-sm text-gray-900">{variant.size}</div>
+                        <div className="font-bold text-sm text-gray-900">
+                          {variant.size}
+                        </div>
                         {variant.price ? (
                           <div className="flex items-baseline gap-1.5 flex-wrap mt-1">
                             <span className="text-3xl font-bold text-gray-900">
@@ -533,7 +639,12 @@ const ProductDetails: React.FC = () => {
                             )}
                           </div>
                         ) : (
-                          <div className="text-[10px] font-semibold mt-1" style={{ color: accent }}>Ask price</div>
+                          <div
+                            className="text-[10px] font-semibold mt-1"
+                            style={{ color: accent }}
+                          >
+                            Ask price
+                          </div>
                         )}
                       </button>
                     );
@@ -544,19 +655,33 @@ const ProductDetails: React.FC = () => {
 
             {/* Quantity Selector and Action Buttons */}
             <div className="flex flex-row items-center gap-4">
-              <div className="flex items-center rounded-2xl border" style={{ backgroundColor: `${accent}0d`, borderColor: `${accent}22` }}>
+              <div
+                className="flex items-center rounded-2xl border"
+                style={{
+                  backgroundColor: `${accent}0d`,
+                  borderColor: `${accent}22`,
+                }}
+              >
                 <button
                   onClick={() => setQuantity(Math.max(1, quantity - 1))}
                   className="p-3 rounded-l-2xl transition-colors hover:opacity-80"
                 >
-                  <Minus className="w-4 h-4 sm:w-5 sm:h-5" style={{ color: accent }} />
+                  <Minus
+                    className="w-4 h-4 sm:w-5 sm:h-5"
+                    style={{ color: accent }}
+                  />
                 </button>
-                <span className="px-5 sm:px-6 font-bold text-sm sm:text-base text-gray-900">{quantity}</span>
+                <span className="px-5 sm:px-6 font-bold text-sm sm:text-base text-gray-900">
+                  {quantity}
+                </span>
                 <button
                   onClick={() => setQuantity(quantity + 1)}
                   className="p-3 rounded-r-2xl transition-colors hover:opacity-80"
                 >
-                  <Plus className="w-4 h-4 sm:w-5 sm:h-5" style={{ color: accent }} />
+                  <Plus
+                    className="w-4 h-4 sm:w-5 sm:h-5"
+                    style={{ color: accent }}
+                  />
                 </button>
               </div>
               <div className="flex flex-col sm:flex-row gap-3 w-full">
@@ -564,7 +689,9 @@ const ProductDetails: React.FC = () => {
                   onClick={() => addToCart(product, selectedVariant, quantity)}
                   disabled={!selectedVariant}
                   className="flex-1 flex items-center justify-center gap-2 text-white py-3.5 px-6 rounded-full text-sm sm:text-base font-bold shadow-[0_15px_35px_-12px_rgba(0,0,0,0.4)] hover:-translate-y-0.5 transition-all duration-200 disabled:opacity-50 disabled:pointer-events-none"
-                  style={{ background: `linear-gradient(90deg, ${accent}, ${accent}dd)` }}
+                  style={{
+                    background: `linear-gradient(90deg, ${accent}, ${accent}dd)`,
+                  }}
                 >
                   <ShoppingCart className="w-4 h-4" />
                   Add to Cart
@@ -582,7 +709,13 @@ const ProductDetails: React.FC = () => {
 
             {/* Cross-sell suggestion, sourced from the same resolved category */}
             {crossSell && (
-              <div className="rounded-2xl p-4 border" style={{ background: `linear-gradient(90deg, ${accent}0d, ${accent}08)`, borderColor: `${accent}22` }}>
+              <div
+                className="rounded-2xl p-4 border"
+                style={{
+                  background: `linear-gradient(90deg, ${accent}0d, ${accent}08)`,
+                  borderColor: `${accent}22`,
+                }}
+              >
                 <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 sm:gap-4">
                   <div className="flex items-center gap-3 flex-1 min-w-0">
                     <span className="bg-blue-600 text-white text-[10px] font-bold px-2.5 py-1 rounded-full flex-shrink-0 uppercase tracking-wide">
@@ -597,16 +730,30 @@ const ProductDetails: React.FC = () => {
                           style={{ borderColor: `${accent}22` }}
                         />
                       ) : (
-                        <div className="w-11 h-11 rounded-xl flex-shrink-0" style={{ backgroundColor: `${accent}22` }} />
+                        <div
+                          className="w-11 h-11 rounded-xl flex-shrink-0"
+                          style={{ backgroundColor: `${accent}22` }}
+                        />
                       )}
                       <div className="min-w-0 flex-1">
-                        <p className="text-xs sm:text-sm font-bold text-gray-900 truncate">{crossSell.name}</p>
-                        <p className="text-[11px] font-semibold uppercase tracking-wide" style={{ color: accent }}>{crossSell.description}</p>
+                        <p className="text-xs sm:text-sm font-bold text-gray-900 truncate">
+                          {crossSell.name}
+                        </p>
+                        <p
+                          className="text-[11px] font-semibold uppercase tracking-wide"
+                          style={{ color: accent }}
+                        >
+                          {crossSell.description}
+                        </p>
                       </div>
                     </div>
                   </div>
                   <button
-                    onClick={() => navigate("/details", { state: { productId: crossSell.id } })}
+                    onClick={() =>
+                      navigate("/details", {
+                        state: { productId: crossSell.id },
+                      })
+                    }
                     className="flex items-center gap-1.5 bg-white border px-4 py-2 rounded-full font-bold text-xs hover:opacity-80 transition-colors flex-shrink-0"
                     style={{ borderColor: `${accent}66`, color: accent }}
                   >
@@ -619,14 +766,23 @@ const ProductDetails: React.FC = () => {
             {/* Features Grid */}
             <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-6 pt-4 sm:pt-6 pb-2">
               {features.map((feature, idx) => (
-                <div key={idx} className="flex flex-col items-center text-center">
+                <div
+                  key={idx}
+                  className="flex flex-col items-center text-center"
+                >
                   <div
                     className="w-14 h-14 rounded-2xl border flex items-center justify-center mb-3"
-                    style={{ backgroundColor: `${accent}0d`, borderColor: `${accent}22`, color: accent }}
+                    style={{
+                      backgroundColor: `${accent}0d`,
+                      borderColor: `${accent}22`,
+                      color: accent,
+                    }}
                   >
                     {feature.icon}
                   </div>
-                  <h3 className="font-bold text-xs sm:text-sm mb-0.5 text-gray-900">{feature.title}</h3>
+                  <h3 className="font-bold text-xs sm:text-sm mb-0.5 text-gray-900">
+                    {feature.title}
+                  </h3>
                   <p className="text-xs text-gray-500">{feature.subtitle}</p>
                 </div>
               ))}
@@ -635,9 +791,15 @@ const ProductDetails: React.FC = () => {
         </div>
 
         {/* Product Description — full width, tabbed, below the two-column layout */}
-        <div className="border-t pt-8 mt-8" style={{ borderColor: `${accent}22` }}>
+        <div
+          className="border-t pt-8 mt-8"
+          style={{ borderColor: `${accent}22` }}
+        >
           {/* Tab bar */}
-          <div className="flex gap-1 sm:gap-2 mb-6 overflow-x-auto border-b" style={{ borderColor: `${accent}22` }}>
+          <div
+            className="flex gap-1 sm:gap-2 mb-6 overflow-x-auto border-b"
+            style={{ borderColor: `${accent}22` }}
+          >
             {DESC_TABS.map((tab) => {
               const isActive = activeDescTab === tab.key;
               return (
@@ -651,7 +813,9 @@ const ProductDetails: React.FC = () => {
                   {isActive && (
                     <span
                       className="absolute bottom-0 left-0 right-0 h-0.5 rounded-full"
-                      style={{ background: `linear-gradient(90deg, ${accent}, ${accent}cc)` }}
+                      style={{
+                        background: `linear-gradient(90deg, ${accent}, ${accent}cc)`,
+                      }}
                     />
                   )}
                 </button>
@@ -678,8 +842,9 @@ const ProductDetails: React.FC = () => {
                   Ingredients
                 </h2>
                 <p className="text-gray-600 text-sm sm:text-base leading-relaxed mb-4">
-                  100% pure, farm-sourced {product.name}. No additives, preservatives, or
-                  artificial colors — made the traditional way.
+                  100% pure, farm-sourced {product.name}. No additives,
+                  preservatives, or artificial colors — made the traditional
+                  way.
                 </p>
                 <ul className="list-disc list-inside text-sm text-gray-600 space-y-1.5">
                   <li>Fresh cow/buffalo milk (as applicable)</li>
@@ -695,7 +860,8 @@ const ProductDetails: React.FC = () => {
                   Nutrition Info
                 </h2>
                 <p className="text-gray-600 text-sm sm:text-base leading-relaxed mb-5">
-                  Approximate values per 100g serving. Actual values may vary slightly by batch.
+                  Approximate values per 100g serving. Actual values may vary
+                  slightly by batch.
                 </p>
                 <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
                   {[
@@ -707,10 +873,18 @@ const ProductDetails: React.FC = () => {
                     <div
                       key={n.label}
                       className="p-3.5 rounded-xl border text-center"
-                      style={{ backgroundColor: `${accent}0d`, borderColor: `${accent}22` }}
+                      style={{
+                        backgroundColor: `${accent}0d`,
+                        borderColor: `${accent}22`,
+                      }}
                     >
-                      <div className="text-sm font-black text-gray-900">{n.value}</div>
-                      <div className="text-[11px] font-semibold uppercase tracking-wide mt-1" style={{ color: accent }}>
+                      <div className="text-sm font-black text-gray-900">
+                        {n.value}
+                      </div>
+                      <div
+                        className="text-[11px] font-semibold uppercase tracking-wide mt-1"
+                        style={{ color: accent }}
+                      >
                         {n.label}
                       </div>
                     </div>
@@ -725,10 +899,21 @@ const ProductDetails: React.FC = () => {
                   How to Use &amp; Store
                 </h2>
                 <ul className="list-disc list-inside text-sm text-gray-600 space-y-2 leading-relaxed">
-                  <li>Use as part of your everyday cooking, or serve as suggested on the pack.</li>
-                  <li>Store as indicated on the packaging, away from direct sunlight.</li>
-                  <li>Always use a clean, dry utensil to scoop — moisture can affect shelf life.</li>
-                  <li>Check the pack for any product-specific storage notes.</li>
+                  <li>
+                    Use as part of your everyday cooking, or serve as suggested
+                    on the pack.
+                  </li>
+                  <li>
+                    Store as indicated on the packaging, away from direct
+                    sunlight.
+                  </li>
+                  <li>
+                    Always use a clean, dry utensil to scoop — moisture can
+                    affect shelf life.
+                  </li>
+                  <li>
+                    Check the pack for any product-specific storage notes.
+                  </li>
                 </ul>
               </div>
             )}
@@ -736,26 +921,38 @@ const ProductDetails: React.FC = () => {
         </div>
 
         {/* Reviews — full width, at the very end of the page */}
-        <div className="border-t pt-8 mt-8" style={{ borderColor: `${accent}22` }}>
+        <div
+          className="border-t pt-8 mt-8"
+          style={{ borderColor: `${accent}22` }}
+        >
           <h2 className="text-xl sm:text-2xl font-black mb-6 tracking-tight text-gray-900">
             Customer Reviews
           </h2>
 
           {/* Summary */}
-          <div className="flex flex-col sm:flex-row gap-8 sm:gap-12 mb-8 pb-8 border-b" style={{ borderColor: `${accent}22` }}>
+          <div
+            className="flex flex-col sm:flex-row gap-8 sm:gap-12 mb-8 pb-8 border-b"
+            style={{ borderColor: `${accent}22` }}
+          >
             <div className="flex flex-col items-center sm:items-start flex-shrink-0">
-              <span className="text-5xl font-black text-gray-900">{averageRating.toFixed(1)}</span>
+              <span className="text-5xl font-black text-gray-900">
+                {averageRating.toFixed(1)}
+              </span>
               <div className="flex my-1.5" style={{ color: accent }}>
                 {[...Array(5)].map((_, i) => (
                   <Star
                     key={i}
                     className="w-4 h-4"
-                    fill={i < Math.round(averageRating) ? "currentColor" : "none"}
+                    fill={
+                      i < Math.round(averageRating) ? "currentColor" : "none"
+                    }
                     strokeWidth={i < Math.round(averageRating) ? 0 : 1.5}
                   />
                 ))}
               </div>
-              <span className="text-xs text-gray-500 font-medium">{reviews.length} reviews</span>
+              <span className="text-xs text-gray-500 font-medium">
+                {reviews.length} reviews
+              </span>
             </div>
 
             <div className="flex-1 max-w-sm space-y-1.5">
@@ -764,12 +961,27 @@ const ProductDetails: React.FC = () => {
                 const pct = reviews.length ? (count / reviews.length) * 100 : 0;
                 return (
                   <div key={star} className="flex items-center gap-2.5 text-xs">
-                    <span className="w-3 text-gray-500 font-medium">{star}</span>
-                    <Star className="w-3 h-3 flex-shrink-0" style={{ color: accent }} fill="currentColor" strokeWidth={0} />
-                    <div className="flex-1 h-1.5 rounded-full overflow-hidden" style={{ backgroundColor: `${accent}14` }}>
-                      <div className="h-full rounded-full" style={{ width: `${pct}%`, backgroundColor: accent }} />
+                    <span className="w-3 text-gray-500 font-medium">
+                      {star}
+                    </span>
+                    <Star
+                      className="w-3 h-3 flex-shrink-0"
+                      style={{ color: accent }}
+                      fill="currentColor"
+                      strokeWidth={0}
+                    />
+                    <div
+                      className="flex-1 h-1.5 rounded-full overflow-hidden"
+                      style={{ backgroundColor: `${accent}14` }}
+                    >
+                      <div
+                        className="h-full rounded-full"
+                        style={{ width: `${pct}%`, backgroundColor: accent }}
+                      />
                     </div>
-                    <span className="w-6 text-right text-gray-400">{count}</span>
+                    <span className="w-6 text-right text-gray-400">
+                      {count}
+                    </span>
                   </div>
                 );
               })}
@@ -780,12 +992,19 @@ const ProductDetails: React.FC = () => {
           <form
             onSubmit={handleSubmitReview}
             className="mb-10 p-5 sm:p-6 rounded-2xl border"
-            style={{ backgroundColor: `${accent}08`, borderColor: `${accent}22` }}
+            style={{
+              backgroundColor: `${accent}08`,
+              borderColor: `${accent}22`,
+            }}
           >
-            <h3 className="text-base font-bold text-gray-900 mb-4">Write a Review</h3>
+            <h3 className="text-base font-bold text-gray-900 mb-4">
+              Write a Review
+            </h3>
 
             <div className="mb-4">
-              <label className="block text-xs font-semibold text-gray-600 mb-1.5">Your Rating</label>
+              <label className="block text-xs font-semibold text-gray-600 mb-1.5">
+                Your Rating
+              </label>
               <div className="flex gap-1">
                 {[1, 2, 3, 4, 5].map((star) => (
                   <button
@@ -800,8 +1019,14 @@ const ProductDetails: React.FC = () => {
                     <Star
                       className="w-6 h-6 transition-transform hover:scale-110"
                       style={{ color: accent }}
-                      fill={star <= (reviewHoverRating || reviewRating) ? "currentColor" : "none"}
-                      strokeWidth={star <= (reviewHoverRating || reviewRating) ? 0 : 1.5}
+                      fill={
+                        star <= (reviewHoverRating || reviewRating)
+                          ? "currentColor"
+                          : "none"
+                      }
+                      strokeWidth={
+                        star <= (reviewHoverRating || reviewRating) ? 0 : 1.5
+                      }
                     />
                   </button>
                 ))}
@@ -809,33 +1034,45 @@ const ProductDetails: React.FC = () => {
             </div>
 
             <div className="mb-4">
-              <label className="block text-xs font-semibold text-gray-600 mb-1.5">Name</label>
+              <label className="block text-xs font-semibold text-gray-600 mb-1.5">
+                Name
+              </label>
               <input
                 type="text"
                 value={reviewName}
                 onChange={(e) => setReviewName(e.target.value)}
                 placeholder="Your name"
                 className="w-full sm:max-w-sm px-3.5 py-2.5 rounded-xl border bg-white text-sm focus:outline-none focus:ring-2"
-                style={{ borderColor: `${accent}22`, ["--tw-ring-color" as any]: `${accent}55` }}
+                style={{
+                  borderColor: `${accent}22`,
+                  ["--tw-ring-color" as any]: `${accent}55`,
+                }}
                 required
               />
             </div>
 
             <div className="mb-4">
-              <label className="block text-xs font-semibold text-gray-600 mb-1.5">Your Review</label>
+              <label className="block text-xs font-semibold text-gray-600 mb-1.5">
+                Your Review
+              </label>
               <textarea
                 value={reviewText}
                 onChange={(e) => setReviewText(e.target.value)}
                 placeholder="Share your experience with this product..."
                 rows={3}
                 className="w-full px-3.5 py-2.5 rounded-xl border bg-white text-sm resize-none focus:outline-none focus:ring-2"
-                style={{ borderColor: `${accent}22`, ["--tw-ring-color" as any]: `${accent}55` }}
+                style={{
+                  borderColor: `${accent}22`,
+                  ["--tw-ring-color" as any]: `${accent}55`,
+                }}
                 required
               />
             </div>
 
             <div className="mb-5">
-              <label className="block text-xs font-semibold text-gray-600 mb-1.5">Add Photos</label>
+              <label className="block text-xs font-semibold text-gray-600 mb-1.5">
+                Add Photos
+              </label>
               <div className="flex flex-wrap gap-2.5">
                 {reviewPhotoFiles.map((p) => (
                   <div
@@ -843,7 +1080,11 @@ const ProductDetails: React.FC = () => {
                     className="relative w-16 h-16 rounded-xl overflow-hidden border group"
                     style={{ borderColor: `${accent}22` }}
                   >
-                    <img src={p.url} alt="Upload preview" className="w-full h-full object-cover" />
+                    <img
+                      src={p.url}
+                      alt="Upload preview"
+                      className="w-full h-full object-cover"
+                    />
                     <button
                       type="button"
                       onClick={() => removeReviewPhoto(p.url)}
@@ -873,7 +1114,9 @@ const ProductDetails: React.FC = () => {
             <button
               type="submit"
               className="text-white px-6 py-2.5 rounded-full text-sm font-bold shadow-[0_10px_25px_-10px_rgba(0,0,0,0.4)] hover:-translate-y-0.5 transition-all duration-200"
-              style={{ background: `linear-gradient(90deg, ${accent}, ${accent}dd)` }}
+              style={{
+                background: `linear-gradient(90deg, ${accent}, ${accent}dd)`,
+              }}
             >
               Post Review
             </button>
@@ -882,7 +1125,11 @@ const ProductDetails: React.FC = () => {
           {/* Review list */}
           <div className="space-y-6">
             {reviews.map((review) => (
-              <div key={review.id} className="pb-6 border-b last:border-b-0" style={{ borderColor: `${accent}14` }}>
+              <div
+                key={review.id}
+                className="pb-6 border-b last:border-b-0"
+                style={{ borderColor: `${accent}14` }}
+              >
                 <div className="flex items-start gap-3 mb-2.5">
                   <div
                     className="w-10 h-10 rounded-full font-bold flex items-center justify-center flex-shrink-0 text-sm"
@@ -892,8 +1139,12 @@ const ProductDetails: React.FC = () => {
                   </div>
                   <div className="flex-1 min-w-0">
                     <div className="flex flex-wrap items-center gap-2">
-                      <span className="font-bold text-sm text-gray-900">{review.name}</span>
-                      <span className="text-xs text-gray-400">· {review.date}</span>
+                      <span className="font-bold text-sm text-gray-900">
+                        {review.name}
+                      </span>
+                      <span className="text-xs text-gray-400">
+                        · {review.date}
+                      </span>
                     </div>
                     <div className="flex mt-1" style={{ color: accent }}>
                       {[...Array(5)].map((_, i) => (
@@ -908,7 +1159,9 @@ const ProductDetails: React.FC = () => {
                   </div>
                 </div>
 
-                <p className="text-sm text-gray-600 leading-relaxed mb-3">{review.text}</p>
+                <p className="text-sm text-gray-600 leading-relaxed mb-3">
+                  {review.text}
+                </p>
 
                 {review.photos.length > 0 && (
                   <div className="flex flex-wrap gap-2.5">
@@ -947,7 +1200,11 @@ const ProductDetails: React.FC = () => {
           >
             <img
               key={lightboxIndex}
-              src={lightboxImages[Math.min(lightboxIndex, lightboxImages.length - 1)]}
+              src={
+                lightboxImages[
+                  Math.min(lightboxIndex, lightboxImages.length - 1)
+                ]
+              }
               alt="Full screen view"
               className="max-w-full max-h-full object-contain drop-shadow-2xl animate-[lightboxImageFade_0.35s_ease-out]"
             />
@@ -973,7 +1230,11 @@ const ProductDetails: React.FC = () => {
                   <ChevronLeft className="w-5 h-5 text-white" />
                 </button>
                 <button
-                  onClick={() => setLightboxIndex((i) => Math.min(lightboxImages.length - 1, i + 1))}
+                  onClick={() =>
+                    setLightboxIndex((i) =>
+                      Math.min(lightboxImages.length - 1, i + 1),
+                    )
+                  }
                   disabled={lightboxIndex === lightboxImages.length - 1}
                   className="absolute right-1 sm:-right-4 top-1/2 -translate-y-1/2 w-11 h-11 bg-white/10 backdrop-blur-xl border border-white/20 rounded-full flex items-center justify-center hover:bg-white/20 transition-all disabled:opacity-30 disabled:pointer-events-none"
                   aria-label="Next image"
@@ -990,7 +1251,10 @@ const ProductDetails: React.FC = () => {
                       className="h-1.5 rounded-full transition-all duration-300"
                       style={{
                         width: idx === lightboxIndex ? 24 : 6,
-                        backgroundColor: idx === lightboxIndex ? accent : "rgba(255,255,255,0.35)",
+                        backgroundColor:
+                          idx === lightboxIndex
+                            ? accent
+                            : "rgba(255,255,255,0.35)",
                       }}
                       aria-label={`View image ${idx + 1}`}
                     />
