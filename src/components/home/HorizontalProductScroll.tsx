@@ -491,7 +491,7 @@ const HorizontalProductScroll: React.FC<HorizontalProductScrollProps> = ({
                       <div style={{ fontSize: 15, fontWeight: 700, color: isSelected ? "#fff" : "#92400e", lineHeight: 1.2 }}>
                         {v.size}{v.packType ? ` (${v.packType})` : ""}
                       </div>
-                      <div style={{ fontSize: 17, fontWeight: 700, color: isSelected ? "#fff" : "#92400e", marginTop: 4 }}>
+                      <div style={{ fontSize: 30, fontWeight: 700, color: isSelected ? "#fff" : "#92400e", marginTop: 4 }}>
                         {v.price != null ? `₹${v.price.toLocaleString("en-IN")}` : "On request"}
                       </div>
                     </button>

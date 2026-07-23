@@ -694,7 +694,7 @@ export const CATEGORIES: ProductCategory[] = [
       {
         id: 701,
         name: "Sweet Box 300gm",
-        image: PH,
+        image: "https://pub-5910ba650a5b4f4ba76486d5a3630c49.r2.dev/vaishnavi-data/sweet3m1.png",
         description: "Slow-simmered silk",
         content:
           "Rich condensed milk dessert simmered for hours with saffron, cardamom, and crushed nuts. A festive classic, made fresh every batch — never from concentrate.",
@@ -706,22 +706,22 @@ export const CATEGORIES: ProductCategory[] = [
         rating: 4.9,
         reviews: 203,
       },
-      {
-        id: 702,
-        name: "Khova",
-        image: PH,
-        description: "Mawa magic",
-        content:
-          "Pure evaporated milk solids, traditionally called mawa. The building block of Indian sweets — used in halwa, barfis, and gulab jamun. Fresh, never frozen.",
-        variants: [
+      // {
+      //   id: 702,
+      //   name: "Khova",
+      //   image: PH,
+      //   description: "Mawa magic",
+      //   content:
+      //     "Pure evaporated milk solids, traditionally called mawa. The building block of Indian sweets — used in halwa, barfis, and gulab jamun. Fresh, never frozen.",
+      //   variants: [
           
-        ],
-        gallery: [],
-      },
+      //   ],
+      //   gallery: [],
+      // },
       {
         id: 703,
         name: "Sweet Box 1000gm",
-        image: PH,
+        image: "https://pub-5910ba650a5b4f4ba76486d5a3630c49.r2.dev/vaishnavi-data/Sweet101.png",
         description: "Melt-in-mouth rounds",
         content:
           "Soft, cardamom-scented milk pedas made from fresh khova. Each piece is hand-shaped and lightly dusted with pistachio for a celebratory finish.",
@@ -758,7 +758,7 @@ export const CATEGORIES: ProductCategory[] = [
       {
         id: 901,
         name: "Water Botle 300ml",
-        image: PH,
+        image: "https://pub-5910ba650a5b4f4ba76486d5a3630c49.r2.dev/vaishnavi-data/water3m1.png",
         description: "Slow-simmered silk",
         content:
           "Rich condensed milk dessert simmered for hours with saffron, cardamom, and crushed nuts. A festive classic, made fresh every batch — never from concentrate.",
@@ -773,7 +773,7 @@ export const CATEGORIES: ProductCategory[] = [
       {
         id: 902,
         name: "Water Bottle 500ml",
-        image: PH,
+        image: "https://pub-5910ba650a5b4f4ba76486d5a3630c49.r2.dev/vaishnavi-data/Water5m1.png",
         description: "Mawa magic",
         content:
           "Pure evaporated milk solids, traditionally called mawa. The building block of Indian sweets — used in halwa, barfis, and gulab jamun. Fresh, never frozen.",
@@ -786,7 +786,7 @@ export const CATEGORIES: ProductCategory[] = [
       {
         id: 903,
         name: "Water Bottle 1liter",
-        image: PH,
+        image: "https://pub-5910ba650a5b4f4ba76486d5a3630c49.r2.dev/vaishnavi-data/water101.png",
         description: "Melt-in-mouth rounds",
         content:
           "Soft, cardamom-scented milk pedas made from fresh khova. Each piece is hand-shaped and lightly dusted with pistachio for a celebratory finish.",

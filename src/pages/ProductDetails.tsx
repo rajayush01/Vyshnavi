@@ -1,13 +1,31 @@
 /**
- * A2GheeProduct.tsx — Vyshnavi Dairy
+ * ProductDetails.tsx — Vyshnavi Dairy
+ * (formerly A2GheeProduct.tsx — generalized to serve every category)
  *
  * Product detail page. Fully wired to vyshnaviData.ts:
  *  - Resolves the product via a route param (/details/:id), router state
  *    (navigate("/details", { state: { productId } })), or falls back to
  *    the flagship Cow Ghee (id 601) so the page always has something to show.
+ *  - CATEGORY IS NOW RESOLVED FROM THE PRODUCT ITSELF, not hardcoded to
+ *    "ghee" — CategoryStore now routes every category (Milk, Curd,
+ *    Beverages, Paneer, Butter, Sweets, Ghee) through this same /details
+ *    page, so we look up whichever category actually contains the
+ *    resolved product and theme everything (accent color, tagline,
+ *    cross-sell) off that.
  *  - Variant sizes, per-variant image galleries, rating/reviews, tag,
  *    description and content all come straight from the data item —
  *    nothing is hardcoded product data anymore.
+ *  - IMAGE VISIBILITY IS DATA-DRIVEN: if the selected variant carries its
+ *    own `images` array (true for Ghee's per-size pack photos, and for
+ *    any other category whose data models per-variant shots), the
+ *    thumbnail rail shows those and switches per size. If a category's
+ *    variants DON'T carry `images` (e.g. Milk/Curd/Beverages where every
+ *    pack size looks the same), we fall back to the product's shared
+ *    `gallery`, and finally to the single `image`. This means the
+ *    thumbnail row naturally appears for some categories and not others,
+ *    based on what the data actually has — no hardcoded per-category
+ *    if/else needed, and it stays correct as new categories/products are
+ *    added to vyshnaviData.ts.
  *  - Variants in the current data set don't carry price yet, so price UI
  *    gracefully degrades to a "Price on Request" state instead of showing
  *    fabricated numbers.
@@ -23,7 +41,7 @@
  */
 
 import React, { useEffect, useMemo, useState } from "react";
-import { useLocation, useParams, useNavigate } from "react-router-dom";
+import { useLocation, useParams } from "react-router-dom";
 import {
   Share2,
   Star,
@@ -45,11 +63,14 @@ import {
 } from "lucide-react";
 import {
   getProductById,
-  getCategoryByKey,
+  CATEGORIES,
   type ProductItem,
   type ProductVariant,
+  type ProductCategory,
 } from "../data/vyshnaviData";
 import { useCart } from "../context/cartContext";
+import { useNavigate } from "react-router-dom";
+import { ArrowLeft } from "lucide-react";
 
 interface Feature {
   icon: JSX.Element;
@@ -70,7 +91,15 @@ type DescTab = "description" | "ingredients" | "nutrition" | "usage";
 
 const DEFAULT_PRODUCT_ID = 601; // Cow Ghee — flagship item, used when no id is passed in
 
-const FALLBACK_GRADIENT = "linear-gradient(135deg,#fef3c7,#fffbeb)";
+const FALLBACK_GRADIENT: Record<string, string> = {
+  milk:      "linear-gradient(135deg,#dbeafe,#eff6ff)",
+  curd:      "linear-gradient(135deg,#dcfce7,#f0fdf4)",
+  beverages: "linear-gradient(135deg,#f3e8ff,#faf5ff)",
+  paneer:    "linear-gradient(135deg,#ffedd5,#fff7ed)",
+  butter:    "linear-gradient(135deg,#fefce8,#fffef0)",
+  ghee:      "linear-gradient(135deg,#fef3c7,#fffbeb)",
+  sweets:    "linear-gradient(135deg,#fdf2f8,#fff5fa)",
+};
 
 const features: Feature[] = [
   { icon: <Truck className="w-8 h-8" />, title: "Free Shipping on", subtitle: "Orders Above ₹499" },
@@ -95,7 +124,7 @@ const SEED_REVIEWS: ProductReview[] = [
     name: "Anita Sharma",
     rating: 5,
     date: "2 weeks ago",
-    text: "The aroma is incredible — reminds me of the ghee my grandmother used to make. A little goes a long way and it's clearly not adulterated.",
+    text: "The aroma is incredible — reminds me of what my grandmother used to make. A little goes a long way and it's clearly not adulterated.",
     photos: [
       "https://picsum.photos/seed/ghee-review-1/400/400",
       "https://picsum.photos/seed/ghee-review-2/400/400",
@@ -106,7 +135,7 @@ const SEED_REVIEWS: ProductReview[] = [
     name: "Rohit Verma",
     rating: 4,
     date: "1 month ago",
-    text: "Great texture and taste, granulates nicely at room temperature which I've read is a sign of purity. Packaging could be sturdier for shipping.",
+    text: "Great texture and taste. Packaging could be sturdier for shipping, but the product itself is excellent.",
     photos: ["https://picsum.photos/seed/ghee-review-3/400/400"],
   },
   {
@@ -114,7 +143,7 @@ const SEED_REVIEWS: ProductReview[] = [
     name: "Priya Nair",
     rating: 5,
     date: "1 month ago",
-    text: "Ordered the 1 liter jar for Diwali sweets and it made all the difference. Will be my go-to from now on.",
+    text: "Ordered this for a family function and it made all the difference. Will be my go-to from now on.",
     photos: [],
   },
   {
@@ -122,7 +151,7 @@ const SEED_REVIEWS: ProductReview[] = [
     name: "Karthik Iyer",
     rating: 3,
     date: "2 months ago",
-    text: "Good quality overall, though I expected a slightly stronger aroma at this price point. Still better than most store-bought options.",
+    text: "Good quality overall, though I expected a bit more at this price point. Still better than most store-bought options.",
     photos: ["https://picsum.photos/seed/ghee-review-4/400/400"],
   },
   {
@@ -130,7 +159,7 @@ const SEED_REVIEWS: ProductReview[] = [
     name: "Meera Joshi",
     rating: 5,
     date: "3 months ago",
-    text: "Been buying this for six months now. Consistent quality every single time and my kids love the taste in their daily roti.",
+    text: "Been buying this for six months now. Consistent quality every single time and my kids love it.",
     photos: [
       "https://picsum.photos/seed/ghee-review-5/400/400",
       "https://picsum.photos/seed/ghee-review-6/400/400",
@@ -139,7 +168,7 @@ const SEED_REVIEWS: ProductReview[] = [
   },
 ];
 
-const A2GheeProduct: React.FC = () => {
+const ProductDetails: React.FC = () => {
   const navigate = useNavigate();
   const params = useParams<{ id?: string }>();
   const location = useLocation();
@@ -155,8 +184,16 @@ const A2GheeProduct: React.FC = () => {
   const product: ProductItem =
     getProductById(resolvedId) ?? getProductById(DEFAULT_PRODUCT_ID)!;
 
-  const category = getCategoryByKey("ghee");
-  const accent = category?.accentHex ?? "#b45309";
+  // ── Resolve category from the product itself ────────────────────────
+  // CategoryStore now sends every category (Milk, Curd, Beverages, Paneer,
+  // Butter, Sweets, Ghee) through this same /details page — so instead of
+  // assuming "ghee", find whichever category actually contains this
+  // product. Falls back to the first category only if something is
+  // badly out of sync with the data.
+  const category: ProductCategory =
+    CATEGORIES.find((c) => c.items.some((it) => it.id === product.id)) ?? CATEGORIES[0];
+  const accent = category.accentHex;
+  const fallbackGradient = FALLBACK_GRADIENT[category.key] ?? "linear-gradient(135deg,#f3f4f6,#fafafa)";
 
   const [selectedVariantSize, setSelectedVariantSize] = useState<string>(
     product.variants[0]?.size ?? ""
@@ -197,12 +234,30 @@ const A2GheeProduct: React.FC = () => {
     setSelectedImage(0);
   }, [selectedVariantSize]);
 
+  // ── Data-driven image resolution ─────────────────────────────────────
+  // 1. If THIS variant carries its own images (per-size pack photos —
+  //    common for Ghee, and for any other category whose data models
+  //    per-variant shots), use those. Switching size updates the gallery.
+  // 2. Otherwise fall back to the product's shared gallery (several shots
+  //    of the same pack — common for Milk/Curd/Beverages/Paneer/Butter/
+  //    Sweets where every size looks identical).
+  // 3. Otherwise fall back to the single product image.
+  // The thumbnail rail below only renders when there's more than one
+  // image, so it naturally disappears for single-image products/categories
+  // without any hardcoded category check.
   const images: string[] =
     selectedVariant?.images && selectedVariant.images.length > 0
       ? selectedVariant.images
+      : product.gallery && product.gallery.length > 0
+      ? product.gallery
       : product.image
       ? [product.image]
       : [];
+
+  // Whether this product's images are per-variant (true) or shared across
+  // all sizes (false) — used only to decide if picking a different size
+  // should also reset which thumbnail is active.
+  const hasPerVariantImages = !!(selectedVariant?.images && selectedVariant.images.length > 0);
 
   // Lightbox: Escape to close, arrow keys to browse, lock body scroll while open
   useEffect(() => {
@@ -225,8 +280,8 @@ const A2GheeProduct: React.FC = () => {
 
   const hasPrice = !!selectedVariant?.price;
 
-  // Cross-sell: another item from the same category, data-driven
-  const crossSell = category?.items.find((p) => p.id !== product.id);
+  // Cross-sell: another item from the SAME resolved category, data-driven
+  const crossSell = category.items.find((p) => p.id !== product.id);
 
   // ── Reviews state ────────────────────────────────────────────────────
   const [reviews, setReviews] = useState<ProductReview[]>(SEED_REVIEWS);
@@ -281,23 +336,57 @@ const A2GheeProduct: React.FC = () => {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-b from-amber-50/50 via-white to-white">
+    <div className="min-h-screen bg-gradient-to-b from-white via-white to-white" style={{ backgroundImage: `linear-gradient(to bottom, ${accent}0d, #ffffff, #ffffff)` }}>
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6 lg:py-8 mt-16 sm:mt-20 lg:mt-28">
         {/* Eyebrow / breadcrumb */}
-        <div className="flex items-center gap-2 mb-6 sm:mb-8">
-          <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-amber-50 border border-amber-100 text-[11px] font-bold uppercase tracking-widest text-amber-700">
-            <Sparkles className="w-3 h-3" />
-            {category?.tagline ?? "Liquid Gold"}
-          </span>
-          <span className="text-slate-300">/</span>
-          <span className="text-xs font-medium text-slate-400">{category?.name ?? "Ghee"}</span>
+        <div className="flex items-center justify-between mb-6 sm:mb-8">
+          <button
+            onClick={() => navigate(-1)}
+            className="group inline-flex items-center gap-2 rounded-full border border-slate-200 bg-white px-4 py-2 text-sm font-medium text-slate-700 shadow-sm transition-all duration-300 hover:shadow-md"
+            style={{ ["--hover-color" as any]: accent }}
+            onMouseEnter={(e) => {
+              (e.currentTarget as HTMLElement).style.borderColor = `${accent}66`;
+              (e.currentTarget as HTMLElement).style.backgroundColor = `${accent}0d`;
+              (e.currentTarget as HTMLElement).style.color = accent;
+            }}
+            onMouseLeave={(e) => {
+              (e.currentTarget as HTMLElement).style.borderColor = "";
+              (e.currentTarget as HTMLElement).style.backgroundColor = "";
+              (e.currentTarget as HTMLElement).style.color = "";
+            }}
+          >
+            <ArrowLeft className="w-4 h-4 transition-transform duration-300 group-hover:-translate-x-1" />
+            Back
+          </button>
+
+          <div className="flex items-center gap-2">
+            <span
+              className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-[11px] font-bold uppercase tracking-widest"
+              style={{ backgroundColor: `${accent}14`, borderColor: `${accent}33`, color: accent, borderWidth: 1 }}
+            >
+              <Sparkles className="w-3 h-3" />
+              {category.tagline}
+            </span>
+
+            <span className="text-slate-300">/</span>
+
+            <span className="text-xs font-medium text-slate-400">
+              {category.name}
+            </span>
+          </div>
         </div>
 
         <div className="grid lg:grid-cols-2 gap-8 lg:gap-12">
           {/* Left Column - Sticky Product Images */}
           <div className="lg:sticky lg:top-8 h-fit space-y-4">
-            <div className="relative rounded-[28px] overflow-hidden aspect-square flex items-center justify-center bg-gradient-to-br from-amber-50 to-white border border-amber-100 shadow-[0_30px_70px_-30px_rgba(180,83,9,0.35)]">
-              <div className="absolute w-2/3 h-2/3 rounded-full bg-gradient-to-br from-amber-100/70 to-transparent blur-3xl" />
+            <div
+              className="relative rounded-[28px] overflow-hidden aspect-square flex items-center justify-center border shadow-[0_30px_70px_-30px_rgba(15,23,42,0.25)]"
+              style={{ background: fallbackGradient, borderColor: `${accent}22` }}
+            >
+              <div
+                className="absolute w-2/3 h-2/3 rounded-full blur-3xl"
+                style={{ background: `${accent}22` }}
+              />
               {images.length > 0 ? (
                 <button
                   type="button"
@@ -310,14 +399,17 @@ const A2GheeProduct: React.FC = () => {
                     alt={product.name}
                     className="relative object-contain w-full h-full p-8 sm:p-10 lg:p-12 drop-shadow-xl transition-transform duration-500 group-hover:scale-105"
                   />
-                  <span className="absolute bottom-4 right-4 w-10 h-10 rounded-full bg-white/90 backdrop-blur-sm border border-amber-100 flex items-center justify-center text-amber-700 opacity-0 group-hover:opacity-100 transition-opacity duration-300 shadow-lg">
+                  <span
+                    className="absolute bottom-4 right-4 w-10 h-10 rounded-full bg-white/90 backdrop-blur-sm border flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity duration-300 shadow-lg"
+                    style={{ borderColor: `${accent}33`, color: accent }}
+                  >
                     <Expand className="w-4 h-4" />
                   </span>
                 </button>
               ) : (
                 <div
-                  className="relative w-56 h-56 rounded-3xl flex items-center justify-center text-amber-700/60 font-semibold text-sm"
-                  style={{ background: FALLBACK_GRADIENT }}
+                  className="relative w-56 h-56 rounded-3xl flex items-center justify-center font-semibold text-sm"
+                  style={{ background: fallbackGradient, color: accent }}
                 >
                   {product.name}
                 </div>
@@ -333,17 +425,23 @@ const A2GheeProduct: React.FC = () => {
               )}
             </div>
 
+            {/* Thumbnail rail — only renders when there's more than one
+                image to show. Appears for categories/products whose data
+                has per-variant images or a multi-shot gallery; stays
+                hidden for single-image products, with no category
+                special-casing required. */}
             {images.length > 1 && (
               <div className="flex gap-2.5 overflow-x-auto px-1 pb-2">
                 {images.map((img, idx) => (
                   <button
                     key={idx}
                     onClick={() => setSelectedImage(idx)}
-                    className={`min-w-16 h-16 sm:min-w-20 sm:h-20 bg-amber-50/50 rounded-xl border-2 flex-shrink-0 overflow-hidden transition-all duration-200 ${
-                      selectedImage === idx
-                        ? "border-amber-500 shadow-[0_8px_20px_-10px_rgba(180,83,9,0.5)]"
-                        : "border-transparent hover:border-amber-200"
-                    }`}
+                    className={`min-w-16 h-16 sm:min-w-20 sm:h-20 rounded-xl border-2 flex-shrink-0 overflow-hidden transition-all duration-200`}
+                    style={{
+                      backgroundColor: `${accent}0d`,
+                      borderColor: selectedImage === idx ? accent : "transparent",
+                      boxShadow: selectedImage === idx ? `0 8px 20px -10px ${accent}80` : "none",
+                    }}
                   >
                     <img src={img} alt={`View ${idx + 1}`} className="w-full h-full object-cover" />
                   </button>
@@ -359,13 +457,13 @@ const A2GheeProduct: React.FC = () => {
               <h1 className="text-2xl sm:text-3xl lg:text-4xl font-black text-gray-900 tracking-tight">
                 {product.name}
               </h1>
-              <button className="p-2.5 hover:bg-amber-50 rounded-full flex-shrink-0 border border-transparent hover:border-amber-100 transition-colors">
+              <button className="p-2.5 hover:bg-gray-50 rounded-full flex-shrink-0 border border-transparent hover:border-gray-100 transition-colors">
                 <Share2 className="w-5 h-5 text-gray-500" />
               </button>
             </div>
 
             {/* Product tagline */}
-            <p className="text-xs text-amber-700/80 font-bold uppercase tracking-widest leading-relaxed">
+            <p className="text-xs font-bold uppercase tracking-widest leading-relaxed" style={{ color: `${accent}cc` }}>
               {product.description}
             </p>
 
@@ -385,81 +483,88 @@ const A2GheeProduct: React.FC = () => {
                 <p className="text-xs text-gray-500">MRP (Incl. of all taxes)</p>
 
                 {selectedVariant.discount && (
-                  <div className="relative inline-block text-white px-4 py-2 rounded-full text-xs sm:text-sm font-bold overflow-hidden bg-gradient-to-r from-amber-500 to-amber-600 shadow-[0_10px_25px_-8px_rgba(217,119,6,0.5)]">
+                  <div
+                    className="relative inline-block text-white px-4 py-2 rounded-full text-xs sm:text-sm font-bold overflow-hidden shadow-[0_10px_25px_-8px_rgba(0,0,0,0.35)]"
+                    style={{ background: `linear-gradient(90deg, ${accent}, ${accent}cc)` }}
+                  >
                     <span className="relative z-10">{selectedVariant.discount} on this size</span>
                     <span className="absolute inset-0 bg-gradient-to-r from-transparent via-white/40 to-transparent -translate-x-full animate-[shine_2s_linear_infinite]" />
                   </div>
                 )}
               </>
             ) : (
-              <div className="inline-flex items-center gap-2 px-4 py-2.5 rounded-2xl bg-amber-50 border border-amber-100 text-amber-800 text-sm font-semibold">
+              <div
+                className="inline-flex items-center gap-2 px-4 py-2.5 rounded-2xl border text-sm font-semibold"
+                style={{ backgroundColor: `${accent}0d`, borderColor: `${accent}33`, color: accent }}
+              >
                 <Sparkles className="w-4 h-4" />
                 Price on request — our team will confirm availability for this size
               </div>
             )}
 
             {/* Variant Selection */}
-            <div>
-              <h3 className="text-base sm:text-lg font-bold text-gray-900 mb-3 tracking-tight">Select Size</h3>
-              <div className="grid grid-cols-2 sm:grid-cols-3 gap-2.5 sm:gap-3">
-                {product.variants.map((variant) => {
-                  const isActive = selectedVariantSize === variant.size;
-                  return (
-                    <button
-                      key={variant.size}
-                      onClick={() => setSelectedVariantSize(variant.size)}
-                      className={`p-3 rounded-2xl border-2 text-left transition-all duration-200 ${
-                        isActive
-                          ? "border-amber-500 bg-amber-50 shadow-[0_10px_25px_-12px_rgba(217,119,6,0.5)]"
-                          : "border-gray-100 hover:border-amber-200 bg-white"
-                      }`}
-                    >
-                      <div className="font-bold text-sm text-gray-900">{variant.size}</div>
-                      {variant.packType && (
-                        <div className="text-[10px] text-gray-400 uppercase tracking-wide mb-1">{variant.packType}</div>
-                      )}
-                      {variant.price ? (
-                        <div className="flex items-baseline gap-1.5 flex-wrap mt-1">
-                          <span className="text-xs font-bold text-gray-900">
-                            ₹{variant.price.toLocaleString("en-IN")}
-                          </span>
-                          {variant.originalPrice && (
-                            <span className="text-[10px] text-gray-400 line-through">
-                              ₹{variant.originalPrice.toLocaleString("en-IN")}
+            {product.variants.length > 0 && (
+              <div>
+                <h3 className="text-base sm:text-lg font-bold text-gray-900 mb-3 tracking-tight">Select Size</h3>
+                <div className="grid grid-cols-2 sm:grid-cols-3 gap-2.5 sm:gap-3">
+                  {product.variants.map((variant) => {
+                    const isActive = selectedVariantSize === variant.size;
+                    return (
+                      <button
+                        key={variant.size}
+                        onClick={() => setSelectedVariantSize(variant.size)}
+                        className="p-3 rounded-2xl border-2 text-left transition-all duration-200 bg-white"
+                        style={{
+                          borderColor: isActive ? accent : "#f1f5f9",
+                          backgroundColor: isActive ? `${accent}0d` : "#ffffff",
+                          boxShadow: isActive ? `0 10px 25px -12px ${accent}80` : "none",
+                        }}
+                      >
+                        <div className="font-bold text-sm text-gray-900">{variant.size}</div>
+                        {variant.price ? (
+                          <div className="flex items-baseline gap-1.5 flex-wrap mt-1">
+                            <span className="text-3xl font-bold text-gray-900">
+                              ₹{variant.price.toLocaleString("en-IN")}
                             </span>
-                          )}
-                        </div>
-                      ) : (
-                        <div className="text-[10px] text-amber-600 font-semibold mt-1">Ask price</div>
-                      )}
-                    </button>
-                  );
-                })}
+                            {variant.originalPrice && (
+                              <span className="text-[10px] text-gray-400 line-through">
+                                ₹{variant.originalPrice.toLocaleString("en-IN")}
+                              </span>
+                            )}
+                          </div>
+                        ) : (
+                          <div className="text-[10px] font-semibold mt-1" style={{ color: accent }}>Ask price</div>
+                        )}
+                      </button>
+                    );
+                  })}
+                </div>
               </div>
-            </div>
+            )}
 
             {/* Quantity Selector and Action Buttons */}
             <div className="flex flex-row items-center gap-4">
-              <div className="flex items-center bg-amber-50 rounded-2xl border border-amber-100">
+              <div className="flex items-center rounded-2xl border" style={{ backgroundColor: `${accent}0d`, borderColor: `${accent}22` }}>
                 <button
                   onClick={() => setQuantity(Math.max(1, quantity - 1))}
-                  className="p-3 hover:bg-amber-100 rounded-l-2xl transition-colors"
+                  className="p-3 rounded-l-2xl transition-colors hover:opacity-80"
                 >
-                  <Minus className="w-4 h-4 sm:w-5 sm:h-5 text-amber-700" />
+                  <Minus className="w-4 h-4 sm:w-5 sm:h-5" style={{ color: accent }} />
                 </button>
                 <span className="px-5 sm:px-6 font-bold text-sm sm:text-base text-gray-900">{quantity}</span>
                 <button
                   onClick={() => setQuantity(quantity + 1)}
-                  className="p-3 hover:bg-amber-100 rounded-r-2xl transition-colors"
+                  className="p-3 rounded-r-2xl transition-colors hover:opacity-80"
                 >
-                  <Plus className="w-4 h-4 sm:w-5 sm:h-5 text-amber-700" />
+                  <Plus className="w-4 h-4 sm:w-5 sm:h-5" style={{ color: accent }} />
                 </button>
               </div>
               <div className="flex flex-col sm:flex-row gap-3 w-full">
                 <button
                   onClick={() => addToCart(product, selectedVariant, quantity)}
                   disabled={!selectedVariant}
-                  className="flex-1 flex items-center justify-center gap-2 bg-gradient-to-r from-amber-500 to-amber-600 text-white py-3.5 px-6 rounded-full text-sm sm:text-base font-bold shadow-[0_15px_35px_-12px_rgba(217,119,6,0.55)] hover:shadow-[0_20px_45px_-10px_rgba(217,119,6,0.7)] hover:-translate-y-0.5 transition-all duration-200 disabled:opacity-50 disabled:pointer-events-none"
+                  className="flex-1 flex items-center justify-center gap-2 text-white py-3.5 px-6 rounded-full text-sm sm:text-base font-bold shadow-[0_15px_35px_-12px_rgba(0,0,0,0.4)] hover:-translate-y-0.5 transition-all duration-200 disabled:opacity-50 disabled:pointer-events-none"
+                  style={{ background: `linear-gradient(90deg, ${accent}, ${accent}dd)` }}
                 >
                   <ShoppingCart className="w-4 h-4" />
                   Add to Cart
@@ -475,9 +580,9 @@ const A2GheeProduct: React.FC = () => {
               </div>
             </div>
 
-            {/* Cross-sell suggestion, sourced from the same category */}
+            {/* Cross-sell suggestion, sourced from the same resolved category */}
             {crossSell && (
-              <div className="bg-gradient-to-r from-amber-50 to-orange-50 rounded-2xl p-4 border border-amber-100">
+              <div className="rounded-2xl p-4 border" style={{ background: `linear-gradient(90deg, ${accent}0d, ${accent}08)`, borderColor: `${accent}22` }}>
                 <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 sm:gap-4">
                   <div className="flex items-center gap-3 flex-1 min-w-0">
                     <span className="bg-blue-600 text-white text-[10px] font-bold px-2.5 py-1 rounded-full flex-shrink-0 uppercase tracking-wide">
@@ -488,20 +593,22 @@ const A2GheeProduct: React.FC = () => {
                         <img
                           src={crossSell.image}
                           alt={crossSell.name}
-                          className="w-11 h-11 rounded-xl object-cover flex-shrink-0 bg-white border border-amber-100"
+                          className="w-11 h-11 rounded-xl object-cover flex-shrink-0 bg-white border"
+                          style={{ borderColor: `${accent}22` }}
                         />
                       ) : (
-                        <div className="w-11 h-11 rounded-xl bg-amber-100 flex-shrink-0" />
+                        <div className="w-11 h-11 rounded-xl flex-shrink-0" style={{ backgroundColor: `${accent}22` }} />
                       )}
                       <div className="min-w-0 flex-1">
                         <p className="text-xs sm:text-sm font-bold text-gray-900 truncate">{crossSell.name}</p>
-                        <p className="text-[11px] text-amber-700 font-semibold uppercase tracking-wide">{crossSell.description}</p>
+                        <p className="text-[11px] font-semibold uppercase tracking-wide" style={{ color: accent }}>{crossSell.description}</p>
                       </div>
                     </div>
                   </div>
                   <button
                     onClick={() => navigate("/details", { state: { productId: crossSell.id } })}
-                    className="flex items-center gap-1.5 bg-white border border-amber-300 text-amber-700 px-4 py-2 rounded-full font-bold text-xs hover:bg-amber-50 transition-colors flex-shrink-0"
+                    className="flex items-center gap-1.5 bg-white border px-4 py-2 rounded-full font-bold text-xs hover:opacity-80 transition-colors flex-shrink-0"
+                    style={{ borderColor: `${accent}66`, color: accent }}
                   >
                     View <ArrowRight className="w-3.5 h-3.5" />
                   </button>
@@ -513,7 +620,10 @@ const A2GheeProduct: React.FC = () => {
             <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-6 pt-4 sm:pt-6 pb-2">
               {features.map((feature, idx) => (
                 <div key={idx} className="flex flex-col items-center text-center">
-                  <div className="w-14 h-14 rounded-2xl bg-amber-50 border border-amber-100 flex items-center justify-center text-amber-600 mb-3">
+                  <div
+                    className="w-14 h-14 rounded-2xl border flex items-center justify-center mb-3"
+                    style={{ backgroundColor: `${accent}0d`, borderColor: `${accent}22`, color: accent }}
+                  >
                     {feature.icon}
                   </div>
                   <h3 className="font-bold text-xs sm:text-sm mb-0.5 text-gray-900">{feature.title}</h3>
@@ -525,22 +635,24 @@ const A2GheeProduct: React.FC = () => {
         </div>
 
         {/* Product Description — full width, tabbed, below the two-column layout */}
-        <div className="border-t border-amber-100 pt-8 mt-8">
+        <div className="border-t pt-8 mt-8" style={{ borderColor: `${accent}22` }}>
           {/* Tab bar */}
-          <div className="flex gap-1 sm:gap-2 mb-6 overflow-x-auto border-b border-amber-100">
+          <div className="flex gap-1 sm:gap-2 mb-6 overflow-x-auto border-b" style={{ borderColor: `${accent}22` }}>
             {DESC_TABS.map((tab) => {
               const isActive = activeDescTab === tab.key;
               return (
                 <button
                   key={tab.key}
                   onClick={() => setActiveDescTab(tab.key)}
-                  className={`relative px-4 sm:px-5 py-3 text-xs sm:text-sm font-bold whitespace-nowrap transition-colors ${
-                    isActive ? "text-amber-700" : "text-gray-400 hover:text-amber-600"
-                  }`}
+                  className="relative px-4 sm:px-5 py-3 text-xs sm:text-sm font-bold whitespace-nowrap transition-colors"
+                  style={{ color: isActive ? accent : "#9ca3af" }}
                 >
                   {tab.label}
                   {isActive && (
-                    <span className="absolute bottom-0 left-0 right-0 h-0.5 rounded-full bg-gradient-to-r from-amber-500 to-amber-600" />
+                    <span
+                      className="absolute bottom-0 left-0 right-0 h-0.5 rounded-full"
+                      style={{ background: `linear-gradient(90deg, ${accent}, ${accent}cc)` }}
+                    />
                   )}
                 </button>
               );
@@ -567,7 +679,7 @@ const A2GheeProduct: React.FC = () => {
                 </h2>
                 <p className="text-gray-600 text-sm sm:text-base leading-relaxed mb-4">
                   100% pure, farm-sourced {product.name}. No additives, preservatives, or
-                  artificial colors — just milk, traditionally churned the old-fashioned way.
+                  artificial colors — made the traditional way.
                 </p>
                 <ul className="list-disc list-inside text-sm text-gray-600 space-y-1.5">
                   <li>Fresh cow/buffalo milk (as applicable)</li>
@@ -592,9 +704,13 @@ const A2GheeProduct: React.FC = () => {
                     { label: "Saturated Fat", value: "62 g" },
                     { label: "Cholesterol", value: "256 mg" },
                   ].map((n) => (
-                    <div key={n.label} className="p-3.5 rounded-xl bg-amber-50 border border-amber-100 text-center">
+                    <div
+                      key={n.label}
+                      className="p-3.5 rounded-xl border text-center"
+                      style={{ backgroundColor: `${accent}0d`, borderColor: `${accent}22` }}
+                    >
                       <div className="text-sm font-black text-gray-900">{n.value}</div>
-                      <div className="text-[11px] text-amber-700 font-semibold uppercase tracking-wide mt-1">
+                      <div className="text-[11px] font-semibold uppercase tracking-wide mt-1" style={{ color: accent }}>
                         {n.label}
                       </div>
                     </div>
@@ -609,10 +725,10 @@ const A2GheeProduct: React.FC = () => {
                   How to Use &amp; Store
                 </h2>
                 <ul className="list-disc list-inside text-sm text-gray-600 space-y-2 leading-relaxed">
-                  <li>Use as a substitute for cooking oil or butter in everyday cooking, or drizzle over rice, roti, and dals.</li>
-                  <li>Store in a cool, dry place away from direct sunlight; refrigeration isn't required.</li>
-                  <li>Always use a clean, dry spoon to scoop — moisture can affect shelf life.</li>
-                  <li>Granulation at room temperature is normal and a sign of purity, not spoilage.</li>
+                  <li>Use as part of your everyday cooking, or serve as suggested on the pack.</li>
+                  <li>Store as indicated on the packaging, away from direct sunlight.</li>
+                  <li>Always use a clean, dry utensil to scoop — moisture can affect shelf life.</li>
+                  <li>Check the pack for any product-specific storage notes.</li>
                 </ul>
               </div>
             )}
@@ -620,16 +736,16 @@ const A2GheeProduct: React.FC = () => {
         </div>
 
         {/* Reviews — full width, at the very end of the page */}
-        <div className="border-t border-amber-100 pt-8 mt-8">
+        <div className="border-t pt-8 mt-8" style={{ borderColor: `${accent}22` }}>
           <h2 className="text-xl sm:text-2xl font-black mb-6 tracking-tight text-gray-900">
             Customer Reviews
           </h2>
 
           {/* Summary */}
-          <div className="flex flex-col sm:flex-row gap-8 sm:gap-12 mb-8 pb-8 border-b border-amber-100">
+          <div className="flex flex-col sm:flex-row gap-8 sm:gap-12 mb-8 pb-8 border-b" style={{ borderColor: `${accent}22` }}>
             <div className="flex flex-col items-center sm:items-start flex-shrink-0">
               <span className="text-5xl font-black text-gray-900">{averageRating.toFixed(1)}</span>
-              <div className="flex text-amber-400 my-1.5">
+              <div className="flex my-1.5" style={{ color: accent }}>
                 {[...Array(5)].map((_, i) => (
                   <Star
                     key={i}
@@ -649,9 +765,9 @@ const A2GheeProduct: React.FC = () => {
                 return (
                   <div key={star} className="flex items-center gap-2.5 text-xs">
                     <span className="w-3 text-gray-500 font-medium">{star}</span>
-                    <Star className="w-3 h-3 text-amber-400 flex-shrink-0" fill="currentColor" strokeWidth={0} />
-                    <div className="flex-1 h-1.5 rounded-full bg-amber-50 overflow-hidden">
-                      <div className="h-full rounded-full bg-amber-400" style={{ width: `${pct}%` }} />
+                    <Star className="w-3 h-3 flex-shrink-0" style={{ color: accent }} fill="currentColor" strokeWidth={0} />
+                    <div className="flex-1 h-1.5 rounded-full overflow-hidden" style={{ backgroundColor: `${accent}14` }}>
+                      <div className="h-full rounded-full" style={{ width: `${pct}%`, backgroundColor: accent }} />
                     </div>
                     <span className="w-6 text-right text-gray-400">{count}</span>
                   </div>
@@ -663,7 +779,8 @@ const A2GheeProduct: React.FC = () => {
           {/* Write a review */}
           <form
             onSubmit={handleSubmitReview}
-            className="mb-10 p-5 sm:p-6 rounded-2xl bg-amber-50/50 border border-amber-100"
+            className="mb-10 p-5 sm:p-6 rounded-2xl border"
+            style={{ backgroundColor: `${accent}08`, borderColor: `${accent}22` }}
           >
             <h3 className="text-base font-bold text-gray-900 mb-4">Write a Review</h3>
 
@@ -681,7 +798,8 @@ const A2GheeProduct: React.FC = () => {
                     aria-label={`Rate ${star} stars`}
                   >
                     <Star
-                      className="w-6 h-6 text-amber-400 transition-transform hover:scale-110"
+                      className="w-6 h-6 transition-transform hover:scale-110"
+                      style={{ color: accent }}
                       fill={star <= (reviewHoverRating || reviewRating) ? "currentColor" : "none"}
                       strokeWidth={star <= (reviewHoverRating || reviewRating) ? 0 : 1.5}
                     />
@@ -697,7 +815,8 @@ const A2GheeProduct: React.FC = () => {
                 value={reviewName}
                 onChange={(e) => setReviewName(e.target.value)}
                 placeholder="Your name"
-                className="w-full sm:max-w-sm px-3.5 py-2.5 rounded-xl border border-amber-100 bg-white text-sm focus:outline-none focus:ring-2 focus:ring-amber-300"
+                className="w-full sm:max-w-sm px-3.5 py-2.5 rounded-xl border bg-white text-sm focus:outline-none focus:ring-2"
+                style={{ borderColor: `${accent}22`, ["--tw-ring-color" as any]: `${accent}55` }}
                 required
               />
             </div>
@@ -709,7 +828,8 @@ const A2GheeProduct: React.FC = () => {
                 onChange={(e) => setReviewText(e.target.value)}
                 placeholder="Share your experience with this product..."
                 rows={3}
-                className="w-full px-3.5 py-2.5 rounded-xl border border-amber-100 bg-white text-sm resize-none focus:outline-none focus:ring-2 focus:ring-amber-300"
+                className="w-full px-3.5 py-2.5 rounded-xl border bg-white text-sm resize-none focus:outline-none focus:ring-2"
+                style={{ borderColor: `${accent}22`, ["--tw-ring-color" as any]: `${accent}55` }}
                 required
               />
             </div>
@@ -720,7 +840,8 @@ const A2GheeProduct: React.FC = () => {
                 {reviewPhotoFiles.map((p) => (
                   <div
                     key={p.url}
-                    className="relative w-16 h-16 rounded-xl overflow-hidden border border-amber-100 group"
+                    className="relative w-16 h-16 rounded-xl overflow-hidden border group"
+                    style={{ borderColor: `${accent}22` }}
                   >
                     <img src={p.url} alt="Upload preview" className="w-full h-full object-cover" />
                     <button
@@ -733,8 +854,11 @@ const A2GheeProduct: React.FC = () => {
                     </button>
                   </div>
                 ))}
-                <label className="w-16 h-16 rounded-xl border-2 border-dashed border-amber-200 flex items-center justify-center cursor-pointer hover:border-amber-400 hover:bg-amber-50 transition-colors">
-                  <Camera className="w-5 h-5 text-amber-500" />
+                <label
+                  className="w-16 h-16 rounded-xl border-2 border-dashed flex items-center justify-center cursor-pointer transition-colors"
+                  style={{ borderColor: `${accent}44` }}
+                >
+                  <Camera className="w-5 h-5" style={{ color: accent }} />
                   <input
                     type="file"
                     accept="image/*"
@@ -748,7 +872,8 @@ const A2GheeProduct: React.FC = () => {
 
             <button
               type="submit"
-              className="bg-gradient-to-r from-amber-500 to-amber-600 text-white px-6 py-2.5 rounded-full text-sm font-bold shadow-[0_10px_25px_-10px_rgba(217,119,6,0.55)] hover:shadow-[0_15px_30px_-8px_rgba(217,119,6,0.7)] hover:-translate-y-0.5 transition-all duration-200"
+              className="text-white px-6 py-2.5 rounded-full text-sm font-bold shadow-[0_10px_25px_-10px_rgba(0,0,0,0.4)] hover:-translate-y-0.5 transition-all duration-200"
+              style={{ background: `linear-gradient(90deg, ${accent}, ${accent}dd)` }}
             >
               Post Review
             </button>
@@ -757,9 +882,12 @@ const A2GheeProduct: React.FC = () => {
           {/* Review list */}
           <div className="space-y-6">
             {reviews.map((review) => (
-              <div key={review.id} className="pb-6 border-b border-amber-50 last:border-b-0">
+              <div key={review.id} className="pb-6 border-b last:border-b-0" style={{ borderColor: `${accent}14` }}>
                 <div className="flex items-start gap-3 mb-2.5">
-                  <div className="w-10 h-10 rounded-full bg-amber-100 text-amber-700 font-bold flex items-center justify-center flex-shrink-0 text-sm">
+                  <div
+                    className="w-10 h-10 rounded-full font-bold flex items-center justify-center flex-shrink-0 text-sm"
+                    style={{ backgroundColor: `${accent}22`, color: accent }}
+                  >
                     {review.name.charAt(0).toUpperCase()}
                   </div>
                   <div className="flex-1 min-w-0">
@@ -767,7 +895,7 @@ const A2GheeProduct: React.FC = () => {
                       <span className="font-bold text-sm text-gray-900">{review.name}</span>
                       <span className="text-xs text-gray-400">· {review.date}</span>
                     </div>
-                    <div className="flex text-amber-400 mt-1">
+                    <div className="flex mt-1" style={{ color: accent }}>
                       {[...Array(5)].map((_, i) => (
                         <Star
                           key={i}
@@ -789,7 +917,8 @@ const A2GheeProduct: React.FC = () => {
                         key={idx}
                         type="button"
                         onClick={() => openLightbox(review.photos, idx)}
-                        className="w-16 h-16 sm:w-20 sm:h-20 rounded-xl overflow-hidden border border-amber-100 hover:border-amber-300 transition-colors"
+                        className="w-16 h-16 sm:w-20 sm:h-20 rounded-xl overflow-hidden border transition-colors"
+                        style={{ borderColor: `${accent}22` }}
                       >
                         <img
                           src={photo}
@@ -861,7 +990,7 @@ const A2GheeProduct: React.FC = () => {
                       className="h-1.5 rounded-full transition-all duration-300"
                       style={{
                         width: idx === lightboxIndex ? 24 : 6,
-                        backgroundColor: idx === lightboxIndex ? "#f59e0b" : "rgba(255,255,255,0.35)",
+                        backgroundColor: idx === lightboxIndex ? accent : "rgba(255,255,255,0.35)",
                       }}
                       aria-label={`View image ${idx + 1}`}
                     />
@@ -895,4 +1024,4 @@ const A2GheeProduct: React.FC = () => {
   );
 };
 
-export default A2GheeProduct;
+export default ProductDetails;

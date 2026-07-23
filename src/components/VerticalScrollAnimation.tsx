@@ -1,50 +1,38 @@
 /**
- * VerticalScrollAnimation.tsx — Vyshnavi Dairy, Mobile / Phone View
+ * MobilePortfolio.tsx — Vyshnavi Dairy, mobile-only experience
  *
- * This is the phone counterpart to Portfolio.tsx. It now mirrors Portfolio's
- * data model exactly instead of running its own independent one:
+ * Same product data and behaviour as Portfolio.tsx (categories, ghee
+ * variant flattening, cart, image galleries) but built as a distinct,
+ * touch-native design rather than a shrunk-down desktop carousel.
  *
- *  - Same CATEGORIES tab bar, same accentHex-driven theming (no more
- *    hardcoded Tailwind gradient map).
- *  - Same ghee special case: Cow Ghee / Buffalo Ghee sub-tabs, with each
- *    ghee item's `variants` flattened into individual cards.
- *  - Same variant pill row + "Available sizes" chips.
- *  - Same cart integration (Add to Cart only appears for ghee variants,
- *    exactly like Portfolio).
- *  - Same dark cinematic panel language (glass cards, accent glows).
+ * DESIGN CONCEPT — "the milk pouch deck"
+ * Everyday Indian dairy comes in two familiar objects: the torn-open
+ * plastic pouch, and the steel tiffin box you unpack it into. That's
+ * the whole visual system here:
+ *   - Products are a stacked deck of "pouch" cards with a torn top
+ *     edge and a stitched seam — drag left/right to move through them.
+ *   - Category switching happens on a "clothesline": a thread strung
+ *     across the top with a wooden pin marking the active category.
+ *   - Details live in a tiffin-lid sheet that you drag up from the
+ *     bottom — closed it just shows name + price, pulled up it reveals
+ *     description, sizes, and (for ghee) the buy button.
+ *   - Tapping the pouch opens a fullscreen gallery you page through
+ *     with a swipe, same white-overlay / black-chrome language as the
+ *     desktop lightbox.
  *
- * Interaction differs on purpose: instead of Portfolio's carousel, this is a
- * vertical stacked-scroll (GSAP ScrollTrigger) through the items of whichever
- * category/ghee-item is active — built for one-handed phone scrolling.
- *
- * Responsiveness fixes applied:
- *  - 100dvh instead of 100vh (avoids mobile browser chrome jump).
- *  - No more fixed px image boxes (w-64/w-80/h-[440px]) — images now size
- *    off the viewport with clamp()-style Tailwind arbitrary values so they
- *    never overflow a 320–360px wide screen.
- *  - Watermark type uses clamp() instead of a fixed 6rem/10rem block that
- *    overflowed on narrow phones.
- *  - Tab rows are horizontally scrollable with hidden scrollbars instead of
- *    wrapping and eating vertical space.
- *  - Safe-area padding for notches (env(safe-area-inset-*)).
- *  - Info panel content is scrollable/clamped so it never gets clipped by
- *    the fixed-height stacked section on short screens.
- *  - Outer wrapper is overflow-x-hidden to kill any stray horizontal scroll.
+ * This file is self-contained and only touches mobile viewports — mount
+ * it behind your own breakpoint/device check (e.g. render <MobilePortfolio />
+ * instead of <Portfolio /> under a `useIsMobile()` hook or a `md:hidden`
+ * wrapper in the parent route).
  */
 
-import React, { useEffect, useRef, useState, useCallback, useMemo } from 'react';
-import { gsap } from 'gsap';
-import { ScrollTrigger } from 'gsap/ScrollTrigger';
-import { ChevronLeft, ChevronRight, X, Sparkles, ShoppingCart, Star } from 'lucide-react';
-import { CATEGORIES, type ProductCategory, type ProductItem, type ProductVariant } from '../data/vyshnaviData';
-import { useCart } from '../context/cartContext';
+import React, { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import { ChevronLeft, ChevronRight, X, ShoppingCart, Pin } from "lucide-react";
+import { CATEGORIES, type ProductCategory, type ProductItem, type ProductVariant } from "../data/vyshnaviData";
+import { useCart } from "../context/cartContext";
 
-gsap.registerPlugin(ScrollTrigger);
+// ── Shared display model (mirrors Portfolio.tsx) ──────────────────────────
 
-// ── Flat, category-scoped display entity ──────────────────────────────────
-// Same shape/idea as Portfolio's DisplayItem: for "ghee" this represents one
-// variant of the selected ghee item; for every other category it's 1:1 with
-// a ProductItem.
 interface DisplayItem {
   id: string | number;
   name: string;
@@ -52,36 +40,49 @@ interface DisplayItem {
   gallery: string[];
   description: string;
   content: string;
-  tag?: 'Best Seller' | 'New Launch';
-  rating?: number;
-  reviews?: number;
+  tag?: "Best Seller" | "New Launch";
   variant?: ProductVariant;
   sourceItem: ProductItem;
 }
 
-const VerticalScrollAnimation: React.FC = () => {
-  const [activeCategoryKey, setActiveCategoryKey] = useState<string>(CATEGORIES[0].key);
-  const [activeGheeItemId, setActiveGheeItemId] = useState<number | null>(null);
-  const [activeIndex, setActiveIndex] = useState<number>(0);
-  const [selectedGallery, setSelectedGallery] = useState<{ item: DisplayItem; imageIndex: number } | null>(null);
-  const [justAddedId, setJustAddedId] = useState<string | number | null>(null);
+const SWIPE_THRESHOLD = 70;      // px of horizontal drag to change product
+const SHEET_PEEK = 128;          // px of the tiffin sheet visible when closed
 
+const VerticalScrollAnimation: React.FC = () => {
   const { addToCart } = useCart();
 
-  const stackRef = useRef<HTMLDivElement>(null);
-  const sectionRefs = useRef<(HTMLDivElement | null)[]>([]);
-  const categoryPillsRef = useRef<HTMLDivElement>(null);
+  const [activeCategoryKey, setActiveCategoryKey] = useState<string>(CATEGORIES[0].key);
+  const [currentIndex, setCurrentIndex] = useState(0);
+  const [activeGheeItemId, setActiveGheeItemId] = useState<number | null>(null);
+  const [justAdded, setJustAdded] = useState(false);
+  const [sheetExpanded, setSheetExpanded] = useState(false);
+  const [lightbox, setLightbox] = useState<{ index: number } | null>(null);
+  const [hintVisible, setHintVisible] = useState(true);
 
-  const activeCategory: ProductCategory = CATEGORIES.find(c => c.key === activeCategoryKey) ?? CATEGORIES[0];
-  const isGhee = activeCategoryKey === 'ghee';
+  // drag state for the card deck (not React state — avoids re-render storms)
+  const dragRef = useRef({ active: false, startX: 0, dx: 0 });
+  const [dragX, setDragX] = useState(0);
+  const [dragging, setDragging] = useState(false);
+
+  // drag state for the tiffin sheet
+  const sheetDragRef = useRef({ active: false, startY: 0 });
+  const [sheetDragY, setSheetDragY] = useState(0);
+  const [sheetDragging, setSheetDragging] = useState(false);
+
+  // drag state for the lightbox
+  const lbDragRef = useRef({ active: false, startX: 0, dx: 0 });
+  const [lbDragX, setLbDragX] = useState(0);
+  const [lbDragging, setLbDragging] = useState(false);
+
+  const activeCategory: ProductCategory =
+    CATEGORIES.find((c) => c.key === activeCategoryKey) ?? CATEGORIES[0];
+  const isGhee = activeCategoryKey === "ghee";
   const accent = activeCategory.accentHex;
-  const categoryIndex = CATEGORIES.findIndex(c => c.key === activeCategoryKey);
 
   const selectedGheeItem: ProductItem | undefined = isGhee
-    ? activeCategory.items.find(it => it.id === activeGheeItemId) ?? activeCategory.items[0]
+    ? activeCategory.items.find((it) => it.id === activeGheeItemId) ?? activeCategory.items[0]
     : undefined;
 
-  // ── Build the scoped list for the current category/ghee-item ───────────
   const displayItems: DisplayItem[] = useMemo(() => {
     if (isGhee) {
       if (!selectedGheeItem) return [];
@@ -89,7 +90,7 @@ const VerticalScrollAnimation: React.FC = () => {
         id: `${selectedGheeItem.id}-${vi}`,
         name: `${selectedGheeItem.name} — ${v.size}`,
         image: v.images?.[0] ?? selectedGheeItem.image,
-        gallery: v.images && v.images.length > 0 ? v.images : (selectedGheeItem.image ? [selectedGheeItem.image] : []),
+        gallery: v.images && v.images.length > 0 ? v.images : selectedGheeItem.image ? [selectedGheeItem.image] : [],
         description: selectedGheeItem.description,
         content: selectedGheeItem.content,
         tag: selectedGheeItem.tag,
@@ -97,7 +98,7 @@ const VerticalScrollAnimation: React.FC = () => {
         sourceItem: selectedGheeItem,
       }));
     }
-    return activeCategory.items.map(item => ({
+    return activeCategory.items.map((item) => ({
       id: item.id,
       name: item.name,
       image: item.image,
@@ -105,165 +106,202 @@ const VerticalScrollAnimation: React.FC = () => {
       description: item.description,
       content: item.content,
       tag: item.tag,
-      rating: (item as any).rating,
-      reviews: (item as any).reviews,
       variant: undefined,
       sourceItem: item,
     }));
   }, [activeCategory, isGhee, selectedGheeItem]);
 
-  // ── Stacked-scroll setup — rebuilt whenever the item list changes ──────
-  useEffect(() => {
-    sectionRefs.current = sectionRefs.current.slice(0, displayItems.length);
-    const sections = sectionRefs.current.filter((s): s is HTMLDivElement => s !== null);
-    if (sections.length === 0) return;
+  const total = displayItems.length;
+  const current = displayItems[currentIndex] ?? displayItems[0];
+  const singleItem = total <= 1;
+  const gallery = current ? (current.gallery.length > 0 ? current.gallery : current.image ? [current.image] : []) : [];
+  const cartVariant = isGhee ? current?.variant : undefined;
 
-    gsap.set(sections, { yPercent: 0, opacity: 1 });
-    if (sections.length > 1) {
-      gsap.set(sections.slice(1), { yPercent: 100, opacity: 0 });
-    }
-
-    const triggers: ScrollTrigger[] = [];
-    sections.forEach((section, index) => {
-      if (index === 0) return;
-      const tween = gsap.to(section, {
-        yPercent: 0,
-        opacity: 1,
-        ease: 'power2.inOut',
-        scrollTrigger: {
-          trigger: sections[index - 1],
-          start: 'top top',
-          end: 'bottom top',
-          scrub: 1,
-          onEnter: () => setActiveIndex(index),
-          onEnterBack: () => setActiveIndex(index),
-        },
-      });
-      if (tween.scrollTrigger) triggers.push(tween.scrollTrigger);
-    });
-
-    ScrollTrigger.refresh();
-
-    return () => {
-      triggers.forEach(t => t.kill());
-    };
-  }, [displayItems]);
-
-  // ── Category / ghee-item switching ──────────────────────────────────────
+  // ── Category / ghee-tab switching ──────────────────────────
   const changeCategory = (key: string) => {
     if (key === activeCategoryKey) return;
     setActiveCategoryKey(key);
     setActiveGheeItemId(null);
-    setActiveIndex(0);
-    stackRef.current?.scrollIntoView({ behavior: 'auto', block: 'start' });
+    setCurrentIndex(0);
+    setSheetExpanded(false);
   };
-
-  // Prev/next category, with wraparound — used by the arrow buttons flanking
-  // the category tab row.
-  const goToAdjacentCategory = (direction: 1 | -1) => {
-    const nextIndex = (categoryIndex + direction + CATEGORIES.length) % CATEGORIES.length;
-    changeCategory(CATEGORIES[nextIndex].key);
-  };
-
-  // Keep the active category pill scrolled into view whenever it changes
-  // (e.g. after using the arrow buttons).
-  useEffect(() => {
-    const rail = categoryPillsRef.current;
-    if (!rail) return;
-    const activePill = rail.children[categoryIndex] as HTMLElement | undefined;
-    activePill?.scrollIntoView({ behavior: 'smooth', block: 'nearest', inline: 'center' });
-  }, [categoryIndex]);
 
   const changeGheeItem = (id: number) => {
     if (id === selectedGheeItem?.id) return;
     setActiveGheeItemId(id);
-    setActiveIndex(0);
-    stackRef.current?.scrollIntoView({ behavior: 'auto', block: 'start' });
+    setCurrentIndex(0);
+    setSheetExpanded(false);
   };
 
-  const scrollToIndex = (idx: number) => {
-    setActiveIndex(idx);
-    sectionRefs.current[idx]?.scrollIntoView({ behavior: 'smooth' });
+  useEffect(() => {
+    setJustAdded(false);
+  }, [currentIndex, activeCategoryKey]);
+
+  useEffect(() => {
+    const t = setTimeout(() => setHintVisible(false), 3200);
+    return () => clearTimeout(t);
+  }, []);
+
+  const goTo = useCallback((idx: number) => {
+    if (total === 0) return;
+    setCurrentIndex(((idx % total) + total) % total);
+    setHintVisible(false);
+  }, [total]);
+
+  const next = () => goTo(currentIndex + 1);
+  const prev = () => goTo(currentIndex - 1);
+
+  // ── Card deck drag handlers ─────────────────────────────────
+  const onCardPointerDown = (e: React.PointerEvent) => {
+    if (singleItem) return;
+    dragRef.current = { active: true, startX: e.clientX, dx: 0 };
+    setDragging(true);
+    (e.target as HTMLElement).setPointerCapture(e.pointerId);
   };
 
-  const handleAddToCart = useCallback((item: DisplayItem) => {
-    if (!item.variant) return;
-    addToCart(item.sourceItem, item.variant, 1);
-    setJustAddedId(item.id);
-    window.setTimeout(() => setJustAddedId(prev => (prev === item.id ? null : prev)), 1800);
-  }, [addToCart]);
+  const onCardPointerMove = (e: React.PointerEvent) => {
+    if (!dragRef.current.active) return;
+    const dx = e.clientX - dragRef.current.startX;
+    dragRef.current.dx = dx;
+    setDragX(dx);
+  };
 
-  if (displayItems.length === 0) return null;
+  const endCardDrag = () => {
+    if (!dragRef.current.active) return;
+    const dx = dragRef.current.dx;
+    dragRef.current.active = false;
+    setDragging(false);
+    setDragX(0);
+    if (dx <= -SWIPE_THRESHOLD) next();
+    else if (dx >= SWIPE_THRESHOLD) prev();
+  };
+
+  // ── Tiffin sheet drag handlers ──────────────────────────────
+  const onSheetPointerDown = (e: React.PointerEvent) => {
+    sheetDragRef.current = { active: true, startY: e.clientY };
+    setSheetDragging(true);
+    (e.target as HTMLElement).setPointerCapture(e.pointerId);
+  };
+
+  const onSheetPointerMove = (e: React.PointerEvent) => {
+    if (!sheetDragRef.current.active) return;
+    setSheetDragY(e.clientY - sheetDragRef.current.startY);
+  };
+
+  const endSheetDrag = () => {
+    if (!sheetDragRef.current.active) return;
+    sheetDragRef.current.active = false;
+    setSheetDragging(false);
+    if (sheetDragY <= -40) setSheetExpanded(true);
+    else if (sheetDragY >= 40) setSheetExpanded(false);
+    setSheetDragY(0);
+  };
+
+  // ── Lightbox drag (swipe through this product's gallery) ───
+  const showRelativeThumb = useCallback((delta: number) => {
+    setLightbox((prevLb) => {
+      if (!prevLb || gallery.length === 0) return prevLb;
+      return { index: (prevLb.index + delta + gallery.length) % gallery.length };
+    });
+  }, [gallery]);
+
+  const onLbPointerDown = (e: React.PointerEvent) => {
+    lbDragRef.current = { active: true, startX: e.clientX, dx: 0 };
+    setLbDragging(true);
+    (e.target as HTMLElement).setPointerCapture(e.pointerId);
+  };
+
+  const onLbPointerMove = (e: React.PointerEvent) => {
+    if (!lbDragRef.current.active) return;
+    const dx = e.clientX - lbDragRef.current.startX;
+    lbDragRef.current.dx = dx;
+    setLbDragX(dx);
+  };
+
+  const endLbDrag = () => {
+    if (!lbDragRef.current.active) return;
+    const dx = lbDragRef.current.dx;
+    lbDragRef.current.active = false;
+    setLbDragging(false);
+    setLbDragX(0);
+    if (gallery.length > 1) {
+      if (dx <= -50) showRelativeThumb(1);
+      else if (dx >= 50) showRelativeThumb(-1);
+    }
+  };
+
+  const handleAddToCart = () => {
+    if (!cartVariant || !current) return;
+    addToCart(current.sourceItem, cartVariant, 1);
+    setJustAdded(true);
+  };
+
+  if (!current) return null;
+
+  // ── Torn-pouch top edge (signature shape) ───────────────────
+  const TORN_EDGE = "polygon(0% 7%,4% 3%,8% 8%,12% 2%,16% 7%,20% 3%,24% 8%,28% 2%,32% 7%,36% 3%,40% 8%,44% 2%,48% 7%,52% 3%,56% 8%,60% 2%,64% 7%,68% 3%,72% 8%,76% 2%,80% 7%,84% 3%,88% 8%,92% 2%,96% 7%,100% 3%,100% 100%,0% 100%)";
 
   return (
-    <div className="relative w-full overflow-x-hidden bg-[#0b1220]">
-      {/* ── Fixed top nav: category tabs (+ ghee sub-tabs) ── */}
+    <div className="relative w-full h-[100dvh] bg-[#0b1220] overflow-hidden select-none touch-none">
+      {/* backdrop */}
+      <div className="absolute inset-0 bg-gradient-to-b from-slate-950 via-slate-900 to-slate-950" />
       <div
-        className="fixed top-0 inset-x-0 z-50 bg-[#0b1220]/85 backdrop-blur-xl border-b border-white/10"
-        style={{ paddingTop: 'max(0.6rem, env(safe-area-inset-top))' }}
-      >
-        <div className="flex items-center justify-center gap-1.5 px-1.5 pb-1">
-          <Sparkles className="w-3 h-3 flex-shrink-0" style={{ color: accent }} />
-          <span className="text-[10px] font-bold uppercase tracking-[0.25em] text-white/60">
-            The Collection
-          </span>
+        className="absolute inset-0 transition-colors duration-500"
+        style={{ background: `radial-gradient(circle at 50% 0%, ${accent}26, transparent 60%)` }}
+      />
+
+      {/* ── Clothesline category rail ── */}
+      <div className="relative z-40 pt-5 px-4">
+        <div className="flex items-center gap-1 mb-1">
+          <span className="text-[10px] font-bold uppercase tracking-[0.35em] text-white/50">Vyshnavi Dairy</span>
         </div>
-
-        <div className="flex items-center gap-1 px-2 pb-2">
-          <button
-            onClick={() => goToAdjacentCategory(-1)}
-            aria-label="Previous category"
-            className="flex-shrink-0 w-7 h-7 rounded-full bg-white/[0.06] backdrop-blur-xl border border-white/10 flex items-center justify-center active:scale-95 transition-transform"
-          >
-            <ChevronLeft className="w-3.5 h-3.5 text-white/70" />
-          </button>
-
-          <div
-            ref={categoryPillsRef}
-            className="flex gap-1.5 overflow-x-auto scrollbar-hide px-1 snap-x snap-mandatory"
-            style={{ scrollbarWidth: 'none', msOverflowStyle: 'none' }}
-          >
-            {CATEGORIES.map(cat => {
+        <div className="relative">
+          <div className="absolute left-0 right-0 top-[18px] h-px bg-white/15" />
+          <div className="flex gap-4 overflow-x-auto pb-2 scrollbar-hide">
+            {CATEGORIES.map((cat) => {
               const isActive = cat.key === activeCategoryKey;
               return (
                 <button
                   key={cat.key}
                   onClick={() => changeCategory(cat.key)}
-                  className="flex-shrink-0 snap-start px-3.5 py-2 rounded-full text-[11px] font-bold uppercase tracking-wide transition-all duration-300"
-                  style={
-                    isActive
-                      ? { backgroundColor: cat.accentHex, color: '#fff', boxShadow: `0 6px 18px -6px ${cat.accentHex}99` }
-                      : { backgroundColor: 'rgba(255,255,255,0.06)', color: 'rgba(255,255,255,0.55)', border: '1px solid rgba(255,255,255,0.08)' }
-                  }
+                  className="relative flex-shrink-0 flex flex-col items-center gap-1.5 pt-1"
                 >
-                  {cat.name}
+                  <Pin
+                    className="w-3.5 h-3.5 transition-transform duration-300"
+                    strokeWidth={2.5}
+                    style={{
+                      color: isActive ? cat.accentHex : "rgba(255,255,255,0.25)",
+                      transform: isActive ? "rotate(0deg) scale(1.15)" : "rotate(-25deg)",
+                    }}
+                  />
+                  <span
+                    className={`text-[11px] font-bold uppercase tracking-wider whitespace-nowrap px-2 py-1 rounded-full transition-all duration-300 ${
+                      isActive ? "text-white" : "text-white/40"
+                    }`}
+                    style={isActive ? { backgroundColor: `${cat.accentHex}33`, border: `1px solid ${cat.accentHex}66` } : undefined}
+                  >
+                    {cat.name}
+                  </span>
                 </button>
               );
             })}
           </div>
-
-          <button
-            onClick={() => goToAdjacentCategory(1)}
-            aria-label="Next category"
-            className="flex-shrink-0 w-7 h-7 rounded-full bg-white/[0.06] backdrop-blur-xl border border-white/10 flex items-center justify-center active:scale-95 transition-transform"
-          >
-            <ChevronRight className="w-3.5 h-3.5 text-white/70" />
-          </button>
         </div>
 
+        {/* ghee sub-tabs */}
         {isGhee && activeCategory.items.length > 1 && (
-          <div className="flex gap-1.5 overflow-x-auto scrollbar-hide px-3 pb-2.5" style={{ scrollbarWidth: 'none', msOverflowStyle: 'none' }}>
-            {activeCategory.items.map(item => {
+          <div className="flex gap-2 mt-1 mb-1">
+            {activeCategory.items.map((item) => {
               const isActive = item.id === selectedGheeItem?.id;
               return (
                 <button
                   key={item.id}
                   onClick={() => changeGheeItem(item.id)}
-                  className="flex-shrink-0 px-3 py-1.5 rounded-full text-[10px] font-bold uppercase tracking-wide border transition-all duration-300"
+                  className="px-3 py-1 rounded-full text-[10px] font-bold uppercase tracking-wider border transition-all"
                   style={
                     isActive
-                      ? { backgroundColor: accent, borderColor: accent, color: '#fff' }
-                      : { backgroundColor: 'rgba(255,255,255,0.03)', borderColor: 'rgba(255,255,255,0.1)', color: 'rgba(255,255,255,0.55)' }
+                      ? { backgroundColor: accent, borderColor: accent, color: "#fff" }
+                      : { borderColor: "rgba(255,255,255,0.15)", color: "rgba(255,255,255,0.5)" }
                   }
                 >
                   {item.name}
@@ -274,278 +312,279 @@ const VerticalScrollAnimation: React.FC = () => {
         )}
       </div>
 
-      {/* ── Stacked scroll sections for the active category/ghee-item ── */}
-      <div
-        key={`${activeCategoryKey}-${selectedGheeItem?.id ?? ''}`}
-        ref={stackRef}
-        className="relative"
-        style={{ paddingTop: isGhee && activeCategory.items.length > 1 ? '7rem' : '4.5rem' }}
-      >
-        {displayItems.map((item, index) => {
-          const gallery = item.gallery.filter(Boolean);
-          const cartVariant = isGhee ? item.variant : undefined;
-          const justAdded = justAddedId === item.id;
+      {/* ── Pouch card deck ── */}
+      <div className="relative z-10 flex items-center justify-center" style={{ height: `calc(100dvh - 210px)` }}>
+        {displayItems.map((item, i) => {
+          const rel = (() => {
+            const raw = i - currentIndex;
+            if (raw > total / 2) return raw - total;
+            if (raw < -total / 2) return raw + total;
+            return raw;
+          })();
+          if (Math.abs(rel) > 1) return null; // only render current ± 1
+
+          const isTop = rel === 0;
+          const baseX = rel * 26; // peeking offset for neighbours, in px
+          const translateX = isTop ? dragX : baseX;
+          const rotate = isTop ? dragX / 18 : rel * 4;
+          const scale = isTop ? 1 : 0.9;
+          const opacity = isTop ? 1 : 0.45;
 
           return (
             <div
               key={item.id}
-              ref={el => { sectionRefs.current[index] = el; }}
-              className="w-full flex flex-col sticky top-0 overflow-hidden"
-              style={{ minHeight: '100dvh' }}
+              className="absolute w-[72vw] max-w-[300px] flex flex-col items-center"
+              style={{
+                zIndex: isTop ? 30 : 10 - Math.abs(rel),
+                transform: `translateX(${translateX}px) rotate(${rotate}deg) scale(${scale})`,
+                opacity,
+                transition: isTop && dragging ? "none" : "transform 0.35s cubic-bezier(0.25,0.46,0.45,0.94), opacity 0.35s",
+                pointerEvents: isTop ? "auto" : "none",
+              }}
+              onPointerDown={isTop ? onCardPointerDown : undefined}
+              onPointerMove={isTop ? onCardPointerMove : undefined}
+              onPointerUp={isTop ? endCardDrag : undefined}
+              onPointerCancel={isTop ? endCardDrag : undefined}
             >
-              {/* Cinematic dark base + accent glow, same language as Portfolio */}
-              <div className="absolute inset-0 bg-gradient-to-b from-slate-950 via-slate-900 to-slate-950" />
-              <div
-                className="absolute inset-0"
-                style={{ background: `radial-gradient(circle at 30% 20%, ${accent}2a, transparent 55%), radial-gradient(circle at 75% 80%, ${accent}1f, transparent 50%)` }}
-              />
-
-              {/* Watermark — clamp()'d so it never overflows narrow phones */}
-              <div className="absolute inset-0 flex items-center justify-center pointer-events-none opacity-[0.07] px-2">
-                <h1
-                  className="font-black text-white text-center leading-none tracking-tighter"
-                  style={{ fontSize: 'clamp(2.25rem, 13vw, 4.5rem)' }}
+              {item.tag && (
+                <span
+                  className="absolute -top-3 z-10 text-[9px] font-bold uppercase tracking-widest px-2.5 py-1 rounded-full text-white shadow-lg"
+                  style={{ backgroundColor: item.tag === "Best Seller" ? accent : "#16a34a" }}
                 >
-                  {item.sourceItem.name.toUpperCase()}
-                </h1>
-              </div>
-
-              {/* Content column */}
-              <div className="relative z-10 flex-1 flex flex-col items-center justify-center gap-4 px-4 pt-4 pb-6">
-                {/* Category chip */}
-                <div className="px-3 py-1 rounded-full text-[10px] font-bold uppercase tracking-widest bg-white/10 backdrop-blur-sm text-white/70 border border-white/10">
-                  {activeCategory.name}
-                </div>
-
-                {/* Product image */}
-                <div className="relative w-[min(62vw,260px)] aspect-[3/4] flex items-center justify-center">
-                  <div
-                    className="absolute w-40 h-40 rounded-full blur-3xl"
-                    style={{ background: `${accent}33` }}
-                  />
-                  {item.image ? (
-                    <img
-                      src={item.image}
-                      alt={item.name}
-                      className="relative w-full h-full object-cover rounded-3xl shadow-2xl"
-                    />
-                  ) : (
-                    <div
-                      className="relative w-full h-full flex flex-col items-center justify-center rounded-3xl border-2 border-white/15 bg-white/5 backdrop-blur-sm"
-                    >
-                      <span className="text-5xl mb-2 opacity-60">🥛</span>
-                      <p className="text-white/50 text-xs font-medium text-center px-4">{item.name}</p>
-                    </div>
-                  )}
-
-                  {item.tag && (
-                    <span
-                      className="absolute top-2.5 left-2.5 text-[10px] font-bold px-2.5 py-1 rounded-full text-white shadow-md"
-                      style={{ backgroundColor: item.tag === 'Best Seller' ? accent : '#16a34a' }}
-                    >
-                      {item.tag}
-                    </span>
-                  )}
-
-                  {item.rating && (
-                    <div className="absolute bottom-2.5 right-2.5 flex items-center gap-1 bg-black/45 backdrop-blur-md text-white text-[10px] font-semibold px-2.5 py-1 rounded-full">
-                      <Star className="w-3 h-3 fill-yellow-400 text-yellow-400" />
-                      {item.rating}
-                      {item.reviews && <span className="opacity-70 ml-0.5">({item.reviews})</span>}
-                    </div>
-                  )}
-                </div>
-
-                {/* Gallery thumbnail row */}
-                {gallery.length > 0 && (
-                  <div className="flex gap-2 overflow-x-auto scrollbar-hide max-w-full px-1" style={{ scrollbarWidth: 'none' }}>
-                    {gallery.slice(0, 6).map((src, gi) => (
-                      <button
-                        key={gi}
-                        onClick={() => setSelectedGallery({ item, imageIndex: gi })}
-                        className="flex-shrink-0 w-12 h-12 rounded-xl overflow-hidden shadow-md ring-1 ring-white/15 hover:ring-white/40 transition-all"
-                      >
-                        <img src={src} alt={`${item.name} view ${gi + 1}`} className="w-full h-full object-cover" />
-                      </button>
-                    ))}
-                  </div>
+                  {item.tag === "Best Seller" ? "★ Best Seller" : "New Launch"}
+                </span>
+              )}
+              <div
+                className="w-full aspect-[4/5] flex items-center justify-center overflow-hidden shadow-[0_30px_60px_-20px_rgba(0,0,0,0.6)]"
+                style={{
+                  clipPath: TORN_EDGE,
+                  background: `linear-gradient(160deg, ${accent}29, rgba(255,255,255,0.04))`,
+                  border: "1px dashed rgba(255,255,255,0.18)",
+                }}
+                onClick={() => isTop && setLightbox({ index: 0 })}
+              >
+                {item.image ? (
+                  <img src={item.image} alt={item.name} className="w-[68%] h-[68%] object-contain drop-shadow-2xl pointer-events-none" />
+                ) : (
+                  <span className="text-xs font-semibold text-white/50 text-center px-4">{item.name}</span>
                 )}
-
-                {/* Info panel */}
-                <div className="relative w-full max-w-sm bg-white/[0.06] backdrop-blur-2xl rounded-[24px] p-5 shadow-2xl border border-white/10 max-h-[38dvh] overflow-y-auto">
-                  <h2 className="text-xl font-bold text-white leading-tight">
-                    {item.sourceItem.name}
-                    {item.variant && (
-                      <span className="ml-2 text-sm font-semibold" style={{ color: accent }}>
-                        {item.variant.size}
-                      </span>
-                    )}
-                  </h2>
-                  <p className="text-[11px] font-bold uppercase tracking-wide mt-1 mb-2" style={{ color: accent }}>
-                    {item.description}
-                  </p>
-                  <p className="text-white/60 text-sm leading-relaxed line-clamp-4">{item.content}</p>
-
-                  {item.sourceItem.variants.length > 0 && (
-                    <div className="mt-3">
-                      <p className="text-[9px] font-bold uppercase tracking-widest text-white/30 mb-1.5">
-                        Available sizes
-                      </p>
-                      <div className="flex flex-wrap gap-1.5">
-                        {item.sourceItem.variants.map((v, vi) => {
-                          const isSelected = item.variant?.size === v.size;
-                          return (
-                            <span
-                              key={vi}
-                              className="text-[10px] font-semibold border rounded-md px-2 py-1"
-                              style={
-                                isSelected
-                                  ? { borderColor: accent, color: '#fff', backgroundColor: accent }
-                                  : { borderColor: `${accent}40`, color: accent, backgroundColor: `${accent}14` }
-                              }
-                            >
-                              {v.size}{v.packType ? ` (${v.packType})` : ''}
-                            </span>
-                          );
-                        })}
-                      </div>
-                    </div>
-                  )}
-
-                  {isGhee && cartVariant && (
-                    <>
-                      {cartVariant.price != null && (
-                        <p className="mt-3 text-lg font-bold text-white">
-                          ₹{cartVariant.price}
-                          {cartVariant.perUnit && <span className="text-white/40 text-xs font-medium"> / {cartVariant.perUnit}</span>}
-                        </p>
-                      )}
-                      <button
-                        onClick={() => handleAddToCart(item)}
-                        className="mt-2.5 w-full flex items-center justify-center gap-2 text-white font-bold text-sm py-3 rounded-2xl transition-all duration-300"
-                        style={{
-                          backgroundColor: justAdded ? '#16a34a' : accent,
-                          boxShadow: `0 12px 24px -12px ${justAdded ? '#16a34a' : accent}aa`,
-                        }}
-                      >
-                        <ShoppingCart size={16} />
-                        {justAdded ? 'Added to cart' : 'Add to cart'}
-                      </button>
-                    </>
-                  )}
-
-                  {!isGhee && (
-                    <button
-                      className="mt-3 w-full bg-white text-gray-900 py-3 rounded-2xl font-bold text-xs uppercase tracking-wide"
-                    >
-                      View Details
-                    </button>
-                  )}
-                </div>
               </div>
+            </div>
+          );
+        })}
 
-              {/* Progress dots for items within this category */}
-              {displayItems.length > 1 && (
-                <div className="relative z-10 flex justify-center gap-1.5 pb-[max(0.75rem,env(safe-area-inset-bottom))]">
-                  {displayItems.map((_, i) => (
+        {/* swipe hint */}
+        {hintVisible && !singleItem && (
+          <div className="absolute bottom-2 left-1/2 -translate-x-1/2 flex items-center gap-2 text-white/40 text-[11px] font-semibold animate-pulse pointer-events-none">
+            <ChevronLeft className="w-3.5 h-3.5" />
+            swipe the pouch
+            <ChevronRight className="w-3.5 h-3.5" />
+          </div>
+        )}
+      </div>
+
+      {/* progress dots */}
+      {!singleItem && (
+        <div className="relative z-20 flex justify-center gap-1.5 mb-3">
+          {displayItems.map((_, i) => (
+            <button
+              key={i}
+              onClick={() => goTo(i)}
+              className="h-1.5 rounded-full transition-all duration-400"
+              style={{
+                width: i === currentIndex ? "1.6rem" : "0.4rem",
+                backgroundColor: i === currentIndex ? accent : "rgba(255,255,255,0.2)",
+              }}
+              aria-label={`Go to product ${i + 1}`}
+            />
+          ))}
+        </div>
+      )}
+
+      {/* ── Tiffin-lid detail sheet ── */}
+      <div
+        className="fixed left-0 right-0 bottom-0 z-40 rounded-t-[28px] bg-[#141b2e]/95 backdrop-blur-xl border-t border-white/10 shadow-[0_-20px_50px_rgba(0,0,0,0.5)]"
+        style={{
+          height: "72dvh",
+          transform: sheetExpanded
+            ? `translateY(${sheetDragging ? sheetDragY : 0}px)`
+            : `translateY(calc(100% - ${SHEET_PEEK}px + ${sheetDragging ? sheetDragY : 0}px))`,
+          transition: sheetDragging ? "none" : "transform 0.32s cubic-bezier(0.25,0.46,0.45,0.94)",
+        }}
+      >
+        <div
+          className="pt-2.5 pb-1 flex flex-col items-center cursor-grab active:cursor-grabbing"
+          onClick={() => setSheetExpanded((s) => !s)}
+          onPointerDown={onSheetPointerDown}
+          onPointerMove={onSheetPointerMove}
+          onPointerUp={endSheetDrag}
+          onPointerCancel={endSheetDrag}
+        >
+          <div className="w-10 h-1 rounded-full bg-white/25" />
+        </div>
+
+        <div className="px-6 pb-8 overflow-y-auto" style={{ height: "calc(72dvh - 28px)" }}>
+          <div className="flex items-start justify-between gap-3 pt-1">
+            <div>
+              <h3 className="text-lg font-bold text-white leading-tight">
+                {current.sourceItem.name}
+                {current.variant && (
+                  <span className="ml-2 text-sm font-semibold" style={{ color: accent }}>
+                    {current.variant.size}
+                  </span>
+                )}
+              </h3>
+              <p className="text-[11px] font-bold uppercase tracking-wide mt-1" style={{ color: accent }}>
+                {current.description}
+              </p>
+            </div>
+            {isGhee && cartVariant?.price != null && (
+              <div className="text-right flex-shrink-0">
+                <p className="text-xl font-bold text-white">₹{cartVariant.price}</p>
+                {cartVariant.perUnit && <p className="text-white/40 text-[10px]">/ {cartVariant.perUnit}</p>}
+              </div>
+            )}
+          </div>
+
+          <p className="text-white/60 text-sm leading-relaxed mt-3">{current.content}</p>
+
+          {current.sourceItem.variants.length > 0 && (
+            <div className="mt-4">
+              <p className="text-[10px] font-bold uppercase tracking-widest text-white/30 mb-2">Available sizes</p>
+              <div className="flex flex-wrap gap-1.5">
+                {current.sourceItem.variants.map((v, vi) => {
+                  const isSelected = current.variant?.size === v.size;
+                  return (
+                    <span
+                      key={vi}
+                      className="text-[11px] font-semibold border rounded-md px-2.5 py-1"
+                      style={
+                        isSelected
+                          ? { borderColor: accent, color: "#fff", backgroundColor: accent }
+                          : { borderColor: `${accent}40`, color: accent, backgroundColor: `${accent}14` }
+                      }
+                    >
+                      {v.size}{v.packType ? ` (${v.packType})` : ""}
+                    </span>
+                  );
+                })}
+              </div>
+            </div>
+          )}
+
+          {gallery.length > 1 && (
+            <div className="mt-5">
+              <p className="text-[10px] font-bold uppercase tracking-widest text-white/30 mb-2">More photos</p>
+              <div className="flex gap-2 overflow-x-auto pb-1 scrollbar-hide">
+                {gallery.map((src, gi) => (
+                  <button
+                    key={gi}
+                    onClick={() => setLightbox({ index: gi })}
+                    className="flex-shrink-0 w-16 h-16 rounded-xl overflow-hidden border border-white/10"
+                  >
+                    <img src={src} alt={`${current.name} ${gi + 1}`} className="w-full h-full object-cover" />
+                  </button>
+                ))}
+              </div>
+            </div>
+          )}
+
+          {isGhee && cartVariant && (
+            <button
+              onClick={handleAddToCart}
+              className="mt-6 w-full flex items-center justify-center gap-2 text-white font-bold text-sm py-3.5 rounded-2xl transition-all duration-300"
+              style={{
+                backgroundColor: justAdded ? "#16a34a" : accent,
+                boxShadow: `0 15px 30px -14px ${justAdded ? "#16a34a" : accent}aa`,
+              }}
+            >
+              <ShoppingCart size={16} />
+              {justAdded ? "Added to cart" : "Add to cart"}
+            </button>
+          )}
+        </div>
+      </div>
+
+      {/* collapsed-state peek row (name + price, visible under the handle when closed) */}
+      {!sheetExpanded && (
+        <div
+          className="fixed left-0 right-0 z-30 px-6 flex items-center justify-between pointer-events-none"
+          style={{ bottom: `${SHEET_PEEK - 68}px` }}
+        >
+          <div className="pointer-events-auto">
+            <p className="text-white font-bold text-sm">{current.sourceItem.name}{current.variant ? ` · ${current.variant.size}` : ""}</p>
+            <p className="text-white/40 text-[11px]">tap to peel back for details</p>
+          </div>
+          {isGhee && cartVariant?.price != null && (
+            <p className="text-white font-bold text-base pointer-events-auto">₹{cartVariant.price}</p>
+          )}
+        </div>
+      )}
+
+      {/* ── Fullscreen gallery lightbox ── */}
+      {lightbox && gallery.length > 0 && (
+        <div
+          className="fixed inset-0 z-50 bg-white/95 flex items-center justify-center p-6"
+          onClick={() => setLightbox(null)}
+        >
+          <div
+            className="relative w-full max-h-full"
+            onClick={(e) => e.stopPropagation()}
+            onPointerDown={onLbPointerDown}
+            onPointerMove={onLbPointerMove}
+            onPointerUp={endLbDrag}
+            onPointerCancel={endLbDrag}
+          >
+            <div
+              className="rounded-2xl overflow-hidden flex items-center justify-center"
+              style={{
+                backgroundColor: activeCategoryKey === "milk" ? "#036AAD" : "transparent",
+                transform: `translateX(${lbDragX}px)`,
+                transition: lbDragging ? "none" : "transform 0.25s ease-out",
+              }}
+            >
+              <img
+                src={gallery[lightbox.index]}
+                alt={`${current.name} ${lightbox.index + 1}`}
+                className="w-full max-h-[65dvh] object-contain pointer-events-none"
+              />
+            </div>
+
+            <button
+              onClick={() => setLightbox(null)}
+              className="absolute -top-2 right-0 w-10 h-10 bg-black/60 rounded-full flex items-center justify-center shadow-lg"
+              aria-label="Close"
+            >
+              <X className="w-5 h-5 text-white" strokeWidth={2.5} />
+            </button>
+
+            {gallery.length > 1 && (
+              <>
+                <div className="flex items-center justify-center gap-2 mt-4">
+                  {gallery.map((_, gi) => (
                     <button
-                      key={i}
-                      onClick={() => scrollToIndex(i)}
-                      aria-label={`Go to item ${i + 1}`}
-                      className="h-1.5 rounded-full transition-all duration-300"
+                      key={gi}
+                      onClick={() => setLightbox({ index: gi })}
+                      className="h-1.5 rounded-full transition-all"
                       style={{
-                        width: i === activeIndex ? '1.5rem' : '0.4rem',
-                        backgroundColor: i === activeIndex ? accent : 'rgba(255,255,255,0.2)',
+                        width: gi === lightbox.index ? "1.4rem" : "0.4rem",
+                        backgroundColor: gi === lightbox.index ? accent : "rgba(0,0,0,0.15)",
                       }}
                     />
                   ))}
                 </div>
-              )}
-
-              {/* Scroll indicator on first section only */}
-              {index === 0 && displayItems.length > 1 && (
-                <div className="absolute bottom-8 left-1/2 -translate-x-1/2 text-white/50 animate-bounce">
-                  <ChevronRight className="w-5 h-5 rotate-90" />
-                </div>
-              )}
-            </div>
-          );
-        })}
-      </div>
-
-      {/* ── Gallery lightbox ── */}
-      {selectedGallery && (
-        <div
-          className="fixed inset-0 z-[100] bg-black/90 backdrop-blur-sm flex items-center justify-center p-4"
-          onClick={() => setSelectedGallery(null)}
-        >
-          <div className="relative w-full max-w-md" onClick={e => e.stopPropagation()}>
-            <img
-              src={selectedGallery.item.gallery.filter(Boolean)[selectedGallery.imageIndex]}
-              alt={selectedGallery.item.name}
-              className="w-full h-auto max-h-[70dvh] object-contain rounded-2xl shadow-2xl"
-            />
-
-            <button
-              onClick={() => setSelectedGallery(null)}
-              className="absolute top-3 right-3 w-10 h-10 bg-white/10 backdrop-blur-xl border border-white/20 rounded-full flex items-center justify-center hover:bg-white/20 transition-colors shadow-lg"
-              aria-label="Close"
-            >
-              <X className="w-5 h-5 text-white" />
-            </button>
-
-            <div className="absolute bottom-14 left-1/2 -translate-x-1/2 max-w-[85%]">
-              <div className="bg-white/10 backdrop-blur-xl border border-white/20 px-4 py-2 rounded-full shadow">
-                <p className="text-white text-xs font-semibold text-center truncate">{selectedGallery.item.name}</p>
-              </div>
-            </div>
-
-            {(() => {
-              const total = selectedGallery.item.gallery.filter(Boolean).length;
-              if (total <= 1) return null;
-              return (
-                <>
-                  <div className="absolute bottom-5 left-1/2 -translate-x-1/2 flex gap-1.5">
-                    {selectedGallery.item.gallery.filter(Boolean).map((_, idx) => (
-                      <button
-                        key={idx}
-                        onClick={e => {
-                          e.stopPropagation();
-                          setSelectedGallery(prev => (prev ? { ...prev, imageIndex: idx } : prev));
-                        }}
-                        className={`h-1.5 rounded-full transition-all duration-300 ${
-                          idx === selectedGallery.imageIndex ? 'bg-white w-6' : 'bg-white/40 w-1.5'
-                        }`}
-                      />
-                    ))}
-                  </div>
-                  <button
-                    onClick={e => {
-                      e.stopPropagation();
-                      setSelectedGallery(prev => prev ? { ...prev, imageIndex: (prev.imageIndex - 1 + total) % total } : prev);
-                    }}
-                    className="absolute left-2 top-1/2 -translate-y-1/2 w-9 h-9 bg-white/15 backdrop-blur-sm rounded-full flex items-center justify-center text-white"
-                  >
-                    <ChevronLeft className="w-4 h-4" />
-                  </button>
-                  <button
-                    onClick={e => {
-                      e.stopPropagation();
-                      setSelectedGallery(prev => prev ? { ...prev, imageIndex: (prev.imageIndex + 1) % total } : prev);
-                    }}
-                    className="absolute right-2 top-1/2 -translate-y-1/2 w-9 h-9 bg-white/15 backdrop-blur-sm rounded-full flex items-center justify-center text-white"
-                  >
-                    <ChevronRight className="w-4 h-4" />
-                  </button>
-                </>
-              );
-            })()}
+                <p className="text-center text-black/50 text-xs font-semibold mt-2">
+                  swipe to see more · {lightbox.index + 1}/{gallery.length}
+                </p>
+              </>
+            )}
           </div>
         </div>
       )}
 
       <style>{`
         .scrollbar-hide::-webkit-scrollbar { display: none; }
+        .scrollbar-hide { scrollbar-width: none; -ms-overflow-style: none; }
       `}</style>
     </div>
   );

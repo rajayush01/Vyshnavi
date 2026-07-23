@@ -15,6 +15,14 @@
  * NOTE: all carousel math (getPos / animateTo / resetAutoPlay / gsap refs)
  * is unchanged from the original — only the surrounding visual layer was
  * elevated.
+ *
+ * FULLSCREEN LIGHTBOX BEHAVIOUR (updated):
+ *  - Overlay is white, close/nav icons are black.
+ *  - Carousel autoplay and the drifting background watermark are frozen
+ *    for as long as the lightbox is open, and resume the instant it closes.
+ *  - You can page left/right through every sub-image of the product that
+ *    was open when the lightbox launched (buttons, filmstrip, and arrow
+ *    keys), not just view a single static image.
  */
 
 import React, { useEffect, useRef, useState, useCallback, useMemo } from "react";
@@ -50,7 +58,9 @@ const ImagePlaceholder: React.FC<PlaceholderProps> = ({ category, name }) => (
   </div>
 );
 
-interface SelectedThumb { src: string; name: string }
+// Lightbox now tracks the gallery INDEX (not just a src string) so the
+// user can page through every sub-image of the currently selected product.
+interface SelectedThumb { index: number; name: string }
 
 // A single carousel-displayable entity. For most categories this maps
 // 1:1 to a ProductItem. For "ghee" it maps 1:1 to a variant of an item.
@@ -183,6 +193,9 @@ const Portfolio: React.FC = () => {
   const resetAutoPlay = useCallback(() => {
     if (autoPlayRef.current) clearInterval(autoPlayRef.current);
     if (singleItem) return;
+    // Never (re)start the carousel autoplay while the fullscreen
+    // lightbox is open — the background must stay perfectly still.
+    if (selectedThumb) return;
     autoPlayRef.current = setInterval(() => {
       setCurrentIndex((prev) => {
         const next = (prev + 1) % currentItems.length;
@@ -190,7 +203,7 @@ const Portfolio: React.FC = () => {
         return next;
       });
     }, 5000);
-  }, [singleItem, currentItems.length, animateTo]);
+  }, [singleItem, currentItems.length, animateTo, selectedThumb]);
 
   const next = () => {
     if (singleItem) return;
@@ -269,6 +282,19 @@ const Portfolio: React.FC = () => {
     };
   }, [activeCategoryKey, selectedGheeItem?.id]); // eslint-disable-line react-hooks/exhaustive-deps
 
+  // ── Pause / resume everything while the fullscreen lightbox is open ──
+  useEffect(() => {
+    if (selectedThumb) {
+      // Freeze the autoplay carousel and the drifting background watermark
+      // the instant fullscreen opens.
+      if (autoPlayRef.current) clearInterval(autoPlayRef.current);
+      if (bgTextRef.current) gsap.killTweensOf(bgTextRef.current);
+    } else {
+      // Resume normal behaviour once fullscreen is closed.
+      resetAutoPlay();
+    }
+  }, [selectedThumb]); // eslint-disable-line react-hooks/exhaustive-deps
+
   const current = currentItems[currentIndex];
   const gallery    = current.gallery.length > 0 ? current.gallery : (current.image ? [current.image] : []);
 
@@ -287,9 +313,36 @@ const Portfolio: React.FC = () => {
     setJustAdded(true);
   };
 
+  // ── Lightbox navigation (page through this product's sub-images) ──
+  const showNextThumb = useCallback(() => {
+    setSelectedThumb((prevThumb) => {
+      if (!prevThumb || gallery.length === 0) return prevThumb;
+      return { ...prevThumb, index: (prevThumb.index + 1) % gallery.length };
+    });
+  }, [gallery]);
+
+  const showPrevThumb = useCallback(() => {
+    setSelectedThumb((prevThumb) => {
+      if (!prevThumb || gallery.length === 0) return prevThumb;
+      return { ...prevThumb, index: (prevThumb.index - 1 + gallery.length) % gallery.length };
+    });
+  }, [gallery]);
+
+  // Keyboard support (Esc to close, arrows to page) while fullscreen is open
+  useEffect(() => {
+    if (!selectedThumb) return;
+    const onKeyDown = (e: KeyboardEvent) => {
+      if (e.key === "Escape") setSelectedThumb(null);
+      else if (e.key === "ArrowRight") showNextThumb();
+      else if (e.key === "ArrowLeft") showPrevThumb();
+    };
+    window.addEventListener("keydown", onKeyDown);
+    return () => window.removeEventListener("keydown", onKeyDown);
+  }, [selectedThumb, showNextThumb, showPrevThumb]);
+
   // ── Render ────────────────────────────────────────────────
   return (
-    <div className="relative w-full h-screen bg-[#0b1220] overflow-hidden">
+    <div className="relative w-full h-screen bg-[#0b1220] overflow-x-hidden">
       {/* Cinematic layered background */}
       <div className="absolute inset-0 bg-gradient-to-br from-slate-950 via-slate-900 to-slate-950" />
       <div
@@ -578,7 +631,7 @@ const Portfolio: React.FC = () => {
           {gallery.map((src, gi) => (
             <button
               key={gi}
-              onClick={() => setSelectedThumb({ src, name: current.name })}
+              onClick={() => setSelectedThumb({ index: gi, name: current.name })}
               className="relative w-14 h-14 rounded-2xl overflow-hidden shadow-xl transition-all duration-300 hover:scale-110 ring-2 ring-white/10 hover:ring-2 group"
               style={{ ["--tw-ring-color" as any]: `${accent}` }}
             >
@@ -608,26 +661,87 @@ const Portfolio: React.FC = () => {
         </div>
       )}
 
-      {/* ── Thumbnail lightbox modal ── */}
-      {selectedThumb && (
+      {/* ── Thumbnail lightbox modal ──
+           White overlay + black chrome per spec, with left/right paging
+           through every sub-image of the current product, and the rest of
+           the page (autoplay + watermark drift) frozen while it's open. */}
+      {selectedThumb && gallery.length > 0 && (
         <div
-          className="fixed inset-0 z-50 bg-black/85 backdrop-blur-sm flex items-center justify-center p-8 animate-[lightboxFadeIn_0.25s_ease-out]"
+          className="fixed inset-0 z-50 bg-white/95 backdrop-blur-sm flex items-center justify-center p-8 animate-[lightboxFadeIn_0.25s_ease-out]"
           onClick={() => setSelectedThumb(null)}
         >
           <div
             className="relative max-w-3xl max-h-full animate-[lightboxZoomIn_0.3s_cubic-bezier(0.25,0.46,0.45,0.94)]"
             onClick={(e) => e.stopPropagation()}
           >
-            <img src={selectedThumb.src} alt={selectedThumb.name} className="w-full h-full object-contain rounded-2xl shadow-2xl max-h-[80vh]" />
+            {/* Milk category gets a black card behind the image in fullscreen;
+                every other category stays on the plain white overlay. */}
+            <div
+              className="rounded-2xl shadow-2xl overflow-hidden flex items-center justify-center"
+              style={{ backgroundColor: activeCategoryKey === "milk" ? "#036AAD" : "transparent" }}
+            >
+              <img
+                src={gallery[selectedThumb.index]}
+                alt={`${selectedThumb.name} ${selectedThumb.index + 1}`}
+                className="w-full h-full object-contain max-h-[80vh]"
+              />
+            </div>
+
+            {/* Close — black icon on light chrome, per spec */}
             <button
               onClick={() => setSelectedThumb(null)}
-              className="absolute top-3 right-3 w-10 h-10 bg-white/10 backdrop-blur-xl border border-white/20 rounded-full flex items-center justify-center hover:bg-white/20 transition-colors shadow-lg"
+              className="absolute top-3 right-3 w-10 h-10 bg-black/50 backdrop-blur-xl border border-black/10 rounded-full flex items-center justify-center hover:bg-black/40 transition-colors shadow-lg"
               aria-label="Close"
             >
-              <X className="w-5 h-5 text-white" />
+              <X className="w-5 h-5 text-white" strokeWidth={2.5} />
             </button>
-            <div className="absolute bottom-3 left-1/2 -translate-x-1/2 bg-white/10 backdrop-blur-xl border border-white/20 px-5 py-2 rounded-full shadow">
-              <p className="text-white text-sm font-semibold">{selectedThumb.name}</p>
+
+            {/* Paging through this product's other sub-images */}
+            {gallery.length > 1 && (
+              <>
+                <button
+                  onClick={showPrevThumb}
+                  className="absolute top-1/2 -translate-y-1/2 left-3 w-10 h-10 bg-black/50 backdrop-blur-xl border border-black/10 rounded-full flex items-center justify-center hover:bg-black/40 transition-colors shadow-lg"
+                  aria-label="Previous image"
+                >
+                  <ChevronLeft className="w-5 h-5 text-white" strokeWidth={2.5} />
+                </button>
+                <button
+                  onClick={showNextThumb}
+                  className="absolute top-1/2 -translate-y-1/2 right-3 w-10 h-10 bg-black/50 backdrop-blur-xl border border-black/10 rounded-full flex items-center justify-center hover:bg-black/40 transition-colors shadow-lg"
+                  aria-label="Next image"
+                >
+                  <ChevronRight className="w-5 h-5 text-white" strokeWidth={2.5} />
+                </button>
+
+                {/* Scrollable filmstrip of every sub-image for this product */}
+                <div className="absolute -bottom-20 left-1/2 -translate-x-1/2 flex gap-2 max-w-full overflow-x-auto px-2 py-1 scrollbar-hide">
+                  {gallery.map((src, gi) => (
+                    <button
+                      key={gi}
+                      onClick={() => setSelectedThumb({ index: gi, name: selectedThumb.name })}
+                      className="relative flex-shrink-0 w-12 h-12 rounded-xl overflow-hidden shadow-md transition-all duration-200"
+                      style={{
+                        outline: gi === selectedThumb.index ? `2px solid ${accent}` : "2px solid transparent",
+                        opacity: gi === selectedThumb.index ? 1 : 0.55,
+                      }}
+                    >
+                      <img src={src} alt={`${selectedThumb.name} ${gi + 1}`} className="w-full h-full object-cover" />
+                    </button>
+                  ))}
+                </div>
+              </>
+            )}
+
+            <div className="absolute bottom-3 left-1/2 -translate-x-1/2 bg-black/5 backdrop-blur-xl border border-black/10 px-5 py-2 rounded-full shadow">
+              <p className="text-black text-sm font-semibold">
+                {selectedThumb.name}
+                {gallery.length > 1 && (
+                  <span className="text-black/40 font-normal">
+                    {" "}· {selectedThumb.index + 1}/{gallery.length}
+                  </span>
+                )}
+              </p>
             </div>
           </div>
         </div>
@@ -647,6 +761,7 @@ const Portfolio: React.FC = () => {
           to { opacity: 1; transform: scale(1); }
         }
         .scrollbar-hide::-webkit-scrollbar { display: none; }
+        .scrollbar-hide { scrollbar-width: none; -ms-overflow-style: none; }
       `}</style>
     </div>
   );
