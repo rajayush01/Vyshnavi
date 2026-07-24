@@ -10,7 +10,6 @@ import GheeStore from './pages/GheeStore';
 import DairyAuthPage from './pages/DairyAuthPage';
 import ProductDetails from './pages/ProductDetails';
 import Portfolio from './pages/Portfolio';
-import VerticalScrollAnimation from './components/VerticalScrollAnimation';
 import Profile from './pages/Profile';
 import { CartProvider } from './context/cartContext';
 import CategoryStore from './pages/CategoryStore';
@@ -18,22 +17,6 @@ import ScrollToTop from './components/ui/ScrollToTop';
 import ContactUs from './pages/ContactUs';
 
 const Home = lazy(() => import('./pages/Home'));
-
-// Responsive component wrapper
-const ResponsivePortfolio = () => {
-	const [isMobile, setIsMobile] = useState(window.innerWidth < 768);
-
-	useEffect(() => {
-		const handleResize = () => {
-			setIsMobile(window.innerWidth < 768);
-		};
-
-		window.addEventListener('resize', handleResize);
-		return () => window.removeEventListener('resize', handleResize);
-	}, []);
-
-	return isMobile ? <VerticalScrollAnimation /> : <Portfolio />;
-};
 
 function App() {
 	const [isInitialLoading, setIsInitialLoading] = useState(true);
@@ -80,7 +63,7 @@ function App() {
 						<Route path='/auth' element={<DairyAuthPage/>} />
 						<Route path="/details" element={<ProductDetails/>} />
 						<Route path="/details/:id" element={<ProductDetails/>} />
-						<Route path='/portfolio' element={<ResponsivePortfolio/>} />
+						<Route path='/portfolio' element={<Portfolio/>} />
 						<Route path="/profile" element={ <Profile />} />
 						<Route path="/contact-us" element={ <ContactUs />} />
 						<Route path="/category/:key" element={<CategoryStore />} />

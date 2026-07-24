@@ -298,6 +298,7 @@ const Portfolio: React.FC = () => {
 
   const current = currentItems[currentIndex];
   const gallery    = current.gallery.length > 0 ? current.gallery : (current.image ? [current.image] : []);
+  const hasGallery = gallery.length > 0;
 
   // Reset the "added" confirmation whenever the featured card changes
   useEffect(() => {
@@ -343,7 +344,7 @@ const Portfolio: React.FC = () => {
 
   // ── Render ────────────────────────────────────────────────
   return (
-    <div className="relative w-full h-screen bg-[#0b1220] overflow-x-hidden">
+    <div className="relative w-full min-h-[100svh] sm:h-screen bg-[#0b1220] overflow-x-hidden overflow-y-auto sm:overflow-y-hidden pt-16 sm:pt-0 pb-6 sm:pb-0">
       {/* Cinematic layered background */}
       <div className="absolute inset-0 bg-gradient-to-br from-slate-950 via-slate-900 to-slate-950" />
       <div
@@ -354,7 +355,7 @@ const Portfolio: React.FC = () => {
       <div className="absolute inset-0 pointer-events-none" style={{ boxShadow: "inset 0 0 200px rgba(0,0,0,0.6)" }} />
 
       {/* ── Eyebrow + product counter ── */}
-      <div className="absolute top-8 left-1/2 -translate-x-1/2 z-50 flex items-center gap-2 px-4 py-1.5 rounded-full bg-white/5 backdrop-blur-md border border-white/10">
+      <div className="absolute top-3 sm:top-8 left-1/2 -translate-x-1/2 z-50 flex items-center gap-2 px-4 py-1.5 rounded-full bg-white/5 backdrop-blur-md border border-white/10">
         <Sparkles className="w-3.5 h-3.5" style={{ color: accent }} />
         <span className="text-[11px] font-bold uppercase tracking-[0.3em] text-white/70">
           The Collection
@@ -370,13 +371,14 @@ const Portfolio: React.FC = () => {
       )}
 
       {/* ── Category Tab Bar ── */}
-      <div className="absolute w-full top-20 left-1/2 -translate-x-1/2 z-50 flex gap-2 flex-wrap justify-center px-4">
-        <div className="flex gap-1.5 p-1.5 rounded-full bg-white/5 backdrop-blur-xl border border-white/10 shadow-2xl flex-wrap justify-center">
+      {/* <div className="absolute w-full top-16 sm:top-20 left-1/2 -translate-x-1/2 z-50 flex gap-2 flex-wrap justify-center px-3 sm:px-4"> */}
+      <div className="absolute w-full top-16 sm:top-20 left-0 z-50 px-3 sm:px-4">
+        <div className="flex max-w-full gap-1.5 p-2 sm:p-1.5 rounded-[2rem] sm:rounded-full bg-white/5 backdrop-blur-xl border border-white/10 shadow-2xl flex-wrap justify-center">
           {CATEGORIES.map((cat) => (
             <button
               key={cat.key}
               onClick={() => changeCategory(cat.key)}
-              className={`px-5 py-2.5 rounded-full font-semibold text-xs uppercase tracking-wider transition-all duration-300 ${
+              className={`px-4 sm:px-5 py-2 sm:py-2.5 rounded-full font-semibold text-[11px] sm:text-xs uppercase tracking-wide sm:tracking-wider transition-all duration-300 ${
                 activeCategoryKey === cat.key
                   ? "text-white shadow-lg scale-105"
                   : "text-white/50 hover:text-white/80 hover:bg-white/5"
@@ -391,7 +393,7 @@ const Portfolio: React.FC = () => {
 
       {/* ── Ghee Type Tabs (Cow / Buffalo) ── */}
       {isGhee && activeCategory.items.length > 1 && (
-        <div className="absolute top-[8.25rem] left-1/2 -translate-x-1/2 z-50 flex gap-2 mt-5">
+        <div className="absolute top-[8.5rem] sm:top-[8.25rem] left-1/2 -translate-x-1/2 z-50 flex gap-2 mt-2 sm:mt-5 px-4 flex-wrap justify-center">
           {activeCategory.items.map((item) => {
             const isActive = item.id === selectedGheeItem?.id;
             return (
@@ -415,8 +417,9 @@ const Portfolio: React.FC = () => {
       )}
 
       {/* ── Subtype / Variant Pill Row ── */}
-      {!singleItem && (
-        <div className={`absolute ${isGhee ? "top-[10.75rem]" : "top-[8.25rem]"} left-0 right-0 z-50 flex items-center justify-center gap-2 px-6 mt-8`}>
+      {!singleItem && ( 
+        <div className={`absolute ${isGhee ? "top-[11.5rem] sm:top-[10.75rem]" : "top-[10.75rem] sm:top-[8.25rem]"} left-0 right-0 z-50 flex items-center justify-center gap-2 px-3 sm:px-6 mt-2 sm:mt-8`}>
+       
           <button
             onClick={() => scrollByPill(-1)}
             aria-label="Scroll varieties left"
@@ -425,7 +428,7 @@ const Portfolio: React.FC = () => {
             <ChevronLeft className="w-3.5 h-3.5 text-white/70" />
           </button>
 
-          <div className="relative max-w-3xl">
+          <div className="relative max-w-[calc(100vw-2rem)] sm:max-w-3xl">
             <div className="absolute inset-y-0 left-0 w-8 bg-gradient-to-r from-[#0b1220] to-transparent z-10 pointer-events-none" />
             <div className="absolute inset-y-0 right-0 w-8 bg-gradient-to-l from-[#0b1220] to-transparent z-10 pointer-events-none" />
             <div
@@ -439,7 +442,7 @@ const Portfolio: React.FC = () => {
                   <button
                     key={item.id}
                     onClick={() => jumpTo(i)}
-                    className="flex-shrink-0 flex items-center gap-1.5 px-3.5 py-1.5 rounded-full text-[11px] font-semibold transition-all duration-300 whitespace-nowrap"
+                    className="flex-shrink-0 flex items-center gap-1.5 px-3 py-1.5 rounded-full text-[10px] sm:text-[11px] font-semibold transition-all duration-300 whitespace-nowrap"
                     style={
                       isActive
                         ? { backgroundColor: accent, color: "#fff", boxShadow: `0 4px 16px ${accent}66`, transform: "scale(1.06)" }
@@ -478,7 +481,7 @@ const Portfolio: React.FC = () => {
       {/* ── Background watermark text ── */}
       <div
         ref={bgTextRef}
-        className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 z-0 pointer-events-none"
+        className="hidden sm:block absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 z-0 pointer-events-none"
         style={{ opacity: 0.06 }}
       >
         <h1
@@ -490,7 +493,7 @@ const Portfolio: React.FC = () => {
       </div>
 
       {/* ── Product carousel ── */}
-      <div ref={containerRef} className={`relative w-full h-full ${isGhee ? "mt-16" : "mt-10"}`}>
+      <div ref={containerRef} className={`relative w-full h-[22rem] sm:h-full ${isGhee ? "mt-[15.5rem] sm:mt-16" : "mt-[13.5rem] sm:mt-10"}`}>
         {currentItems.map((item, i) => {
           const isActive = i === currentIndex;
           return (
@@ -505,7 +508,7 @@ const Portfolio: React.FC = () => {
                 {/* Ambient glow behind the active product */}
                 {isActive && (
                   <div
-                    className="absolute w-72 h-72 rounded-full blur-3xl transition-colors duration-700"
+                    className="absolute w-52 h-52 sm:w-72 sm:h-72 rounded-full blur-3xl transition-colors duration-700"
                     style={{ background: `${accent}33` }}
                   />
                 )}
@@ -517,7 +520,7 @@ const Portfolio: React.FC = () => {
                   <img
                     src={item.image}
                     alt={item.name}
-                    className="relative w-56 h-72 object-contain drop-shadow-2xl"
+                    className="relative w-40 h-52 sm:w-56 sm:h-72 object-contain drop-shadow-2xl"
                   />
                 ) : (
                   <ImagePlaceholder category={activeCategoryKey} name={item.name} />
@@ -529,10 +532,10 @@ const Portfolio: React.FC = () => {
       </div>
 
       {/* ── Left description panel ── */}
-      <div className="absolute left-6 bottom-32 z-40 max-w-xs">
+      <div className="absolute left-4 right-4 sm:right-auto sm:left-6 bottom-16 sm:bottom-32 z-40 max-w-none sm:max-w-xs">
         <div
           key={current.id}
-          className="relative bg-white/[0.06] backdrop-blur-2xl rounded-[26px] p-6 shadow-2xl border border-white/10 animate-[panelFadeUp_0.5s_cubic-bezier(0.25,0.46,0.45,0.94)_both]"
+          className="relative bg-white/[0.06] backdrop-blur-2xl rounded-[26px] p-4 sm:p-6 shadow-2xl border border-white/10 animate-[panelFadeUp_0.5s_cubic-bezier(0.25,0.46,0.45,0.94)_both]"
         >
           <div className="absolute top-0 left-6 right-6 h-px bg-gradient-to-r from-transparent via-white/30 to-transparent" />
           {current.tag && (
@@ -543,7 +546,7 @@ const Portfolio: React.FC = () => {
               {current.tag}
             </span>
           )}
-          <h3 className="text-xl font-bold text-white mb-1 tracking-tight">
+          <h3 className="text-lg sm:text-xl font-bold text-white mb-1 tracking-tight">
             {current.sourceItem.name}
             {current.variant && (
               <span className="ml-2 text-sm font-semibold" style={{ color: accent }}>
@@ -554,7 +557,16 @@ const Portfolio: React.FC = () => {
           <p className="text-xs font-bold uppercase tracking-wide mb-2.5" style={{ color: accent }}>
             {current.description}
           </p>
-          <p className="text-white/60 text-sm leading-relaxed mb-4">{current.content}</p>
+          <p className="text-white/60 text-xs sm:text-sm leading-relaxed mb-4">{current.content}</p>
+
+          {hasGallery && (
+            <button
+              onClick={() => setSelectedThumb({ index: 0, name: current.name })}
+              className="sm:hidden mb-4 w-full rounded-2xl border border-white/10 bg-white/5 px-4 py-2.5 text-sm font-semibold text-white/85"
+            >
+              View gallery
+            </button>
+          )}
 
           {current.sourceItem.variants.length > 0 && (
             <div>
@@ -608,7 +620,7 @@ const Portfolio: React.FC = () => {
 
       {/* ── Prev / Next buttons ── */}
       {!singleItem && (
-        <div className="absolute left-6 bottom-8 z-40 flex gap-3">
+        <div className="hidden sm:flex absolute left-6 bottom-8 z-40 gap-3">
           <button
             onClick={prev}
             className="w-12 h-12 bg-white/[0.06] backdrop-blur-xl border border-white/10 rounded-full shadow-xl flex items-center justify-center hover:bg-white/10 hover:border-white/20 transition-all duration-300 hover:scale-105"
@@ -627,8 +639,8 @@ const Portfolio: React.FC = () => {
       )}
 
       {/* ── Right thumbnail rail ── */}
-      {gallery.length > 0 && (
-        <div className="absolute right-6 bottom-8 z-40 flex flex-col gap-2.5">
+      {hasGallery && (
+        <div className="hidden sm:flex absolute right-6 bottom-8 z-40 flex-col gap-2.5">
           {gallery.map((src, gi) => (
             <button
               key={gi}
@@ -668,11 +680,11 @@ const Portfolio: React.FC = () => {
            the page (autoplay + watermark drift) frozen while it's open. */}
       {selectedThumb && gallery.length > 0 && (
         <div
-          className="fixed inset-0 z-50 bg-white/95 backdrop-blur-sm flex items-center justify-center p-8 animate-[lightboxFadeIn_0.25s_ease-out]"
+          className="fixed inset-0 z-50 bg-white/95 backdrop-blur-sm flex items-center justify-center p-4 sm:p-8 animate-[lightboxFadeIn_0.25s_ease-out]"
           onClick={() => setSelectedThumb(null)}
         >
           <div
-            className="relative max-w-3xl max-h-full animate-[lightboxZoomIn_0.3s_cubic-bezier(0.25,0.46,0.45,0.94)]"
+            className="relative max-w-[calc(100vw-2rem)] sm:max-w-3xl max-h-full animate-[lightboxZoomIn_0.3s_cubic-bezier(0.25,0.46,0.45,0.94)]"
             onClick={(e) => e.stopPropagation()}
           >
             {/* Milk category gets a black card behind the image in fullscreen;
@@ -716,7 +728,7 @@ const Portfolio: React.FC = () => {
                 </button>
 
                 {/* Scrollable filmstrip of every sub-image for this product */}
-                <div className="absolute -bottom-20 left-1/2 -translate-x-1/2 flex gap-2 max-w-full overflow-x-auto px-2 py-1 scrollbar-hide">
+                <div className="absolute -bottom-16 sm:-bottom-20 left-1/2 -translate-x-1/2 flex gap-2 max-w-full overflow-x-auto px-2 py-1 scrollbar-hide">
                   {gallery.map((src, gi) => (
                     <button
                       key={gi}
