@@ -15,6 +15,7 @@ import Profile from './pages/Profile';
 import { CartProvider } from './context/cartContext';
 import CategoryStore from './pages/CategoryStore';
 import ScrollToTop from './components/ui/ScrollToTop';
+import ContactUs from './pages/ContactUs';
 
 const Home = lazy(() => import('./pages/Home'));
 
@@ -81,6 +82,7 @@ function App() {
 						<Route path="/details/:id" element={<ProductDetails/>} />
 						<Route path='/portfolio' element={<ResponsivePortfolio/>} />
 						<Route path="/profile" element={ <Profile />} />
+						<Route path="/contact-us" element={ <ContactUs />} />
 						<Route path="/category/:key" element={<CategoryStore />} />
 					</Route>
 					<Route

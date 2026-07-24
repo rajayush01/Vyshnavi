@@ -1,26 +1,17 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { motion, useInView, useAnimation, Variants, TargetAndTransition } from 'framer-motion';
-import { MapPinIcon, PhoneIcon, EnvelopeIcon, ClockIcon, CodeBracketIcon } from '@heroicons/react/24/outline';
-
-// Mock social media icons (since we don't have react-icons)
-const SocialIcon: React.FC<{ type: string }> = ({ type }) => {
-  const iconStyles = "h-6 w-6 fill-current";
-  
-  switch (type) {
-    case 'facebook':
-      return <div className={iconStyles}>f</div>;
-    case 'twitter':
-      return <div className={iconStyles}>t</div>;
-    case 'instagram':
-      return <div className={iconStyles}>i</div>;
-    case 'youtube':
-      return <div className={iconStyles}>y</div>;
-    case 'linkedin':
-      return <div className={iconStyles}>in</div>;
-    default:
-      return <div className={iconStyles}>?</div>;
-  }
-};
+import {
+  MapPin,
+  Phone,
+  Mail,
+  Clock,
+  Milk,
+  Facebook,
+  Instagram,
+  Youtube,
+  Linkedin,
+  Twitter,
+} from 'lucide-react';
 
 interface FormErrors {
   name?: string;
@@ -31,17 +22,17 @@ interface FormErrors {
 }
 
 const ContactUs: React.FC = () => {
-  // Form state - using consistent naming
+  // Form state
   const [name, setName] = useState("");
   const [email, setEmail] = useState("");
   const [phone, setPhone] = useState("");
   const [service, setService] = useState("");
   const [message, setMessage] = useState("");
-  
+
   // UI state
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [feedback, setFeedback] = useState("");
-const [errors, setErrors] = useState<FormErrors>({});
+  const [errors, setErrors] = useState<FormErrors>({});
   const [mousePosition, setMousePosition] = useState({ x: 0, y: 0 });
 
   // Refs for animations
@@ -78,7 +69,7 @@ const [errors, setErrors] = useState<FormErrors>({});
   }, []);
 
   // Animation variants
-  const fadeInUp:Variants  = {
+  const fadeInUp: Variants = {
     hidden: { opacity: 0, y: 60 },
     visible: {
       opacity: 1,
@@ -90,7 +81,7 @@ const [errors, setErrors] = useState<FormErrors>({});
     },
   };
 
-  const staggerContainer:Variants = {
+  const staggerContainer: Variants = {
     hidden: { opacity: 0 },
     visible: {
       opacity: 1,
@@ -101,7 +92,7 @@ const [errors, setErrors] = useState<FormErrors>({});
     },
   };
 
-  const staggerItem:Variants = {
+  const staggerItem: Variants = {
     hidden: { y: 40, opacity: 0 },
     visible: {
       y: 0,
@@ -158,14 +149,14 @@ const [errors, setErrors] = useState<FormErrors>({});
       email: validateEmail(email),
       phone: validatePhone(phone),
       message: validateMessage(message),
-      service: !service ? "Please select a service type" : "",
+      service: !service ? "Please select what you're reaching out about" : "",
     };
 
     setErrors(newErrors);
     return !Object.values(newErrors).some((error) => error !== "");
   };
 
-  const handleSubmit = async (e:React.FormEvent<HTMLFormElement>) => {
+  const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
 
     if (!validateForm()) {
@@ -188,8 +179,7 @@ const [errors, setErrors] = useState<FormErrors>({});
       const data = await response.json();
 
       if (data.success) {
-        setFeedback("Message sent successfully! We'll get back to you within 24 hours.");
-        // Reset form
+        setFeedback("Message sent! Our team will get back to you within 24 hours.");
         setName("");
         setEmail("");
         setPhone("");
@@ -198,23 +188,23 @@ const [errors, setErrors] = useState<FormErrors>({});
         setErrors({});
       } else {
         setFeedback(
-          data.message || "Failed to send message. Please try again."
+          data.message || "Couldn't send your message. Please try again."
         );
       }
     } catch (error) {
       console.error("Error sending message:", error);
-      setFeedback("An error occurred. Please try again later.");
+      setFeedback("Something went wrong. Please try again in a moment.");
     } finally {
       setIsSubmitting(false);
     }
   };
 
   return (
-    <div className="bg-gradient-to-br from-slate-50 via-indigo-50 to-white min-h-screen">
+    <div className="bg-gradient-to-br from-slate-50 via-sky-50 to-white min-h-screen">
       {/* Animated Background Elements */}
       <div className="fixed inset-0 overflow-hidden pointer-events-none">
         <motion.div
-          className="absolute -top-40 -right-40 w-80 h-80 bg-red-400 rounded-full mix-blend-multiply filter blur-xl opacity-20"
+          className="absolute -top-40 -right-40 w-80 h-80 bg-cyan-400 rounded-full mix-blend-multiply filter blur-xl opacity-20"
           animate={{
             scale: [1, 1.2, 1],
             rotate: [0, 180, 360],
@@ -226,7 +216,7 @@ const [errors, setErrors] = useState<FormErrors>({});
           }}
         />
         <motion.div
-          className="absolute -bottom-40 -left-40 w-80 h-80 bg-purple-400 rounded-full mix-blend-multiply filter blur-xl opacity-20"
+          className="absolute -bottom-40 -left-40 w-80 h-80 bg-blue-400 rounded-full mix-blend-multiply filter blur-xl opacity-20"
           animate={{
             scale: [1.2, 1, 1.2],
             rotate: [360, 180, 0],
@@ -238,7 +228,7 @@ const [errors, setErrors] = useState<FormErrors>({});
           }}
         />
         <motion.div
-          className="absolute top-1/2 left-1/2 w-60 h-60 bg-blue-300 rounded-full mix-blend-multiply filter blur-xl opacity-10"
+          className="absolute top-1/2 left-1/2 w-60 h-60 bg-sky-300 rounded-full mix-blend-multiply filter blur-xl opacity-10"
           animate={{
             x: [0, 100, -100, 0],
             y: [0, -100, 100, 0],
@@ -254,7 +244,7 @@ const [errors, setErrors] = useState<FormErrors>({});
 
       {/* Mouse Follower Effect */}
       <motion.div
-        className="fixed w-6 h-6 bg-indigo-500 rounded-full mix-blend-difference pointer-events-none z-50"
+        className="fixed w-6 h-6 bg-cyan-400 rounded-full mix-blend-difference pointer-events-none z-50"
         animate={{
           x: mousePosition.x - 12,
           y: mousePosition.y - 12,
@@ -274,7 +264,8 @@ const [errors, setErrors] = useState<FormErrors>({});
         variants={fadeInUp}
         className="relative overflow-hidden"
       >
-        <div className="absolute inset-0 bg-[#0C115E]">
+        <div className="absolute inset-0 bg-slate-900">
+          <div className="absolute inset-0 bg-gradient-to-b from-slate-950/40 via-slate-900/70 to-slate-950/90" />
           <div className="absolute inset-0 bg-black/20"></div>
         </div>
 
@@ -298,6 +289,24 @@ const [errors, setErrors] = useState<FormErrors>({});
           />
         </div>
 
+        {/* Decorative milk-drop ripple SVG layer */}
+        <svg
+          className="absolute bottom-0 left-0 w-full opacity-30 pointer-events-none"
+          viewBox="0 0 1440 120"
+          preserveAspectRatio="none"
+        >
+          <path
+            d="M0,64 C240,110 480,20 720,50 C960,80 1200,20 1440,60 L1440,120 L0,120 Z"
+            fill="url(#milkWave)"
+          />
+          <defs>
+            <linearGradient id="milkWave" x1="0" y1="0" x2="1" y2="0">
+              <stop offset="0%" stopColor="#22d3ee" />
+              <stop offset="100%" stopColor="#0ea5e9" />
+            </linearGradient>
+          </defs>
+        </svg>
+
         <div className="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-32 mt-20">
           <motion.div
             className="text-center"
@@ -307,9 +316,9 @@ const [errors, setErrors] = useState<FormErrors>({});
           >
             <motion.div className="flex justify-center mb-8" animate={floatingAnimation}>
               <div className="relative">
-                <CodeBracketIcon className="h-16 w-16 text-indigo-300" />
+                <Milk className="h-16 w-16 text-cyan-300" strokeWidth={1.5} />
                 <motion.div
-                  className="absolute inset-0 rounded-full bg-indigo-400/30"
+                  className="absolute inset-0 rounded-full bg-cyan-400/30"
                   animate={{
                     scale: [1, 1.5, 1],
                     opacity: [0.5, 0, 0.5],
@@ -323,24 +332,23 @@ const [errors, setErrors] = useState<FormErrors>({});
             </motion.div>
 
             <motion.h1
-              className="text-3xl md:text-6xl font-black text-white mb-6 bg-gradient-to-r from-white to-indigo-200 bg-clip-text text-transparent"
+              className="text-3xl md:text-6xl font-black text-white mb-6 bg-gradient-to-r from-white to-cyan-200 bg-clip-text text-transparent"
               initial={{ y: 50, opacity: 0 }}
               animate={{ y: 0, opacity: 1 }}
               transition={{ duration: 0.8, delay: 0.2 }}
             >
-              Contact IB Technologies
+              Get in Touch with Vyshnavi Dairy
             </motion.h1>
 
             <motion.p
-              className="text-lg md:text-xl text-indigo-100 max-w-3xl mx-auto leading-relaxed"
+              className="text-lg md:text-xl text-sky-100 max-w-3xl mx-auto leading-relaxed"
               initial={{ y: 30, opacity: 0 }}
               animate={{ y: 0, opacity: 1 }}
               transition={{ duration: 0.8, delay: 0.4 }}
             >
-              Premier ITES organization delivering world-class Business Intelligence solutions and 
-              IT services. Transform your business with our innovative technology solutions.
+              Farm-fresh milk, A2 ghee, and dairy products delivered with care. Whether it's a
+              bulk order, a subscription, or just a question — we'd love to hear from you.
             </motion.p>
-            
           </motion.div>
         </div>
 
@@ -376,19 +384,19 @@ const [errors, setErrors] = useState<FormErrors>({});
           {/* Contact Information */}
           <motion.div ref={infoRef} initial="hidden" animate={infoControls} variants={staggerContainer}>
             <motion.div variants={staggerItem}>
-              <h2 className="text-4xl font-bold text-gray-900 mb-2">IB Technologies Group</h2>
-              <h3 className="text-2xl font-semibold text-indigo-600 mb-4">
-                Premier ITES & Business Intelligence Solutions
+              <h2 className="text-4xl font-bold text-slate-900 mb-2">Vyshnavi Dairy</h2>
+              <h3 className="text-2xl font-semibold text-sky-600 mb-4">
+                Pure & Fresh, Straight From the Farm
               </h3>
-              <p className="text-lg text-gray-600 mb-8 leading-relaxed">
-                We are a premier ITES organization serving customers with efficient and dedicated service. 
-                Our skilled professional workforce provides on-time, quality solutions across multiple industries 
-                including Insurance, Healthcare, Financial, Agriculture, and Pharmaceutical sectors.
+              <p className="text-lg text-slate-600 mb-8 leading-relaxed">
+                We're a family-run dairy bringing farm-fresh milk, A2 ghee, paneer, and curd to
+                homes and businesses. Every batch is sourced daily, processed hygienically, and
+                delivered with the same care we'd want for our own family.
               </p>
-              <div className="bg-indigo-50 border-l-4 border-indigo-500 p-4 mb-8 rounded-r-lg">
-                <p className="text-indigo-800 font-medium">
-                  "We approach every client's business as if it were our own. We put ourselves in our 
-                  clients' shoes and collaborate to unlock the full potential of their business."
+              <div className="bg-sky-50 border-l-4 border-cyan-500 p-4 mb-8 rounded-r-lg">
+                <p className="text-sky-900 font-medium">
+                  We treat every drop of milk the way it deserves to be treated — with patience,
+                  cleanliness, and respect for where it came from.
                 </p>
               </div>
             </motion.div>
@@ -396,32 +404,32 @@ const [errors, setErrors] = useState<FormErrors>({});
             <div className="space-y-8">
               {[
                 {
-                  icon: MapPinIcon,
-                  title: 'Visit Our Office',
-                  details: ['3401 Mallory Lane Suite #101', 'Franklin, TN 37067', 'United States'],
-                  color: 'bg-indigo-500',
+                  icon: MapPin,
+                  title: 'Visit Our Farm & Store',
+                  details: ['Vyshnavi Dairy Farm', 'Main Road, [Village/Town], [District]', '[State] — [PIN Code], India'],
+                  color: 'bg-cyan-500',
                 },
                 {
-                  icon: PhoneIcon,
+                  icon: Phone,
                   title: 'Call Us',
-                  details: ['+1 (615) 555-0123', 'Available Mon-Fri 9AM-6PM EST'],
-                  color: 'bg-purple-500',
+                  details: ['+91 [XXXXX XXXXX]', 'Daily, 6:00 AM – 8:00 PM'],
+                  color: 'bg-sky-500',
                 },
                 {
-                  icon: EnvelopeIcon,
+                  icon: Mail,
                   title: 'Email Us',
-                  details: ['info@ibtechnologiesgroup.com', 'careers@ibtechnologiesgroup.com'],
+                  details: ['hello@vyshnavidairy.com', 'orders@vyshnavidairy.com'],
                   color: 'bg-blue-600',
                 },
                 {
-                  icon: ClockIcon,
-                  title: 'Business Hours',
-                  details: ['Monday - Friday: 9:00 AM - 6:00 PM EST', 'Saturday: 10:00 AM - 2:00 PM EST'],
+                  icon: Clock,
+                  title: 'Delivery Hours',
+                  details: ['Morning delivery: 5:30 AM – 8:00 AM', 'Evening delivery: 5:00 PM – 7:00 PM'],
                   color: 'bg-slate-600',
                 },
               ].map((item, index) => (
                 <motion.div key={index} variants={staggerItem} className="group" whileHover={{ x: 10 }}>
-                  <div className="flex items-start space-x-4 p-6 rounded-2xl bg-white shadow-lg hover:shadow-2xl transition-all duration-300 border border-gray-100">
+                  <div className="flex items-start space-x-4 p-6 rounded-2xl bg-white shadow-lg hover:shadow-2xl transition-all duration-300 border border-slate-100">
                     <motion.div
                       className={`flex-shrink-0 p-3 rounded-xl ${item.color} text-white`}
                       whileHover={{
@@ -433,10 +441,10 @@ const [errors, setErrors] = useState<FormErrors>({});
                       <item.icon className="h-6 w-6" />
                     </motion.div>
                     <div>
-                      <h3 className="text-lg font-semibold text-gray-900 mb-2">{item.title}</h3>
+                      <h3 className="text-lg font-semibold text-slate-900 mb-2">{item.title}</h3>
                       <div className="space-y-1">
                         {item.details.map((detail, idx) => (
-                          <p key={idx} className="text-gray-600 text-sm md:text-base">
+                          <p key={idx} className="text-slate-600 text-sm md:text-base">
                             {detail}
                           </p>
                         ))}
@@ -449,38 +457,43 @@ const [errors, setErrors] = useState<FormErrors>({});
 
             {/* Social Media */}
             <motion.div variants={staggerItem} className="mt-12">
-              <h3 className="text-2xl font-bold text-gray-900 mb-6">Connect & Follow</h3>
+              <h3 className="text-2xl font-bold text-slate-900 mb-6">Connect & Follow</h3>
               <div className="flex space-x-4">
                 {[
                   {
-                    type: 'facebook',
+                    Icon: Facebook,
                     color: 'bg-blue-600',
                     hoverColor: 'hover:bg-blue-700',
-                    href: 'https://facebook.com/ibtechnologiesgroup',
+                    href: 'https://facebook.com/vyshnavidairy',
+                    label: 'Facebook',
                   },
                   {
-                    type: 'twitter',
+                    Icon: Twitter,
                     color: 'bg-sky-500',
                     hoverColor: 'hover:bg-sky-600',
-                    href: 'https://twitter.com/ibtechgroup',
+                    href: 'https://twitter.com/vyshnavidairy',
+                    label: 'Twitter',
                   },
                   {
-                    type: 'instagram',
+                    Icon: Instagram,
                     color: 'bg-pink-600',
                     hoverColor: 'hover:bg-pink-700',
-                    href: 'https://instagram.com/ibtechnologiesgroup',
+                    href: 'https://instagram.com/vyshnavidairy',
+                    label: 'Instagram',
                   },
                   {
-                    type: 'youtube',
+                    Icon: Youtube,
                     color: 'bg-red-600',
                     hoverColor: 'hover:bg-red-700',
-                    href: 'https://youtube.com/@ibtechnologies',
+                    href: 'https://youtube.com/@vyshnavidairy',
+                    label: 'YouTube',
                   },
                   {
-                    type: 'linkedin',
+                    Icon: Linkedin,
                     color: 'bg-blue-700',
                     hoverColor: 'hover:bg-blue-800',
-                    href: 'https://linkedin.com/company/ib-technologies-group',
+                    href: 'https://linkedin.com/company/vyshnavi-dairy',
+                    label: 'LinkedIn',
                   },
                 ].map((social, index) => (
                   <motion.a
@@ -488,6 +501,7 @@ const [errors, setErrors] = useState<FormErrors>({});
                     href={social.href}
                     target="_blank"
                     rel="noopener noreferrer"
+                    aria-label={social.label}
                     className={`flex items-center justify-center w-14 h-14 rounded-full ${social.color} ${social.hoverColor} text-white transition-all duration-300`}
                     whileHover={{
                       y: -8,
@@ -497,7 +511,7 @@ const [errors, setErrors] = useState<FormErrors>({});
                     whileTap={{ scale: 0.9 }}
                     transition={{ type: 'spring', stiffness: 400 }}
                   >
-                    <SocialIcon type={social.type} />
+                    <social.Icon className="h-6 w-6" strokeWidth={1.75} />
                   </motion.a>
                 ))}
               </div>
@@ -508,7 +522,7 @@ const [errors, setErrors] = useState<FormErrors>({});
           <motion.div ref={formRef} initial="hidden" animate={formControls} variants={fadeInUp}>
             <div className="relative">
               {/* Glassmorphism Background */}
-              <div className="absolute inset-0 bg-gradient-to-br from-white/80 to-indigo-50/80 backdrop-blur-sm rounded-3xl"></div>
+              <div className="absolute inset-0 bg-gradient-to-br from-white/80 to-sky-50/80 backdrop-blur-sm rounded-3xl"></div>
               <div className="absolute inset-0 border border-white/20 rounded-3xl"></div>
 
               <div className="relative p-8 lg:p-12">
@@ -517,12 +531,12 @@ const [errors, setErrors] = useState<FormErrors>({});
                   animate={{ opacity: 1, y: 0 }}
                   transition={{ delay: 0.2 }}
                 >
-                  <h2 className="text-3xl font-bold text-gray-900 mb-2">
-                    Let's Build Something Amazing
+                  <h2 className="text-3xl font-bold text-slate-900 mb-2">
+                    Let's Talk Dairy
                   </h2>
-                  <p className="text-gray-600 mb-8">
-                    Ready to transform your business with cutting-edge IT solutions? Let's discuss 
-                    your project and deliver world-class results together.
+                  <p className="text-slate-600 mb-8">
+                    Placing a bulk order, starting a subscription, or just have a question about
+                    our products? Fill this in and our team will reach out.
                   </p>
                 </motion.div>
 
@@ -532,8 +546,8 @@ const [errors, setErrors] = useState<FormErrors>({});
                     animate={{ opacity: 1, y: 0 }}
                     transition={{ delay: 0.3 }}
                   >
-                    <label htmlFor="name" className="block text-sm font-medium text-gray-700 mb-2">
-                      Full Name / Company Name
+                    <label htmlFor="name" className="block text-sm font-medium text-slate-700 mb-2">
+                      Full Name / Business Name
                     </label>
                     <input
                       type="text"
@@ -549,8 +563,8 @@ const [errors, setErrors] = useState<FormErrors>({});
                           name: validateName(value),
                         });
                       }}
-                      className="w-full px-4 py-3 border border-gray-200 rounded-xl shadow-sm focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition-all duration-200 bg-white/70 backdrop-blur-sm"
-                      placeholder="Enter your name or company name"
+                      className="w-full px-4 py-3 border border-slate-200 rounded-xl shadow-sm focus:outline-none focus:ring-2 focus:ring-cyan-500 focus:border-cyan-500 transition-all duration-200 bg-white/70 backdrop-blur-sm"
+                      placeholder="Enter your name or business name"
                       disabled={isSubmitting}
                     />
                     {errors.name && (
@@ -566,9 +580,9 @@ const [errors, setErrors] = useState<FormErrors>({});
                     >
                       <label
                         htmlFor="email"
-                        className="block text-sm font-medium text-gray-700 mb-2"
+                        className="block text-sm font-medium text-slate-700 mb-2"
                       >
-                        Business Email
+                        Email
                       </label>
                       <input
                         type="email"
@@ -584,8 +598,8 @@ const [errors, setErrors] = useState<FormErrors>({});
                             email: validateEmail(value),
                           });
                         }}
-                        className="w-full px-4 py-3 border border-gray-200 rounded-xl shadow-sm focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition-all duration-200 bg-white/70 backdrop-blur-sm"
-                        placeholder="your.email@company.com"
+                        className="w-full px-4 py-3 border border-slate-200 rounded-xl shadow-sm focus:outline-none focus:ring-2 focus:ring-cyan-500 focus:border-cyan-500 transition-all duration-200 bg-white/70 backdrop-blur-sm"
+                        placeholder="you@email.com"
                         disabled={isSubmitting}
                       />
                       {errors.email && (
@@ -600,7 +614,7 @@ const [errors, setErrors] = useState<FormErrors>({});
                     >
                       <label
                         htmlFor="phone"
-                        className="block text-sm font-medium text-gray-700 mb-2"
+                        className="block text-sm font-medium text-slate-700 mb-2"
                       >
                         Phone Number
                       </label>
@@ -620,8 +634,8 @@ const [errors, setErrors] = useState<FormErrors>({});
                         required
                         disabled={isSubmitting}
                         pattern="[0-9]{10}"
-                        className="w-full px-4 py-3 border border-gray-200 rounded-xl shadow-sm focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition-all duration-200 bg-white/70 backdrop-blur-sm"
-                        placeholder="+1 (555) 123-4567"
+                        className="w-full px-4 py-3 border border-slate-200 rounded-xl shadow-sm focus:outline-none focus:ring-2 focus:ring-cyan-500 focus:border-cyan-500 transition-all duration-200 bg-white/70 backdrop-blur-sm"
+                        placeholder="98765 43210"
                       />
                       {errors.phone && (
                         <p className="mt-1 text-sm text-red-600">{errors.phone}</p>
@@ -636,9 +650,9 @@ const [errors, setErrors] = useState<FormErrors>({});
                   >
                     <label
                       htmlFor="service"
-                      className="block text-sm font-medium text-gray-700 mb-2"
+                      className="block text-sm font-medium text-slate-700 mb-2"
                     >
-                      Service Required
+                      What's This About?
                     </label>
                     <select
                       name="service"
@@ -649,28 +663,22 @@ const [errors, setErrors] = useState<FormErrors>({});
                         setService(e.target.value);
                         setErrors({
                           ...errors,
-                          service: !e.target.value ? 'Please select a service type' : '',
+                          service: !e.target.value ? "Please select what you're reaching out about" : '',
                         });
                       }}
                       disabled={isSubmitting}
-                      className="w-full px-4 py-3 border border-gray-200 rounded-xl shadow-sm focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition-all duration-200 bg-white/70 backdrop-blur-sm"
+                      className="w-full px-4 py-3 border border-slate-200 rounded-xl shadow-sm focus:outline-none focus:ring-2 focus:ring-cyan-500 focus:border-cyan-500 transition-all duration-200 bg-white/70 backdrop-blur-sm"
                     >
-                      <option value="">Select a service</option>
-                      <option value="Business Intelligence Solutions">Business Intelligence Solutions</option>
-                      <option value="Data Analytics & Reporting">Data Analytics & Reporting</option>
-                      <option value="Software Development">Custom Software Development</option>
-                      <option value="Insurance IT Solutions">Insurance IT Solutions</option>
-                      <option value="Healthcare IT Solutions">Healthcare IT Solutions</option>
-                      <option value="Financial IT Solutions">Financial IT Solutions</option>
-                      <option value="Agriculture IT Solutions">Agriculture IT Solutions</option>
-                      <option value="Pharmaceutical IT Solutions">Pharmaceutical IT Solutions</option>
-                      <option value="ETL Development">ETL Development & Data Warehousing</option>
-                      <option value="System Integration">System Integration</option>
-                      <option value="BPO Services">BPO Services</option>
-                      <option value="Technical Consulting">Technical Consulting</option>
-                      <option value="Career Opportunities">Career Opportunities</option>
-                      <option value="Partnership Inquiry">Partnership Inquiry</option>
-                      <option value="Other">Other Services</option>
+                      <option value="">Select an option</option>
+                      <option value="A2 Ghee & Product Inquiry">A2 Ghee & Product Inquiry</option>
+                      <option value="Milk Subscription">Milk Subscription / Home Delivery</option>
+                      <option value="Bulk & Wholesale Orders">Bulk & Wholesale Orders</option>
+                      <option value="Retail Store Inquiry">Retail Store Inquiry</option>
+                      <option value="Corporate & Festival Gifting">Corporate & Festival Gifting</option>
+                      <option value="Franchise & Distributorship">Franchise & Distributorship</option>
+                      <option value="Quality Feedback">Quality Feedback</option>
+                      <option value="Careers">Careers</option>
+                      <option value="Other">Other</option>
                     </select>
                     {errors.service && (
                       <p className="mt-1 text-sm text-red-600">{errors.service}</p>
@@ -684,9 +692,9 @@ const [errors, setErrors] = useState<FormErrors>({});
                   >
                     <label
                       htmlFor="message"
-                      className="block text-sm font-medium text-gray-700 mb-2"
+                      className="block text-sm font-medium text-slate-700 mb-2"
                     >
-                      Project Details / Message
+                      Your Message
                     </label>
                     <textarea
                       name="message"
@@ -703,8 +711,8 @@ const [errors, setErrors] = useState<FormErrors>({});
                         });
                       }}
                       disabled={isSubmitting}
-                      className="w-full px-4 py-3 border border-gray-200 rounded-xl shadow-sm focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition-all duration-200 bg-white/70 backdrop-blur-sm resize-none"
-                      placeholder="Describe your project requirements, technology needs, or business challenges..."
+                      className="w-full px-4 py-3 border border-slate-200 rounded-xl shadow-sm focus:outline-none focus:ring-2 focus:ring-cyan-500 focus:border-cyan-500 transition-all duration-200 bg-white/70 backdrop-blur-sm resize-none"
+                      placeholder="Tell us what you need — order size, delivery area, or any questions about our products..."
                     ></textarea>
                     {errors.message && (
                       <p className="mt-1 text-sm text-red-600">{errors.message}</p>
@@ -716,7 +724,7 @@ const [errors, setErrors] = useState<FormErrors>({});
                       initial={{ opacity: 0, scale: 0.95 }}
                       animate={{ opacity: 1, scale: 1 }}
                       className={`p-4 rounded-xl ${
-                        feedback.includes("successfully")
+                        feedback.includes("sent")
                           ? "bg-green-50 text-green-800 border border-green-200"
                           : "bg-red-50 text-red-800 border border-red-200"
                       }`}
@@ -733,10 +741,10 @@ const [errors, setErrors] = useState<FormErrors>({});
                     <motion.button
                       type="submit"
                       disabled={isSubmitting}
-                      className="w-full relative overflow-hidden bg-gradient-to-r from-indigo-600 to-purple-600 text-white font-semibold py-4 px-8 rounded-xl shadow-lg disabled:opacity-50 group"
+                      className="w-full relative overflow-hidden bg-gradient-to-r from-cyan-500 to-blue-600 text-white font-semibold py-4 px-8 rounded-xl shadow-lg disabled:opacity-50 group"
                       whileHover={{
                         scale: 1.02,
-                        boxShadow: '0 20px 40px rgba(99, 102, 241, 0.3)',
+                        boxShadow: '0 20px 40px rgba(6, 182, 212, 0.35)',
                       }}
                       whileTap={{ scale: 0.98 }}
                     >
@@ -759,7 +767,7 @@ const [errors, setErrors] = useState<FormErrors>({});
                         )}
                       </span>
                       <motion.div
-                        className="absolute inset-0 bg-gradient-to-r from-purple-600 to-indigo-600"
+                        className="absolute inset-0 bg-gradient-to-r from-blue-600 to-cyan-500"
                         initial={{ x: '100%' }}
                         whileHover={{ x: 0 }}
                         transition={{ duration: 0.3 }}
@@ -770,28 +778,28 @@ const [errors, setErrors] = useState<FormErrors>({});
 
                 {/* Additional Info */}
                 <motion.div
-                  className="mt-8 p-6 bg-gradient-to-r from-indigo-50 to-purple-50 rounded-xl border border-indigo-100"
+                  className="mt-8 p-6 bg-gradient-to-r from-sky-50 to-cyan-50 rounded-xl border border-sky-100"
                   initial={{ opacity: 0, y: 20 }}
                   animate={{ opacity: 1, y: 0 }}
                   transition={{ delay: 1 }}
                 >
-                  <h4 className="text-lg font-semibold text-gray-900 mb-3">Why Choose IB Technologies?</h4>
-                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 text-sm text-gray-600">
+                  <h4 className="text-lg font-semibold text-slate-900 mb-3">Why Vyshnavi Dairy?</h4>
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 text-sm text-slate-600">
                     <div className="flex items-center space-x-2">
-                      <div className="w-2 h-2 bg-indigo-500 rounded-full"></div>
-                      <span>World-class quality standards</span>
+                      <div className="w-2 h-2 bg-cyan-500 rounded-full"></div>
+                      <span>Farm-fresh sourcing, daily</span>
                     </div>
                     <div className="flex items-center space-x-2">
-                      <div className="w-2 h-2 bg-purple-500 rounded-full"></div>
-                      <span>Experienced IT consultants</span>
+                      <div className="w-2 h-2 bg-sky-500 rounded-full"></div>
+                      <span>Hygienic, traditional processing</span>
                     </div>
                     <div className="flex items-center space-x-2">
                       <div className="w-2 h-2 bg-blue-500 rounded-full"></div>
-                      <span>On-time delivery guarantee</span>
+                      <span>Reliable doorstep delivery</span>
                     </div>
                     <div className="flex items-center space-x-2">
-                      <div className="w-2 h-2 bg-indigo-600 rounded-full"></div>
-                      <span>24/7 support & maintenance</span>
+                      <div className="w-2 h-2 bg-cyan-600 rounded-full"></div>
+                      <span>No preservatives, ever</span>
                     </div>
                   </div>
                 </motion.div>
@@ -807,8 +815,9 @@ const [errors, setErrors] = useState<FormErrors>({});
         initial="hidden"
         animate={mapControls}
         variants={fadeInUp}
-        className="w-full h-96 bg-gray-100"
+        className="w-full h-96 bg-slate-100"
       >
+        {/* Replace the src below with an embed URL for Vyshnavi Dairy's actual farm/store location */}
         <iframe
           src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3213.7516666666665!2d-86.8633333!3d35.9250000!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x0%3A0x0!2zMzXCsDU1JzMwLjAiTiA4NsKwNTEnNDguMCJX!5e0!3m2!1sen!2sus!4v1699876543210!5m2!1sen!2sus"
           width="100%"
@@ -816,12 +825,12 @@ const [errors, setErrors] = useState<FormErrors>({});
           style={{ border: 0 }}
           allowFullScreen
           loading="lazy"
-          title="IB Technologies Group - Franklin, TN Office"
+          title="Vyshnavi Dairy — Farm & Store Location"
         ></iframe>
       </motion.div>
 
       {/* Footer Section */}
-      <div className="bg-gray-900 text-white py-16">
+      <div className="bg-slate-900 text-white py-16">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
           <motion.h3
             className="text-2xl font-bold mb-4"
@@ -829,17 +838,16 @@ const [errors, setErrors] = useState<FormErrors>({});
             whileInView={{ opacity: 1, y: 0 }}
             viewport={{ once: true }}
           >
-            Transform Your Business with Technology
+            Taste the Purity, Every Single Day
           </motion.h3>
           <motion.p
-            className="text-gray-300 mb-8"
+            className="text-slate-300 mb-8"
             initial={{ opacity: 0, y: 20 }}
             whileInView={{ opacity: 1, y: 0 }}
             viewport={{ once: true }}
             transition={{ delay: 0.2 }}
           >
-            Partner with IB Technologies for innovative IT solutions that drive growth and success. 
-            Let's build the future together.
+            From our farm to your family's table — join the Vyshnavi Dairy family today.
           </motion.p>
           <motion.div
             className="flex justify-center space-x-4"
@@ -849,18 +857,18 @@ const [errors, setErrors] = useState<FormErrors>({});
             transition={{ delay: 0.4 }}
           >
             <motion.button
-              className="bg-indigo-600 hover:bg-indigo-700 text-white font-semibold py-3 px-8 rounded-full transition-all duration-300"
+              className="bg-cyan-500 hover:bg-cyan-600 text-white font-semibold py-3 px-8 rounded-full transition-all duration-300"
               whileHover={{ scale: 1.05 }}
               whileTap={{ scale: 0.95 }}
             >
-              Start Your Project
+              Start a Subscription
             </motion.button>
             <motion.button
-              className="border-2 border-white text-white hover:bg-white hover:text-gray-900 font-semibold py-3 px-8 rounded-full transition-all duration-300"
+              className="border-2 border-white text-white hover:bg-white hover:text-slate-900 font-semibold py-3 px-8 rounded-full transition-all duration-300"
               whileHover={{ scale: 1.05 }}
               whileTap={{ scale: 0.95 }}
             >
-              View Our Portfolio
+              Browse Our Products
             </motion.button>
           </motion.div>
         </div>

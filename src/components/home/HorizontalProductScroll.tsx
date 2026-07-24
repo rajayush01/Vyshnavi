@@ -12,6 +12,7 @@
 
 import React, { useRef, useState, useEffect, useCallback, useMemo } from "react";
 import { ShoppingCart, Zap, ChevronLeft, ChevronRight, Star, X, Expand, Minus, Plus } from "lucide-react";
+import { useNavigate } from "react-router-dom";
 
 // ── Data source ──────────────────────────────────────────────────────────
 import {
@@ -81,6 +82,7 @@ const StageDecorations: React.FC = () => (
 const HorizontalProductScroll: React.FC<HorizontalProductScrollProps> = ({
   heading,
 }) => {
+  const navigate = useNavigate();
   const [current, setCurrent] = useState(0);
   const [activePhoto, setActivePhoto] = useState(0);
   const [isLightboxOpen, setIsLightboxOpen] = useState(false);
@@ -457,7 +459,21 @@ const HorizontalProductScroll: React.FC<HorizontalProductScrollProps> = ({
             <p style={{ fontSize: 11, fontWeight: 700, letterSpacing: "0.15em", textTransform: "uppercase", color: "#2563eb", margin: "0 0 8px" }}>
               {category.name}
             </p>
-            <h3 style={{ fontSize: "clamp(24px, 3vw, 32px)", fontWeight: 800, color: "#0f172a", margin: "0 0 12px", lineHeight: 1.2, letterSpacing: "-0.01em" }}>
+            <h3
+              onClick={() => navigate(`/ghee`)}
+              style={{
+                fontSize: "clamp(24px, 3vw, 32px)",
+                fontWeight: 800,
+                color: "#0f172a",
+                margin: "0 0 12px",
+                lineHeight: 1.2,
+                letterSpacing: "-0.01em",
+                cursor: "pointer",
+                transition: "color 0.2s ease",
+              }}
+              onMouseEnter={(e) => (e.currentTarget.style.color = "#2563eb")}
+              onMouseLeave={(e) => (e.currentTarget.style.color = "#0f172a")}
+            >
               {item.name}
             </h3>
             <p style={{ fontSize: 14.5, color: "#64748b", lineHeight: 1.7, margin: "0 0 20px", maxWidth: 440 }}>
