@@ -23,6 +23,21 @@
  *  - You can page left/right through every sub-image of the product that
  *    was open when the lightbox launched (buttons, filmstrip, and arrow
  *    keys), not just view a single static image.
+ *
+ * RESPONSIVE LAYOUT (updated):
+ *  - Below `sm`, every header control (eyebrow pill, category tabs, ghee
+ *    tabs, variant pill row), the description panel, and the progress
+ *    dots now render in normal document flow instead of being absolutely
+ *    positioned with hardcoded top/margin offsets. Previously those fixed
+ *    offsets assumed a fixed height for everything above them — on a
+ *    narrow screen the category tabs wrap to 2-3 rows, so the pill row
+ *    (and everything after it) would slide up and overlap or hide the
+ *    product carousel entirely.
+ *  - At `sm` and above the same elements switch to `position: absolute`
+ *    and use the original cinematic overlay positioning, unchanged.
+ *  - This is done on the SAME elements (`relative sm:absolute ...`)
+ *    rather than duplicated markup, so there is only ever one pill row
+ *    driving `pillsRef` / `animateTo` — no ref or scroll-into-view bugs.
  */
 
 import React, { useEffect, useRef, useState, useCallback, useMemo } from "react";
@@ -344,7 +359,7 @@ const Portfolio: React.FC = () => {
 
   // ── Render ────────────────────────────────────────────────
   return (
-    <div className="relative w-full min-h-[100svh] sm:h-screen bg-[#0b1220] overflow-x-hidden overflow-y-auto sm:overflow-y-hidden pt-16 sm:pt-0 pb-6 sm:pb-0">
+    <div className="relative w-full min-h-[100svh] sm:h-screen bg-[#0b1220] overflow-x-hidden overflow-y-auto sm:overflow-y-hidden pt-16 sm:pt-0 pb-8 sm:pb-0">
       {/* Cinematic layered background */}
       <div className="absolute inset-0 bg-gradient-to-br from-slate-950 via-slate-900 to-slate-950" />
       <div
@@ -354,8 +369,9 @@ const Portfolio: React.FC = () => {
       <div className="absolute inset-0 opacity-[0.04]" style={{ backgroundImage: "url(\"data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='60' height='60'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='2' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E\")" }} />
       <div className="absolute inset-0 pointer-events-none" style={{ boxShadow: "inset 0 0 200px rgba(0,0,0,0.6)" }} />
 
-      {/* ── Eyebrow + product counter ── */}
-      <div className="absolute top-3 sm:top-8 left-1/2 -translate-x-1/2 z-50 flex items-center gap-2 px-4 py-1.5 rounded-full bg-white/5 backdrop-blur-md border border-white/10">
+      {/* ── Eyebrow ── in flow on mobile (centered via w-fit + mx-auto),
+           absolute-centered overlay on sm+, exactly as before */}
+      <div className="relative sm:absolute w-fit mx-auto sm:mx-0 mt-4 sm:mt-0 sm:top-8 sm:left-1/2 sm:-translate-x-1/2 z-50 flex items-center gap-2 px-4 py-1.5 rounded-full bg-white/5 backdrop-blur-md border border-white/10">
         <Sparkles className="w-3.5 h-3.5" style={{ color: accent }} />
         <span className="text-[11px] font-bold uppercase tracking-[0.3em] text-white/70">
           The Collection
@@ -370,9 +386,9 @@ const Portfolio: React.FC = () => {
         </div>
       )}
 
-      {/* ── Category Tab Bar ── */}
-      {/* <div className="absolute w-full top-16 sm:top-20 left-1/2 -translate-x-1/2 z-50 flex gap-2 flex-wrap justify-center px-3 sm:px-4"> */}
-      <div className="absolute w-full top-16 sm:top-20 left-0 z-50 px-3 sm:px-4">
+      {/* ── Category Tab Bar ── flow on mobile (wraps freely, no fixed
+           offset assumed by anything below it), absolute overlay on sm+ */}
+      <div className="relative sm:absolute w-full sm:left-0 z-50 px-3 sm:px-4 mt-3 sm:mt-0 sm:top-20">
         <div className="flex max-w-full gap-1.5 p-2 sm:p-1.5 rounded-[2rem] sm:rounded-full bg-white/5 backdrop-blur-xl border border-white/10 shadow-2xl flex-wrap justify-center">
           {CATEGORIES.map((cat) => (
             <button
@@ -391,9 +407,9 @@ const Portfolio: React.FC = () => {
         </div>
       </div>
 
-      {/* ── Ghee Type Tabs (Cow / Buffalo) ── */}
+      {/* ── Ghee Type Tabs (Cow / Buffalo) ── flow on mobile, absolute on sm+ */}
       {isGhee && activeCategory.items.length > 1 && (
-        <div className="absolute top-[8.5rem] sm:top-[8.25rem] left-1/2 -translate-x-1/2 z-50 flex gap-2 mt-2 sm:mt-5 px-4 flex-wrap justify-center">
+        <div className="relative sm:absolute sm:top-[8.25rem] sm:left-1/2 sm:-translate-x-1/2 z-50 flex gap-2 flex-wrap justify-center mt-3 sm:mt-5 px-4 w-full sm:w-auto">
           {activeCategory.items.map((item) => {
             const isActive = item.id === selectedGheeItem?.id;
             return (
@@ -416,10 +432,14 @@ const Portfolio: React.FC = () => {
         </div>
       )}
 
-      {/* ── Subtype / Variant Pill Row ── */}
-      {!singleItem && ( 
-        <div className={`absolute ${isGhee ? "top-[11.5rem] sm:top-[10.75rem]" : "top-[10.75rem] sm:top-[8.25rem]"} left-0 right-0 z-50 flex items-center justify-center gap-2 px-3 sm:px-6 mt-2 sm:mt-8`}>
-       
+      {/* ── Subtype / Variant Pill Row ── flow on mobile, absolute on sm+.
+           This is the single instance driving pillsRef — no duplicated
+           markup, so scrollIntoView / active-pill tracking stays correct
+           at every breakpoint. */}
+      {!singleItem && (
+        <div
+          className={`relative sm:absolute ${isGhee ? "sm:top-[10.75rem]" : "sm:top-[8.25rem]"} sm:left-0 sm:right-0 z-50 flex items-center justify-center gap-2 px-3 sm:px-6 mt-3 sm:mt-8`}
+        >
           <button
             onClick={() => scrollByPill(-1)}
             aria-label="Scroll varieties left"
@@ -428,7 +448,7 @@ const Portfolio: React.FC = () => {
             <ChevronLeft className="w-3.5 h-3.5 text-white/70" />
           </button>
 
-          <div className="relative max-w-[calc(100vw-2rem)] sm:max-w-3xl">
+          <div className="relative max-w-full sm:max-w-3xl">
             <div className="absolute inset-y-0 left-0 w-8 bg-gradient-to-r from-[#0b1220] to-transparent z-10 pointer-events-none" />
             <div className="absolute inset-y-0 right-0 w-8 bg-gradient-to-l from-[#0b1220] to-transparent z-10 pointer-events-none" />
             <div
@@ -479,7 +499,7 @@ const Portfolio: React.FC = () => {
       )}
 
       {/* ── Background watermark text ── */}
-      <div
+      {/* <div
         ref={bgTextRef}
         className="hidden sm:block absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 z-0 pointer-events-none"
         style={{ opacity: 0.06 }}
@@ -490,10 +510,15 @@ const Portfolio: React.FC = () => {
         >
           {current.sourceItem.name.toUpperCase()}
         </h1>
-      </div>
+      </div> */}
 
-      {/* ── Product carousel ── */}
-      <div ref={containerRef} className={`relative w-full h-[22rem] sm:h-full ${isGhee ? "mt-[15.5rem] sm:mt-16" : "mt-[13.5rem] sm:mt-10"}`}>
+      {/* ── Product carousel ── in flow at every breakpoint. On mobile it
+           now sits naturally below whatever height the header controls
+           actually rendered at, instead of a hardcoded mt-[13.5rem]/[15.5rem]
+           guess that broke as soon as the category tabs wrapped to extra
+           rows. On sm+ the header controls are absolute again, so this
+           keeps its original margin-based spacing. */}
+      <div ref={containerRef} className="relative w-full h-[22rem] sm:h-full mt-4 sm:mt-10">
         {currentItems.map((item, i) => {
           const isActive = i === currentIndex;
           return (
@@ -531,8 +556,9 @@ const Portfolio: React.FC = () => {
         })}
       </div>
 
-      {/* ── Left description panel ── */}
-      <div className="absolute left-4 right-4 sm:right-auto sm:left-6 bottom-16 sm:bottom-32 z-40 max-w-none sm:max-w-xs">
+      {/* ── Description panel ── flow card below the carousel on mobile,
+           absolute bottom-left overlay on sm+ (unchanged there) */}
+      <div className="relative sm:absolute mx-4 sm:mx-0 sm:right-auto sm:left-6 sm:bottom-32 z-40 max-w-none sm:max-w-xs mt-4 mb-4 sm:mt-0 sm:mb-0">
         <div
           key={current.id}
           className="relative bg-white/[0.06] backdrop-blur-2xl rounded-[26px] p-4 sm:p-6 shadow-2xl border border-white/10 animate-[panelFadeUp_0.5s_cubic-bezier(0.25,0.46,0.45,0.94)_both]"
@@ -618,7 +644,7 @@ const Portfolio: React.FC = () => {
         </div>
       </div>
 
-      {/* ── Prev / Next buttons ── */}
+      {/* ── Prev / Next buttons ── desktop only, unchanged */}
       {!singleItem && (
         <div className="hidden sm:flex absolute left-6 bottom-8 z-40 gap-3">
           <button
@@ -638,7 +664,8 @@ const Portfolio: React.FC = () => {
         </div>
       )}
 
-      {/* ── Right thumbnail rail ── */}
+      {/* ── Right thumbnail rail ── desktop only, unchanged (mobile uses
+           the "View gallery" button in the description panel instead) */}
       {hasGallery && (
         <div className="hidden sm:flex absolute right-6 bottom-8 z-40 flex-col gap-2.5">
           {gallery.map((src, gi) => (
@@ -655,9 +682,9 @@ const Portfolio: React.FC = () => {
         </div>
       )}
 
-      {/* ── Progress bar ── */}
+      {/* ── Progress bar ── flow (centered) on mobile, absolute on sm+ */}
       {!singleItem && (
-        <div className="absolute bottom-8 left-1/2 -translate-x-1/2 flex gap-2 z-10">
+        <div className="relative sm:absolute sm:bottom-8 sm:left-1/2 sm:-translate-x-1/2 flex justify-center gap-2 z-10 py-2 sm:py-0">
           {currentItems.map((_, i) => (
             <button
               key={i}

@@ -38,6 +38,13 @@
  *    "write a review" form (name, star rating, text, photo upload), and
  *    a review list. Review photos open in the same full-screen lightbox
  *    used for the product gallery.
+ *
+ *  RESPONSIVE PASS: fixed several places that could overflow on small
+ *  screens — the title vs. share-button row, the big price row, the
+ *  variant size/price boxes (fixed text-3xl was too wide for a 2-col
+ *  mobile grid), and the quantity + Add to Cart + Buy Now row (previously
+ *  always side-by-side, now stacks quantity above the buttons on mobile).
+ *  Desktop (lg:) appearance is unchanged.
  */
 
 import React, { useEffect, useMemo, useState } from "react";
@@ -365,7 +372,7 @@ const ProductDetails: React.FC = () => {
 
   return (
     <div
-      className="min-h-screen bg-gradient-to-b from-white via-white to-white"
+      className="min-h-screen w-full overflow-x-hidden bg-gradient-to-b from-white via-white to-white"
       style={{
         backgroundImage: `linear-gradient(to bottom, ${accent}0d, #ffffff, #ffffff)`,
       }}
@@ -375,7 +382,7 @@ const ProductDetails: React.FC = () => {
         <div className="flex items-center justify-between mb-6 sm:mb-8">
           <button
             onClick={() => navigate(-1)}
-            className="group inline-flex items-center gap-2 rounded-full border border-slate-200 bg-white px-4 py-2 text-sm font-medium text-slate-700 shadow-sm transition-all duration-300 hover:shadow-md"
+            className="group inline-flex items-center gap-2 rounded-full border border-slate-200 bg-white px-4 py-2 text-sm font-medium text-slate-700 shadow-sm transition-all duration-300 hover:shadow-md mt-5 sm:mt-0"
             style={{ ["--hover-color" as any]: accent }}
             onMouseEnter={(e) => {
               (e.currentTarget as HTMLElement).style.borderColor =
@@ -452,10 +459,10 @@ const ProductDetails: React.FC = () => {
                           prev === 0 ? images.length - 1 : prev - 1,
                         );
                       }}
-                      className="absolute left-4 top-1/2 -translate-y-1/2 w-11 h-11 rounded-full bg-white/80 backdrop-blur-md shadow-lg border border-white/50 flex items-center justify-center hover:scale-105 transition-all"
+                      className="absolute left-2 sm:left-4 top-1/2 -translate-y-1/2 w-9 h-9 sm:w-11 sm:h-11 rounded-full bg-white/80 backdrop-blur-md shadow-lg border border-white/50 flex items-center justify-center hover:scale-105 transition-all"
                       aria-label="Previous Image"
                     >
-                      <ChevronLeft className="w-5 h-5 text-slate-700" />
+                      <ChevronLeft className="w-4 h-4 sm:w-5 sm:h-5 text-slate-700" />
                     </button>
                   )}
 
@@ -468,10 +475,10 @@ const ProductDetails: React.FC = () => {
                           prev === images.length - 1 ? 0 : prev + 1,
                         );
                       }}
-                      className="absolute right-4 top-1/2 -translate-y-1/2 w-11 h-11 rounded-full bg-white/80 backdrop-blur-md shadow-lg border border-white/50 flex items-center justify-center hover:scale-105 transition-all"
+                      className="absolute right-2 sm:right-4 top-1/2 -translate-y-1/2 w-9 h-9 sm:w-11 sm:h-11 rounded-full bg-white/80 backdrop-blur-md shadow-lg border border-white/50 flex items-center justify-center hover:scale-105 transition-all"
                       aria-label="Next Image"
                     >
-                      <ChevronRight className="w-5 h-5 text-slate-700" />
+                      <ChevronRight className="w-4 h-4 sm:w-5 sm:h-5 text-slate-700" />
                     </button>
                   )}
                   <span
@@ -483,7 +490,7 @@ const ProductDetails: React.FC = () => {
                 </button>
               ) : (
                 <div
-                  className="relative w-56 h-56 rounded-3xl flex items-center justify-center font-semibold text-sm"
+                  className="relative w-56 h-56 rounded-3xl flex items-center justify-center font-semibold text-sm text-center px-4"
                   style={{ background: fallbackGradient, color: accent }}
                 >
                   {product.name}
@@ -537,10 +544,10 @@ const ProductDetails: React.FC = () => {
           </div>
 
           {/* Right Column - Scrollable Product Details */}
-          <div className="space-y-5 sm:space-y-6">
+          <div className="space-y-5 sm:space-y-6 min-w-0">
             {/* Header */}
             <div className="flex justify-between items-start gap-3">
-              <h1 className="text-2xl sm:text-3xl lg:text-4xl font-black text-gray-900 tracking-tight">
+              <h1 className="min-w-0 break-words text-2xl sm:text-3xl lg:text-4xl font-black text-gray-900 tracking-tight">
                 {product.name}
               </h1>
               <button className="p-2.5 hover:bg-gray-50 rounded-full flex-shrink-0 border border-transparent hover:border-gray-100 transition-colors">
@@ -550,7 +557,7 @@ const ProductDetails: React.FC = () => {
 
             {/* Product tagline */}
             <p
-              className="text-xs font-bold uppercase tracking-widest leading-relaxed"
+              className="text-xs font-bold uppercase tracking-widest leading-relaxed break-words"
               style={{ color: `${accent}cc` }}
             >
               {product.description}
@@ -559,12 +566,12 @@ const ProductDetails: React.FC = () => {
             {/* Price */}
             {hasPrice ? (
               <>
-                <div className="flex items-baseline gap-2 sm:gap-3">
+                <div className="flex flex-wrap items-baseline gap-2 sm:gap-3">
                   <span className="text-3xl sm:text-4xl lg:text-5xl font-black text-gray-900 tracking-tight">
                     ₹{selectedVariant.price!.toLocaleString("en-IN")}
                   </span>
                   {selectedVariant.originalPrice && (
-                    <span className="text-xl sm:text-2xl text-gray-400 line-through">
+                    <span className="text-lg sm:text-2xl text-gray-400 line-through">
                       ₹{selectedVariant.originalPrice.toLocaleString("en-IN")}
                     </span>
                   )}
@@ -575,7 +582,7 @@ const ProductDetails: React.FC = () => {
 
                 {selectedVariant.discount && (
                   <div
-                    className="relative inline-block text-white px-4 py-2 rounded-full text-xs sm:text-sm font-bold overflow-hidden shadow-[0_10px_25px_-8px_rgba(0,0,0,0.35)]"
+                    className="relative inline-block max-w-full text-white px-4 py-2 rounded-full text-xs sm:text-sm font-bold overflow-hidden shadow-[0_10px_25px_-8px_rgba(0,0,0,0.35)]"
                     style={{
                       background: `linear-gradient(90deg, ${accent}, ${accent}cc)`,
                     }}
@@ -589,16 +596,18 @@ const ProductDetails: React.FC = () => {
               </>
             ) : (
               <div
-                className="inline-flex items-center gap-2 px-4 py-2.5 rounded-2xl border text-sm font-semibold"
+                className="inline-flex items-center gap-2 px-4 py-2.5 rounded-2xl border text-sm font-semibold max-w-full"
                 style={{
                   backgroundColor: `${accent}0d`,
                   borderColor: `${accent}33`,
                   color: accent,
                 }}
               >
-                <Sparkles className="w-4 h-4" />
-                Price on request — our team will confirm availability for this
-                size
+                <Sparkles className="w-4 h-4 flex-shrink-0" />
+                <span className="break-words">
+                  Price on request — our team will confirm availability for
+                  this size
+                </span>
               </div>
             )}
 
@@ -615,7 +624,7 @@ const ProductDetails: React.FC = () => {
                       <button
                         key={variant.size}
                         onClick={() => setSelectedVariantSize(variant.size)}
-                        className="p-3 rounded-2xl border-2 text-left transition-all duration-200 bg-white"
+                        className="p-3 rounded-2xl border-2 text-left transition-all duration-200 bg-white min-w-0"
                         style={{
                           borderColor: isActive ? accent : "#f1f5f9",
                           backgroundColor: isActive ? `${accent}0d` : "#ffffff",
@@ -624,12 +633,12 @@ const ProductDetails: React.FC = () => {
                             : "none",
                         }}
                       >
-                        <div className="font-bold text-sm text-gray-900">
+                        <div className="font-bold text-sm text-gray-900 truncate">
                           {variant.size}
                         </div>
                         {variant.price ? (
                           <div className="flex items-baseline gap-1.5 flex-wrap mt-1">
-                            <span className="text-3xl font-bold text-gray-900">
+                            <span className="text-lg sm:text-xl lg:text-2xl font-bold text-gray-900 break-words">
                               ₹{variant.price.toLocaleString("en-IN")}
                             </span>
                             {variant.originalPrice && (
@@ -653,10 +662,11 @@ const ProductDetails: React.FC = () => {
               </div>
             )}
 
-            {/* Quantity Selector and Action Buttons */}
-            <div className="flex flex-row items-center gap-4">
+            {/* Quantity Selector and Action Buttons — stacked on mobile,
+                quantity + both CTAs side-by-side from sm: up */}
+            <div className="flex flex-row sm:flex-row items-stretch sm:items-center gap-3 sm:gap-4">
               <div
-                className="flex items-center rounded-2xl border"
+                className="flex items-center justify-center sm:justify-start rounded-2xl border self-start sm:self-auto"
                 style={{
                   backgroundColor: `${accent}0d`,
                   borderColor: `${accent}22`,
@@ -684,25 +694,25 @@ const ProductDetails: React.FC = () => {
                   />
                 </button>
               </div>
-              <div className="flex flex-col sm:flex-row gap-3 w-full">
+              <div className="flex flex-row gap-3 w-full">
                 <button
                   onClick={() => addToCart(product, selectedVariant, quantity)}
                   disabled={!selectedVariant}
-                  className="flex-1 flex items-center justify-center gap-2 text-white py-3.5 px-6 rounded-full text-sm sm:text-base font-bold shadow-[0_15px_35px_-12px_rgba(0,0,0,0.4)] hover:-translate-y-0.5 transition-all duration-200 disabled:opacity-50 disabled:pointer-events-none"
+                  className="flex-1 flex items-center justify-center gap-2 text-white py-3.5 px-3 sm:px-6 rounded-full text-xs sm:text-base font-bold shadow-[0_15px_35px_-12px_rgba(0,0,0,0.4)] hover:-translate-y-0.5 transition-all duration-200 disabled:opacity-50 disabled:pointer-events-none whitespace-nowrap"
                   style={{
                     background: `linear-gradient(90deg, ${accent}, ${accent}dd)`,
                   }}
                 >
-                  <ShoppingCart className="w-4 h-4" />
-                  Add to Cart
+                  <ShoppingCart className="w-4 h-4 flex-shrink-0" />
+                  <span className="truncate">Add to Cart</span>
                 </button>
                 <button
                   onClick={() => addToCart(product, selectedVariant, quantity)}
                   disabled={!selectedVariant}
-                  className="flex-1 flex items-center justify-center gap-2 bg-blue-600 text-white py-3.5 px-6 rounded-full text-sm sm:text-base font-bold shadow-[0_15px_35px_-12px_rgba(37,99,235,0.5)] hover:shadow-[0_20px_45px_-10px_rgba(37,99,235,0.65)] hover:-translate-y-0.5 transition-all duration-200 disabled:opacity-50 disabled:pointer-events-none"
+                  className="flex-1 flex items-center justify-center gap-2 bg-blue-600 text-white py-3.5 px-3 sm:px-6 rounded-full text-xs sm:text-base font-bold shadow-[0_15px_35px_-12px_rgba(37,99,235,0.5)] hover:shadow-[0_20px_45px_-10px_rgba(37,99,235,0.65)] hover:-translate-y-0.5 transition-all duration-200 disabled:opacity-50 disabled:pointer-events-none whitespace-nowrap"
                 >
-                  <Zap className="w-4 h-4" />
-                  Buy Now
+                  <Zap className="w-4 h-4 flex-shrink-0" />
+                  <span className="truncate">Buy Now</span>
                 </button>
               </div>
             </div>
@@ -717,7 +727,7 @@ const ProductDetails: React.FC = () => {
                 }}
               >
                 <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 sm:gap-4">
-                  <div className="flex items-center gap-3 flex-1 min-w-0">
+                  <div className="flex items-center gap-3 flex-1 min-w-0 w-full sm:w-auto">
                     <span className="bg-blue-600 text-white text-[10px] font-bold px-2.5 py-1 rounded-full flex-shrink-0 uppercase tracking-wide">
                       Pairs Well
                     </span>
@@ -740,7 +750,7 @@ const ProductDetails: React.FC = () => {
                           {crossSell.name}
                         </p>
                         <p
-                          className="text-[11px] font-semibold uppercase tracking-wide"
+                          className="text-[11px] font-semibold uppercase tracking-wide truncate"
                           style={{ color: accent }}
                         >
                           {crossSell.description}
@@ -754,7 +764,7 @@ const ProductDetails: React.FC = () => {
                         state: { productId: crossSell.id },
                       })
                     }
-                    className="flex items-center gap-1.5 bg-white border px-4 py-2 rounded-full font-bold text-xs hover:opacity-80 transition-colors flex-shrink-0"
+                    className="flex items-center gap-1.5 bg-white border px-4 py-2 rounded-full font-bold text-xs hover:opacity-80 transition-colors flex-shrink-0 self-start sm:self-auto"
                     style={{ borderColor: `${accent}66`, color: accent }}
                   >
                     View <ArrowRight className="w-3.5 h-3.5" />
@@ -768,7 +778,7 @@ const ProductDetails: React.FC = () => {
               {features.map((feature, idx) => (
                 <div
                   key={idx}
-                  className="flex flex-col items-center text-center"
+                  className="flex flex-col items-center text-center min-w-0"
                 >
                   <div
                     className="w-14 h-14 rounded-2xl border flex items-center justify-center mb-3"
@@ -806,7 +816,7 @@ const ProductDetails: React.FC = () => {
                 <button
                   key={tab.key}
                   onClick={() => setActiveDescTab(tab.key)}
-                  className="relative px-4 sm:px-5 py-3 text-xs sm:text-sm font-bold whitespace-nowrap transition-colors"
+                  className="relative px-4 sm:px-5 py-3 text-xs sm:text-sm font-bold whitespace-nowrap transition-colors flex-shrink-0"
                   style={{ color: isActive ? accent : "#9ca3af" }}
                 >
                   {tab.label}
@@ -830,7 +840,7 @@ const ProductDetails: React.FC = () => {
                 <h2 className="text-xl sm:text-2xl font-black mb-4 tracking-tight text-gray-900">
                   Product Description
                 </h2>
-                <p className="text-gray-600 text-sm sm:text-base leading-relaxed">
+                <p className="text-gray-600 text-sm sm:text-base leading-relaxed break-words">
                   {product.content}
                 </p>
               </div>
@@ -841,7 +851,7 @@ const ProductDetails: React.FC = () => {
                 <h2 className="text-xl sm:text-2xl font-black mb-4 tracking-tight text-gray-900">
                   Ingredients
                 </h2>
-                <p className="text-gray-600 text-sm sm:text-base leading-relaxed mb-4">
+                <p className="text-gray-600 text-sm sm:text-base leading-relaxed mb-4 break-words">
                   100% pure, farm-sourced {product.name}. No additives,
                   preservatives, or artificial colors — made the traditional
                   way.
@@ -872,7 +882,7 @@ const ProductDetails: React.FC = () => {
                   ].map((n) => (
                     <div
                       key={n.label}
-                      className="p-3.5 rounded-xl border text-center"
+                      className="p-3.5 rounded-xl border text-center min-w-0"
                       style={{
                         backgroundColor: `${accent}0d`,
                         borderColor: `${accent}22`,
@@ -955,7 +965,7 @@ const ProductDetails: React.FC = () => {
               </span>
             </div>
 
-            <div className="flex-1 max-w-sm space-y-1.5">
+            <div className="flex-1 min-w-0 max-w-sm space-y-1.5">
               {[5, 4, 3, 2, 1].map((star) => {
                 const count = ratingBreakdown[star - 1];
                 const pct = reviews.length ? (count / reviews.length) * 100 : 0;
@@ -1139,10 +1149,10 @@ const ProductDetails: React.FC = () => {
                   </div>
                   <div className="flex-1 min-w-0">
                     <div className="flex flex-wrap items-center gap-2">
-                      <span className="font-bold text-sm text-gray-900">
+                      <span className="font-bold text-sm text-gray-900 truncate">
                         {review.name}
                       </span>
-                      <span className="text-xs text-gray-400">
+                      <span className="text-xs text-gray-400 whitespace-nowrap">
                         · {review.date}
                       </span>
                     </div>
@@ -1159,7 +1169,7 @@ const ProductDetails: React.FC = () => {
                   </div>
                 </div>
 
-                <p className="text-sm text-gray-600 leading-relaxed mb-3">
+                <p className="text-sm text-gray-600 leading-relaxed mb-3 break-words">
                   {review.text}
                 </p>
 
@@ -1170,7 +1180,7 @@ const ProductDetails: React.FC = () => {
                         key={idx}
                         type="button"
                         onClick={() => openLightbox(review.photos, idx)}
-                        className="w-16 h-16 sm:w-20 sm:h-20 rounded-xl overflow-hidden border transition-colors"
+                        className="w-16 h-16 sm:w-20 sm:h-20 rounded-xl overflow-hidden border transition-colors flex-shrink-0"
                         style={{ borderColor: `${accent}22` }}
                       >
                         <img
@@ -1243,7 +1253,7 @@ const ProductDetails: React.FC = () => {
                 </button>
 
                 {/* Thumbnail dots */}
-                <div className="absolute -bottom-3 sm:bottom-4 left-1/2 -translate-x-1/2 flex gap-2">
+                <div className="absolute bottom-2 sm:bottom-4 left-1/2 -translate-x-1/2 flex gap-2">
                   {lightboxImages.map((_, idx) => (
                     <button
                       key={idx}

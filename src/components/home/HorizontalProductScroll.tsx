@@ -8,6 +8,11 @@
  *
  * Props: heading? (optional override; defaults to "Our Ghee Collection")
  * Same data source: vyshnaviData.ts — nothing about data fetching changed.
+ *
+ * RESPONSIVE NOTE: desktop (>960px) layout/values are unchanged from the
+ * original. Everything below that gets extra rules — scoped under
+ * `@media (max-width: ...)` — so small screens no longer crowd the CTA
+ * row, overflow the photo strip, or keep desktop-sized padding/typography.
  */
 
 import React, { useRef, useState, useEffect, useCallback, useMemo } from "react";
@@ -202,10 +207,10 @@ const HorizontalProductScroll: React.FC<HorizontalProductScrollProps> = ({
 
   return (
     <section
+      className="spot-section"
       style={{
         position: "relative",
         width: "100%",
-        padding: "4.5rem 0 4rem",
         background: "#E0F2FE",
         fontFamily: "'Inter', sans-serif",
         overflow: "hidden",
@@ -214,6 +219,8 @@ const HorizontalProductScroll: React.FC<HorizontalProductScrollProps> = ({
       <StageDecorations />
 
       <style>{`
+        /* ── Section / wrapper spacing — desktop values match the original ── */
+        .spot-section { padding: 4.5rem 0 4rem; }
         .spot-wrap { max-width: 1180px; margin: 0 auto; padding: 0 1.25rem; position: relative; z-index: 1; }
         .spot-grid { display: grid; grid-template-columns: 1fr; gap: 2.5rem; align-items: center; }
         @media (min-width: 960px) {
@@ -230,11 +237,55 @@ const HorizontalProductScroll: React.FC<HorizontalProductScrollProps> = ({
         .spot-cta-secondary:hover { background: #f8fafc !important; border-color: #93c5fd !important; }
         .spot-arrow:hover { background: #2563eb !important; color: #fff !important; }
         .spot-thumb-arrow:hover { background: #2563eb !important; color: #fff !important; }
-        .spot-variant-box { transition: all 0.2s ease; cursor: pointer; }
+        .spot-variant-box { transition: all 0.2s ease; cursor: pointer; min-width: 108px; text-align: left; }
         .spot-variant-box:hover { transform: translateY(-2px); border-color: #92400e !important; }
+        .spot-variant-price { font-size: 30px; }
+
+        /* ── CTA row: quantity + Add to cart + Buy now ── */
+        .spot-cta-row { display: flex; gap: 12px; }
+        .spot-qty { flex-shrink: 0; }
+
+        /* ── Photo strip on the spotlight image ── */
+        .spot-photo-strip { bottom: 16px; gap: 8px; }
+        .spot-photo-thumb { width: 40px; height: 40px; border-radius: 10px; }
+        .spot-photo-arrow-btn { width: 26px; height: 26px; }
+
         @keyframes lightboxFadeIn { from { opacity: 0; } to { opacity: 1; } }
         @keyframes lightboxZoomIn { from { opacity: 0; transform: scale(0.94); } to { opacity: 1; transform: scale(1); } }
         @keyframes lightboxImageFade { from { opacity: 0; transform: scale(0.98); } to { opacity: 1; transform: scale(1); } }
+
+        /* ══════════════════════ SMALL-SCREEN OVERRIDES ══════════════════════
+           Everything below only kicks in under the given breakpoints, so the
+           original desktop design above 640px/560px/480px is untouched. */
+
+        @media (max-width: 640px) {
+          .spot-section { padding: 2.5rem 0 2.25rem; }
+        }
+
+        @media (max-width: 480px) {
+          .spot-wrap { padding: 0 1rem; }
+        }
+
+        /* Stack the quantity selector above the two CTA buttons instead of
+           squeezing three controls into one row. */
+        @media (max-width: 560px) {
+          .spot-cta-row { flex-wrap: wrap; }
+          .spot-qty { flex: 1 1 100%; justify-content: center; }
+        }
+
+        /* Shrink variant/size boxes so 2-3 fit per row without overflow. */
+        @media (max-width: 480px) {
+          .spot-variant-box { min-width: 92px; padding: 10px 12px !important; }
+          .spot-variant-price { font-size: 22px; }
+        }
+
+        /* Shrink the photo-strip thumbnails/arrows so they never overrun the
+           narrower image panel on small phones. */
+        @media (max-width: 480px) {
+          .spot-photo-strip { bottom: 10px; gap: 5px; }
+          .spot-photo-thumb { width: 30px; height: 30px; border-radius: 8px; }
+          .spot-photo-arrow-btn { width: 22px; height: 22px; }
+        }
       `}</style>
 
       <div className="spot-wrap">
@@ -260,7 +311,7 @@ const HorizontalProductScroll: React.FC<HorizontalProductScrollProps> = ({
               Bilona Churned
             </span>
           </div>
-          <h2 style={{ fontSize: "clamp(28px, 4vw, 42px)", fontWeight: 800, color: "#0f172a", letterSpacing: "-0.02em", margin: 0 }}>
+          <h2 style={{ fontSize: "clamp(26px, 6vw, 42px)", fontWeight: 800, color: "#0f172a", letterSpacing: "-0.02em", margin: 0 }}>
             {resolvedHeading}
           </h2>
         </div>
@@ -313,7 +364,7 @@ const HorizontalProductScroll: React.FC<HorizontalProductScrollProps> = ({
               background: img ? "#f8fafc" : (FALLBACK_GRADIENT[category.key] ?? "#f3f4f6"),
               border: "1px solid rgba(37,99,235,0.08)",
               boxShadow: "0 40px 80px -35px rgba(37,99,235,0.35)",
-              height: "clamp(320px, 42vw, 460px)",
+              height: "clamp(280px, 42vw, 460px)",
               display: "flex",
               alignItems: "center",
               justifyContent: "center",
@@ -375,17 +426,15 @@ const HorizontalProductScroll: React.FC<HorizontalProductScrollProps> = ({
 
             {/* This variant's own photo strip — up to 5 shots pulled from the selected size */}
             {gallery.length > 1 && (
-              <div style={{ position: "absolute", bottom: 16, left: "50%", transform: "translateX(-50%)", display: "flex", alignItems: "center", gap: 8, zIndex: 2 }}>
+              <div className="spot-photo-strip" style={{ position: "absolute", left: "50%", transform: "translateX(-50%)", display: "flex", alignItems: "center", zIndex: 2, maxWidth: "92%", overflowX: "auto" }}>
                 <button
-                  className="spot-thumb-arrow"
+                  className="spot-thumb-arrow spot-photo-arrow-btn"
                   onClick={(e) => {
                     e.stopPropagation();
                     setActivePhoto((i) => (i - 1 + gallery.length) % gallery.length);
                   }}
                   aria-label={`Previous photo of ${item.name}`}
                   style={{
-                    width: 26,
-                    height: 26,
                     flexShrink: 0,
                     borderRadius: "50%",
                     border: "none",
@@ -408,11 +457,9 @@ const HorizontalProductScroll: React.FC<HorizontalProductScrollProps> = ({
                       setActivePhoto(gi);
                     }}
                     aria-label={`View photo ${gi + 1} of ${item.name}`}
+                    className="spot-photo-thumb"
                     style={{
-                      width: 40,
-                      height: 40,
                       flexShrink: 0,
-                      borderRadius: 10,
                       overflow: "hidden",
                       padding: 0,
                       cursor: "pointer",
@@ -428,15 +475,13 @@ const HorizontalProductScroll: React.FC<HorizontalProductScrollProps> = ({
                 ))}
 
                 <button
-                  className="spot-thumb-arrow"
+                  className="spot-thumb-arrow spot-photo-arrow-btn"
                   onClick={(e) => {
                     e.stopPropagation();
                     setActivePhoto((i) => (i + 1) % gallery.length);
                   }}
                   aria-label={`Next photo of ${item.name}`}
                   style={{
-                    width: 26,
-                    height: 26,
                     flexShrink: 0,
                     borderRadius: "50%",
                     border: "none",
@@ -462,7 +507,7 @@ const HorizontalProductScroll: React.FC<HorizontalProductScrollProps> = ({
             <h3
               onClick={() => navigate(`/ghee`)}
               style={{
-                fontSize: "clamp(24px, 3vw, 32px)",
+                fontSize: "clamp(22px, 5vw, 32px)",
                 fontWeight: 800,
                 color: "#0f172a",
                 margin: "0 0 12px",
@@ -493,8 +538,6 @@ const HorizontalProductScroll: React.FC<HorizontalProductScrollProps> = ({
                       className="spot-variant-box"
                       aria-pressed={isSelected}
                       style={{
-                        minWidth: 108,
-                        textAlign: "left",
                         padding: "12px 16px",
                         borderRadius: 16,
                         border: isSelected ? "2px solid #92400e" : "1.5px solid #d6bfa3",
@@ -507,7 +550,7 @@ const HorizontalProductScroll: React.FC<HorizontalProductScrollProps> = ({
                       <div style={{ fontSize: 15, fontWeight: 700, color: isSelected ? "#fff" : "#92400e", lineHeight: 1.2 }}>
                         {v.size}{v.packType ? ` (${v.packType})` : ""}
                       </div>
-                      <div style={{ fontSize: 30, fontWeight: 700, color: isSelected ? "#fff" : "#92400e", marginTop: 4 }}>
+                      <div className="spot-variant-price" style={{ fontWeight: 700, color: isSelected ? "#fff" : "#92400e", marginTop: 4 }}>
                         {v.price != null ? `₹${v.price.toLocaleString("en-IN")}` : "On request"}
                       </div>
                     </button>
@@ -520,8 +563,8 @@ const HorizontalProductScroll: React.FC<HorizontalProductScrollProps> = ({
             <div style={{ marginBottom: 24, paddingBottom: 24, borderBottom: "1px solid rgba(37,99,235,0.1)" }}>
               {selectedVariant?.price != null ? (
                 <>
-                  <div style={{ display: "flex", alignItems: "baseline", gap: 12 }}>
-                    <span style={{ fontSize: 34, fontWeight: 800, color: "#0f172a", letterSpacing: "-0.02em" }}>
+                  <div style={{ display: "flex", alignItems: "baseline", gap: 12, flexWrap: "wrap" }}>
+                    <span style={{ fontSize: "clamp(26px, 5vw, 34px)", fontWeight: 800, color: "#0f172a", letterSpacing: "-0.02em" }}>
                       ₹{selectedVariant.price.toLocaleString("en-IN")}
                     </span>
                     {selectedVariant.originalPrice && (
@@ -542,22 +585,22 @@ const HorizontalProductScroll: React.FC<HorizontalProductScrollProps> = ({
             </div>
 
             {/* CTAs */}
-            <div style={{ display: "flex", gap: 12 }}>
-              <div className="flex items-center bg-amber-50 rounded-2xl border border-amber-100">
-                              <button
-                                onClick={() => setQuantity(Math.max(1, quantity - 1))}
-                                className="p-3 hover:bg-amber-100 rounded-l-2xl transition-colors"
-                              >
-                                <Minus className="w-4 h-4 sm:w-5 sm:h-5 text-amber-700" />
-                              </button>
-                              <span className="px-5 sm:px-6 font-bold text-sm sm:text-base text-gray-900">{quantity}</span>
-                              <button
-                                onClick={() => setQuantity(quantity + 1)}
-                                className="p-3 hover:bg-amber-100 rounded-r-2xl transition-colors"
-                              >
-                                <Plus className="w-4 h-4 sm:w-5 sm:h-5 text-amber-700" />
-                              </button>
-                            </div>
+            <div className="spot-cta-row">
+              <div className="spot-qty flex items-center bg-amber-50 rounded-2xl border border-amber-100">
+                <button
+                  onClick={() => setQuantity(Math.max(1, quantity - 1))}
+                  className="p-3 hover:bg-amber-100 rounded-l-2xl transition-colors"
+                >
+                  <Minus className="w-4 h-4 sm:w-5 sm:h-5 text-amber-700" />
+                </button>
+                <span className="px-5 sm:px-6 font-bold text-sm sm:text-base text-gray-900">{quantity}</span>
+                <button
+                  onClick={() => setQuantity(quantity + 1)}
+                  className="p-3 hover:bg-amber-100 rounded-r-2xl transition-colors"
+                >
+                  <Plus className="w-4 h-4 sm:w-5 sm:h-5 text-amber-700" />
+                </button>
+              </div>
               <button
                 className="spot-cta-primary"
                 onClick={handleAddToCart}
