@@ -1,7 +1,16 @@
-import { MapPin, Phone, Mail, Clock, Shield, Award } from 'lucide-react';
+import { MapPin, Phone, Mail, Clock, Shield, Award } from "lucide-react";
 import logo from "../../assets/logo.png";
 
-const productLinks = ["Milk", "Curd", "Buttermilk", "Lassi", "Ghee", "Paneer", "Sweets", "View All"];
+const productLinks = [
+  "Milk",
+  "Curd",
+  "Buttermilk",
+  "Lassi",
+  "Ghee",
+  "Paneer",
+  "Sweets",
+  "View All",
+];
 const investorLinks = [
   "Listing Information",
   "Investor Contacts",
@@ -16,7 +25,12 @@ export default function Footer() {
   return (
     <footer className="relative bg-[#e0f2fe] pt-0 overflow-hidden">
       {/* Wave transition from the section above */}
-      <svg viewBox="0 0 1440 80" preserveAspectRatio="none" className="w-full h-12 block -mb-px" aria-hidden="true">
+      <svg
+        viewBox="0 0 1440 80"
+        preserveAspectRatio="none"
+        className="w-full h-12 block -mb-px"
+        aria-hidden="true"
+      >
         <path d="M0,32 Q360,72 720,32 T1440,32 L1440,0 L0,0 Z" fill="#ffffff" />
       </svg>
 
@@ -30,8 +44,8 @@ export default function Footer() {
           <div className="lg:col-span-2">
             <img src={logo} alt="Vyshnavi Dairy" className="h-12 mb-5" />
             <p className="text-slate-500 text-sm leading-relaxed max-w-xs mb-6">
-              Pure, farm-fresh dairy delivered daily — crafted for households who
-              taste the difference.
+              Pure, farm-fresh dairy delivered daily — crafted for households
+              who taste the difference.
             </p>
             <div className="space-y-3">
               <div className="flex items-start gap-3 text-sm text-slate-600">
@@ -40,11 +54,21 @@ export default function Footer() {
               </div>
               <div className="flex items-center gap-3 text-sm text-slate-600">
                 <Phone className="w-4 h-4 text-blue-600 flex-shrink-0" />
-                <a href="tel:+910000000000" className="hover:text-blue-600 transition-colors">+91 00000 00000</a>
+                <a
+                  href="tel:+910000000000"
+                  className="hover:text-blue-600 transition-colors"
+                >
+                  +91 00000 00000
+                </a>
               </div>
               <div className="flex items-center gap-3 text-sm text-slate-600">
                 <Mail className="w-4 h-4 text-blue-600 flex-shrink-0" />
-                <a href="mailto:hello@vyshnavidairy.com" className="hover:text-blue-600 transition-colors">hello@vyshnavidairy.com</a>
+                <a
+                  href="mailto:hello@vyshnavidairy.com"
+                  className="hover:text-blue-600 transition-colors"
+                >
+                  hello@vyshnavidairy.com
+                </a>
               </div>
             </div>
           </div>
@@ -57,7 +81,10 @@ export default function Footer() {
             <ul className="space-y-2.5 text-sm">
               {productLinks.map((label) => (
                 <li key={label}>
-                  <a href="#" className="text-slate-500 hover:text-blue-600 transition-colors">
+                  <a
+                    href="#"
+                    className="text-slate-500 hover:text-blue-600 transition-colors"
+                  >
                     {label}
                   </a>
                 </li>
@@ -73,7 +100,10 @@ export default function Footer() {
             <ul className="space-y-2.5 text-sm">
               {investorLinks.map((label) => (
                 <li key={label}>
-                  <a href="#" className="text-slate-500 hover:text-blue-600 transition-colors">
+                  <a
+                    href="#"
+                    className="text-slate-500 hover:text-blue-600 transition-colors"
+                  >
                     {label}
                   </a>
                 </li>
@@ -87,10 +117,22 @@ export default function Footer() {
               Store Location
             </h3>
             <div className="text-slate-500 text-sm leading-relaxed space-y-4">
-              <p>Konijarla, Wyra,<br />Khammam.</p>
+              <p>
+                Konijarla, Wyra,
+                <br />
+                Khammam.
+              </p>
               <div className="pt-1 border-t border-blue-100/70">
-                <p className="font-semibold text-slate-800 mt-4 mb-1">Dairy Location</p>
-                <p>Konijarla (M)<br />Wyra, Khammam.<br />Telangana.</p>
+                <p className="font-semibold text-slate-800 mt-4 mb-1">
+                  Dairy Location
+                </p>
+                <p>
+                  Konijarla (M)
+                  <br />
+                  Wyra, Khammam.
+                  <br />
+                  Telangana.
+                </p>
               </div>
             </div>
           </div>
@@ -103,7 +145,9 @@ export default function Footer() {
               <Shield className="w-5 h-5" />
             </span>
             <div>
-              <p className="text-sm font-bold text-slate-800">Lab-Tested Purity</p>
+              <p className="text-sm font-bold text-slate-800">
+                Lab-Tested Purity
+              </p>
               <p className="text-xs text-slate-500">Every batch, every time</p>
             </div>
           </div>
@@ -112,8 +156,12 @@ export default function Footer() {
               <Clock className="w-5 h-5" />
             </span>
             <div>
-              <p className="text-sm font-bold text-slate-800">Delivered Fresh Daily</p>
-              <p className="text-xs text-slate-500">Farm to doorstep in 6 hours</p>
+              <p className="text-sm font-bold text-slate-800">
+                Delivered Fresh Daily
+              </p>
+              <p className="text-xs text-slate-500">
+                Farm to doorstep in 6 hours
+              </p>
             </div>
           </div>
           <div className="flex items-center gap-3 bg-white/70 backdrop-blur-sm rounded-2xl px-5 py-4 border border-blue-100/70">
@@ -121,19 +169,45 @@ export default function Footer() {
               <Award className="w-5 h-5" />
             </span>
             <div>
-              <p className="text-sm font-bold text-slate-800">Trusted Quality</p>
-              <p className="text-xs text-slate-500">Certified & family-approved</p>
+              <p className="text-sm font-bold text-slate-800">
+                Trusted Quality
+              </p>
+              <p className="text-xs text-slate-500">
+                Certified & family-approved
+              </p>
             </div>
           </div>
         </div>
 
         {/* Copyright */}
-        <div className="border-t border-blue-100/70 pt-6 flex flex-col sm:flex-row items-center justify-between gap-3 text-center sm:text-left">
+        <div className="border-t border-blue-100/70 pt-6 flex flex-col sm:flex-row items-center justify-between gap-3 text-center">
           <p className="text-sm text-slate-500">
             Copyright © 2025 Vyshnavi Foods. All rights reserved.
           </p>
-          <p className="text-sm text-slate-400">
-            Designed by <span className="font-semibold text-slate-500">Elite8Digital</span>
+        </div>
+        {/* <div className="border-t border-gray-800 mt-8 md:mt-12 pt-6 md:pt-8 text-center text-gray-500 text-xs md:text-sm">
+          <p className="text-2xl font-bold">
+            © {new Date().getFullYear()}
+            <span className="text-blue-500"> VYSHNAVI</span>
+          </p>
+        </div> */}
+
+        <div className="pb-4 text-center text-gray-400 mt-5">
+          <p className="text-sm md:text-lg flex items-center justify-center">
+            Built with ❤️ by{" "}
+            <a
+              href="https://elite8digital.in"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="text-blue-400 hover:text-blue-300 transition-colors inline-flex items-center ml-1"
+            >
+              Elite8 Digital
+              <img
+                src="/elite8digital-nav.png"
+                alt="Elite8 Digital Logo"
+                className="h-10 md:h-12 ml-2"
+              />
+            </a>
           </p>
         </div>
       </div>

@@ -40,27 +40,47 @@
  *    driving `pillsRef` / `animateTo` — no ref or scroll-into-view bugs.
  */
 
-import React, { useEffect, useRef, useState, useCallback, useMemo } from "react";
+import React, {
+  useEffect,
+  useRef,
+  useState,
+  useCallback,
+  useMemo,
+} from "react";
 import { gsap } from "gsap";
-import { ChevronLeft, ChevronRight, X, Sparkles, ShoppingCart } from "lucide-react";
-import { CATEGORIES, type ProductCategory, type ProductItem, type ProductVariant } from "../data/vyshnaviData";
+import {
+  ChevronLeft,
+  ChevronRight,
+  X,
+  Sparkles,
+  ShoppingCart,
+} from "lucide-react";
+import {
+  CATEGORIES,
+  type ProductCategory,
+  type ProductItem,
+  type ProductVariant,
+} from "../data/vyshnaviData";
 import { useCart } from "../context/cartContext";
 
 // ── Category helpers (derived from data) ─────────────────────────────────
 
 const CATEGORY_GRADIENT: Record<string, string> = {
-  milk:      "linear-gradient(135deg,#bfdbfe,#dbeafe)",
-  curd:      "linear-gradient(135deg,#bbf7d0,#dcfce7)",
+  milk: "linear-gradient(135deg,#bfdbfe,#dbeafe)",
+  curd: "linear-gradient(135deg,#bbf7d0,#dcfce7)",
   beverages: "linear-gradient(135deg,#e9d5ff,#f3e8ff)",
-  paneer:    "linear-gradient(135deg,#fed7aa,#ffedd5)",
-  butter:    "linear-gradient(135deg,#fef08a,#fefce8)",
-  ghee:      "linear-gradient(135deg,#fde68a,#fffbeb)",
-  sweets:    "linear-gradient(135deg,#fbcfe8,#fdf2f8)",
+  paneer: "linear-gradient(135deg,#fed7aa,#ffedd5)",
+  butter: "linear-gradient(135deg,#fef08a,#fefce8)",
+  ghee: "linear-gradient(135deg,#fde68a,#fffbeb)",
+  sweets: "linear-gradient(135deg,#fbcfe8,#fdf2f8)",
 };
 
 // ── Sub-components ────────────────────────────────────────────────────────
 
-interface PlaceholderProps { category: string; name: string }
+interface PlaceholderProps {
+  category: string;
+  name: string;
+}
 
 const ImagePlaceholder: React.FC<PlaceholderProps> = ({ category, name }) => (
   <div
@@ -75,7 +95,10 @@ const ImagePlaceholder: React.FC<PlaceholderProps> = ({ category, name }) => (
 
 // Lightbox now tracks the gallery INDEX (not just a src string) so the
 // user can page through every sub-image of the currently selected product.
-interface SelectedThumb { index: number; name: string }
+interface SelectedThumb {
+  index: number;
+  name: string;
+}
 
 // A single carousel-displayable entity. For most categories this maps
 // 1:1 to a ProductItem. For "ghee" it maps 1:1 to a variant of an item.
@@ -87,28 +110,32 @@ interface DisplayItem {
   description: string;
   content: string;
   tag?: "Best Seller" | "New Launch";
-  variant?: ProductVariant;   // set when this card represents one specific pack size
-  sourceItem: ProductItem;    // the underlying item (for cart / "available sizes")
+  variant?: ProductVariant; // set when this card represents one specific pack size
+  sourceItem: ProductItem; // the underlying item (for cart / "available sizes")
 }
 
 // ── Main component ────────────────────────────────────────────────────────
 
 const Portfolio: React.FC = () => {
-  const [activeCategoryKey, setActiveCategoryKey] = useState<string>(CATEGORIES[0].key);
-  const [currentIndex, setCurrentIndex]           = useState<number>(0);
-  const [selectedThumb, setSelectedThumb]         = useState<SelectedThumb | null>(null);
-  const [justAdded, setJustAdded]                 = useState<boolean>(false);
+  const [activeCategoryKey, setActiveCategoryKey] = useState<string>(
+    CATEGORIES[0].key,
+  );
+  const [currentIndex, setCurrentIndex] = useState<number>(0);
+  const [selectedThumb, setSelectedThumb] = useState<SelectedThumb | null>(
+    null,
+  );
+  const [justAdded, setJustAdded] = useState<boolean>(false);
   // Which ghee item (Cow Ghee / Buffalo Ghee) is selected — only relevant
   // when activeCategoryKey === "ghee". null = default to the first item.
-  const [activeGheeItemId, setActiveGheeItemId]   = useState<number | null>(null);
+  const [activeGheeItemId, setActiveGheeItemId] = useState<number | null>(null);
 
   const { addToCart } = useCart();
 
-  const itemsRef     = useRef<(HTMLDivElement | null)[]>([]);
-  const autoPlayRef  = useRef<ReturnType<typeof setInterval> | null>(null);
+  const itemsRef = useRef<(HTMLDivElement | null)[]>([]);
+  const autoPlayRef = useRef<ReturnType<typeof setInterval> | null>(null);
   const containerRef = useRef<HTMLDivElement | null>(null);
-  const bgTextRef    = useRef<HTMLDivElement | null>(null);
-  const pillsRef     = useRef<HTMLDivElement | null>(null);
+  const bgTextRef = useRef<HTMLDivElement | null>(null);
+  const pillsRef = useRef<HTMLDivElement | null>(null);
 
   const activeCategory: ProductCategory =
     CATEGORIES.find((c) => c.key === activeCategoryKey) ?? CATEGORIES[0];
@@ -118,7 +145,8 @@ const Portfolio: React.FC = () => {
   // Cow Ghee / Buffalo Ghee — the two selectable ghee "tabs". Falls back to
   // the first item until the user picks one explicitly.
   const selectedGheeItem: ProductItem | undefined = isGhee
-    ? activeCategory.items.find((it) => it.id === activeGheeItemId) ?? activeCategory.items[0]
+    ? (activeCategory.items.find((it) => it.id === activeGheeItemId) ??
+      activeCategory.items[0])
     : undefined;
 
   // Ghee shows the variants of ONE selected item (Cow or Buffalo) as its own
@@ -130,7 +158,12 @@ const Portfolio: React.FC = () => {
         id: `${selectedGheeItem.id}-${vi}`,
         name: `${selectedGheeItem.name} — ${v.size}`,
         image: v.images?.[0] ?? selectedGheeItem.image,
-        gallery: v.images && v.images.length > 0 ? v.images : (selectedGheeItem.image ? [selectedGheeItem.image] : []),
+        gallery:
+          v.images && v.images.length > 0
+            ? v.images
+            : selectedGheeItem.image
+              ? [selectedGheeItem.image]
+              : [],
         description: selectedGheeItem.description,
         content: selectedGheeItem.content,
         tag: selectedGheeItem.tag,
@@ -160,50 +193,83 @@ const Portfolio: React.FC = () => {
   const getPos = (idx: number, current: number, total: number) => {
     const diff = (idx - current + total) % total;
     if (diff === 0) {
-      return { x: "50%", tx: "-50%", scale: 1.3, y: "50%", ty: "-50%", z: 30, opacity: 1, rot: 0 };
+      return {
+        x: "50%",
+        tx: "-50%",
+        scale: 1.3,
+        y: "50%",
+        ty: "-50%",
+        z: 30,
+        opacity: 1,
+        rot: 0,
+      };
     }
-    const side  = diff <= total / 2 ? 1 : -1;
+    const side = diff <= total / 2 ? 1 : -1;
     const depth = Math.min(diff, total - diff);
     return {
-      x:       side > 0 ? "65%" : "35%",
-      tx:      "-50%",
-      scale:   Math.max(0.25, 0.75 - depth * 0.15),
-      y:       "50%",
-      ty:      "-50%",
-      z:       30 - depth * 5,
+      x: side > 0 ? "65%" : "35%",
+      tx: "-50%",
+      scale: Math.max(0.25, 0.75 - depth * 0.15),
+      y: "50%",
+      ty: "-50%",
+      z: 30 - depth * 5,
       opacity: Math.max(0, 0.5 - depth * 0.15),
-      rot:     side * depth * 4,
+      rot: side * depth * 4,
     };
   };
 
-  const animateTo = useCallback((newIdx: number) => {
-    currentItems.forEach((_, i) => {
-      const p = getPos(i, newIdx, currentItems.length);
-      if (itemsRef.current[i]) {
-        gsap.to(itemsRef.current[i], {
-          left: p.x, x: p.tx, top: p.y, y: p.ty,
-          scale: p.scale, zIndex: p.z, opacity: p.opacity,
-          rotation: p.rot, duration: 0.8, ease: "power2.inOut",
+  const animateTo = useCallback(
+    (newIdx: number) => {
+      currentItems.forEach((_, i) => {
+        const p = getPos(i, newIdx, currentItems.length);
+        if (itemsRef.current[i]) {
+          gsap.to(itemsRef.current[i], {
+            left: p.x,
+            x: p.tx,
+            top: p.y,
+            y: p.ty,
+            scale: p.scale,
+            zIndex: p.z,
+            opacity: p.opacity,
+            rotation: p.rot,
+            duration: 0.8,
+            ease: "power2.inOut",
+          });
+        }
+      });
+
+      if (bgTextRef.current) {
+        gsap.to(bgTextRef.current, {
+          x: -40,
+          opacity: 0.15,
+          duration: 0.35,
+          ease: "power2.inOut",
+          onComplete: () => {
+            gsap.to(bgTextRef.current, {
+              x: 0,
+              opacity: 0.06,
+              duration: 0.35,
+              ease: "power2.inOut",
+            });
+          },
         });
       }
-    });
 
-    if (bgTextRef.current) {
-      gsap.to(bgTextRef.current, {
-        x: -40, opacity: 0.15, duration: 0.35, ease: "power2.inOut",
-        onComplete: () => {
-          gsap.to(bgTextRef.current, { x: 0, opacity: 0.06, duration: 0.35, ease: "power2.inOut" });
-        },
-      });
-    }
+      setCurrentIndex(newIdx);
 
-    setCurrentIndex(newIdx);
-
-    if (pillsRef.current) {
-      const pill = pillsRef.current.children[newIdx] as HTMLElement | undefined;
-      pill?.scrollIntoView({ behavior: "smooth", block: "nearest", inline: "center" });
-    }
-  }, [currentItems]); // eslint-disable-line react-hooks/exhaustive-deps
+      if (pillsRef.current) {
+        const pill = pillsRef.current.children[newIdx] as
+          | HTMLElement
+          | undefined;
+        pill?.scrollIntoView({
+          behavior: "smooth",
+          block: "nearest",
+          inline: "center",
+        });
+      }
+    },
+    [currentItems],
+  ); // eslint-disable-line react-hooks/exhaustive-deps
 
   const resetAutoPlay = useCallback(() => {
     if (autoPlayRef.current) clearInterval(autoPlayRef.current);
@@ -247,7 +313,8 @@ const Portfolio: React.FC = () => {
   const changeCategory = (key: string) => {
     if (!containerRef.current) return;
     gsap.to(containerRef.current, {
-      opacity: 0, duration: 0.25,
+      opacity: 0,
+      duration: 0.25,
       onComplete: () => {
         setActiveCategoryKey(key);
         setActiveGheeItemId(null); // reset to default (first) ghee item on re-entry
@@ -261,7 +328,8 @@ const Portfolio: React.FC = () => {
   const changeGheeItem = (id: number) => {
     if (!containerRef.current || id === selectedGheeItem?.id) return;
     gsap.to(containerRef.current, {
-      opacity: 0, duration: 0.25,
+      opacity: 0,
+      duration: 0.25,
       onComplete: () => {
         setActiveGheeItemId(id);
         setCurrentIndex(0);
@@ -277,15 +345,24 @@ const Portfolio: React.FC = () => {
         const p = getPos(i, 0, currentItems.length);
         if (itemsRef.current[i]) {
           gsap.set(itemsRef.current[i], {
-            left: p.x, x: p.tx, top: p.y, y: p.ty,
-            scale: p.scale, zIndex: p.z, opacity: p.opacity, rotation: p.rot,
+            left: p.x,
+            x: p.tx,
+            top: p.y,
+            y: p.ty,
+            scale: p.scale,
+            zIndex: p.z,
+            opacity: p.opacity,
+            rotation: p.rot,
           });
         }
       });
 
       if (itemsRef.current[0]) {
         gsap.from(itemsRef.current[0], {
-          scale: 0, rotation: -180, duration: 1, ease: "elastic.out(1, 0.5)",
+          scale: 0,
+          rotation: -180,
+          duration: 1,
+          ease: "elastic.out(1, 0.5)",
         });
       }
 
@@ -312,7 +389,12 @@ const Portfolio: React.FC = () => {
   }, [selectedThumb]); // eslint-disable-line react-hooks/exhaustive-deps
 
   const current = currentItems[currentIndex];
-  const gallery    = current.gallery.length > 0 ? current.gallery : (current.image ? [current.image] : []);
+  const gallery =
+    current.gallery.length > 0
+      ? current.gallery
+      : current.image
+        ? [current.image]
+        : [];
   const hasGallery = gallery.length > 0;
 
   // Reset the "added" confirmation whenever the featured card changes
@@ -341,7 +423,10 @@ const Portfolio: React.FC = () => {
   const showPrevThumb = useCallback(() => {
     setSelectedThumb((prevThumb) => {
       if (!prevThumb || gallery.length === 0) return prevThumb;
-      return { ...prevThumb, index: (prevThumb.index - 1 + gallery.length) % gallery.length };
+      return {
+        ...prevThumb,
+        index: (prevThumb.index - 1 + gallery.length) % gallery.length,
+      };
     });
   }, [gallery]);
 
@@ -364,10 +449,21 @@ const Portfolio: React.FC = () => {
       <div className="absolute inset-0 bg-gradient-to-br from-slate-950 via-slate-900 to-slate-950" />
       <div
         className="absolute inset-0 transition-colors duration-700"
-        style={{ background: `radial-gradient(circle at 30% 25%, ${accent}22, transparent 55%), radial-gradient(circle at 75% 75%, ${accent}18, transparent 50%)` }}
+        style={{
+          background: `radial-gradient(circle at 30% 25%, ${accent}22, transparent 55%), radial-gradient(circle at 75% 75%, ${accent}18, transparent 50%)`,
+        }}
       />
-      <div className="absolute inset-0 opacity-[0.04]" style={{ backgroundImage: "url(\"data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='60' height='60'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='2' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E\")" }} />
-      <div className="absolute inset-0 pointer-events-none" style={{ boxShadow: "inset 0 0 200px rgba(0,0,0,0.6)" }} />
+      <div
+        className="absolute inset-0 opacity-[0.04]"
+        style={{
+          backgroundImage:
+            "url(\"data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='60' height='60'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='2' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E\")",
+        }}
+      />
+      <div
+        className="absolute inset-0 pointer-events-none"
+        style={{ boxShadow: "inset 0 0 200px rgba(0,0,0,0.6)" }}
+      />
 
       {/* ── Eyebrow ── in flow on mobile (centered via w-fit + mx-auto),
            absolute-centered overlay on sm+, exactly as before */}
@@ -380,7 +476,9 @@ const Portfolio: React.FC = () => {
 
       {!singleItem && (
         <div className="hidden sm:flex absolute top-8 right-8 z-50 items-center gap-2 px-3.5 py-1.5 rounded-full bg-white/5 backdrop-blur-md border border-white/10 text-white/60 text-xs font-bold tabular-nums">
-          <span style={{ color: accent }}>{String(currentIndex + 1).padStart(2, "0")}</span>
+          <span style={{ color: accent }}>
+            {String(currentIndex + 1).padStart(2, "0")}
+          </span>
           <span className="w-3 h-px bg-white/20" />
           <span>{String(currentItems.length).padStart(2, "0")}</span>
         </div>
@@ -388,7 +486,7 @@ const Portfolio: React.FC = () => {
 
       {/* ── Category Tab Bar ── flow on mobile (wraps freely, no fixed
            offset assumed by anything below it), absolute overlay on sm+ */}
-      <div className="relative sm:absolute w-full sm:left-0 z-50 px-3 sm:px-4 mt-3 sm:mt-0 sm:top-20">
+      <div className="relative sm:absolute w-full sm:left-0 z-50 px-3 sm:px-4 mt-3 sm:mt-5 sm:top-20">
         <div className="flex max-w-full gap-1.5 p-2 sm:p-1.5 rounded-[2rem] sm:rounded-full bg-white/5 backdrop-blur-xl border border-white/10 shadow-2xl flex-wrap justify-center">
           {CATEGORIES.map((cat) => (
             <button
@@ -399,7 +497,14 @@ const Portfolio: React.FC = () => {
                   ? "text-white shadow-lg scale-105"
                   : "text-white/50 hover:text-white/80 hover:bg-white/5"
               }`}
-              style={activeCategoryKey === cat.key ? { backgroundColor: accent, boxShadow: `0 8px 24px -8px ${accent}99` } : undefined}
+              style={
+                activeCategoryKey === cat.key
+                  ? {
+                      backgroundColor: accent,
+                      boxShadow: `0 8px 24px -8px ${accent}99`,
+                    }
+                  : undefined
+              }
             >
               {cat.name}
             </button>
@@ -417,11 +522,17 @@ const Portfolio: React.FC = () => {
                 key={item.id}
                 onClick={() => changeGheeItem(item.id)}
                 className={`px-4 py-1.5 rounded-full text-xs font-bold uppercase tracking-wider transition-all duration-300 border ${
-                  isActive ? "text-white scale-105" : "text-white/50 hover:text-white/80 border-white/10 hover:bg-white/5"
+                  isActive
+                    ? "text-white scale-105"
+                    : "text-white/50 hover:text-white/80 border-white/10 hover:bg-white/5"
                 }`}
                 style={
                   isActive
-                    ? { backgroundColor: accent, borderColor: accent, boxShadow: `0 8px 20px -8px ${accent}99` }
+                    ? {
+                        backgroundColor: accent,
+                        borderColor: accent,
+                        boxShadow: `0 8px 20px -8px ${accent}99`,
+                      }
                     : { backgroundColor: "rgba(255,255,255,0.03)" }
                 }
               >
@@ -465,17 +576,30 @@ const Portfolio: React.FC = () => {
                     className="flex-shrink-0 flex items-center gap-1.5 px-3 py-1.5 rounded-full text-[10px] sm:text-[11px] font-semibold transition-all duration-300 whitespace-nowrap"
                     style={
                       isActive
-                        ? { backgroundColor: accent, color: "#fff", boxShadow: `0 4px 16px ${accent}66`, transform: "scale(1.06)" }
-                        : { backgroundColor: "rgba(255,255,255,0.06)", color: "rgba(255,255,255,0.55)", border: "1px solid rgba(255,255,255,0.08)" }
+                        ? {
+                            backgroundColor: accent,
+                            color: "#fff",
+                            boxShadow: `0 4px 16px ${accent}66`,
+                            transform: "scale(1.06)",
+                          }
+                        : {
+                            backgroundColor: "rgba(255,255,255,0.06)",
+                            color: "rgba(255,255,255,0.55)",
+                            border: "1px solid rgba(255,255,255,0.08)",
+                          }
                     }
                   >
-                    {isActive && <span className="inline-block w-1.5 h-1.5 rounded-full bg-white opacity-80" />}
+                    {isActive && (
+                      <span className="inline-block w-1.5 h-1.5 rounded-full bg-white opacity-80" />
+                    )}
                     {isGhee && item.variant ? item.variant.size : item.name}
                     {item.tag && (
                       <span
                         className="inline-block text-[9px] font-bold uppercase tracking-wider px-1.5 py-0.5 rounded-full"
                         style={{
-                          backgroundColor: isActive ? "rgba(255,255,255,0.25)" : accent,
+                          backgroundColor: isActive
+                            ? "rgba(255,255,255,0.25)"
+                            : accent,
                           color: "#fff",
                         }}
                       >
@@ -518,7 +642,10 @@ const Portfolio: React.FC = () => {
            guess that broke as soon as the category tabs wrapped to extra
            rows. On sm+ the header controls are absolute again, so this
            keeps its original margin-based spacing. */}
-      <div ref={containerRef} className="relative w-full h-[22rem] sm:h-full mt-4 sm:mt-10">
+      <div
+        ref={containerRef}
+        className="relative w-full h-[22rem] sm:h-full mt-4 sm:mt-10"
+      >
         {currentItems.map((item, i) => {
           const isActive = i === currentIndex;
           return (
@@ -548,7 +675,10 @@ const Portfolio: React.FC = () => {
                     className="relative w-40 h-52 sm:w-56 sm:h-72 object-contain drop-shadow-2xl"
                   />
                 ) : (
-                  <ImagePlaceholder category={activeCategoryKey} name={item.name} />
+                  <ImagePlaceholder
+                    category={activeCategoryKey}
+                    name={item.name}
+                  />
                 )}
               </div>
             </div>
@@ -567,7 +697,10 @@ const Portfolio: React.FC = () => {
           {current.tag && (
             <span
               className="inline-block text-[10px] font-bold uppercase tracking-widest px-2.5 py-1 rounded-full mb-3 text-white"
-              style={{ backgroundColor: current.tag === "Best Seller" ? accent : "#16a34a" }}
+              style={{
+                backgroundColor:
+                  current.tag === "Best Seller" ? accent : "#16a34a",
+              }}
             >
               {current.tag}
             </span>
@@ -575,23 +708,45 @@ const Portfolio: React.FC = () => {
           <h3 className="text-lg sm:text-xl font-bold text-white mb-1 tracking-tight">
             {current.sourceItem.name}
             {current.variant && (
-              <span className="ml-2 text-sm font-semibold" style={{ color: accent }}>
+              <span
+                className="ml-2 text-sm font-semibold"
+                style={{ color: accent }}
+              >
                 {current.variant.size}
               </span>
             )}
           </h3>
-          <p className="text-xs font-bold uppercase tracking-wide mb-2.5" style={{ color: accent }}>
+          <p
+            className="text-xs font-bold uppercase tracking-wide mb-2.5"
+            style={{ color: accent }}
+          >
             {current.description}
           </p>
-          <p className="text-white/60 text-xs sm:text-sm leading-relaxed mb-4">{current.content}</p>
+          <p className="text-white/60 text-xs sm:text-sm leading-relaxed mb-4">
+            {current.content}
+          </p>
 
           {hasGallery && (
-            <button
-              onClick={() => setSelectedThumb({ index: 0, name: current.name })}
-              className="sm:hidden mb-4 w-full rounded-2xl border border-white/10 bg-white/5 px-4 py-2.5 text-sm font-semibold text-white/85"
-            >
-              View gallery
-            </button>
+            <div className="sm:hidden mb-4 flex gap-2 overflow-x-auto scrollbar-hide pb-1">
+              {gallery.map((src, index) => (
+                <button
+                  key={index}
+                  onClick={() =>
+                    setSelectedThumb({
+                      index,
+                      name: current.name,
+                    })
+                  }
+                  className="flex-shrink-0 w-16 h-16 rounded-xl overflow-hidden border border-white/10 transition-transform active:scale-95"
+                >
+                  <img
+                    src={src}
+                    alt={`${current.name} ${index + 1}`}
+                    className="w-full h-full object-cover"
+                  />
+                </button>
+              ))}
+            </div>
           )}
 
           {current.sourceItem.variants.length > 0 && (
@@ -608,11 +763,20 @@ const Portfolio: React.FC = () => {
                       className="text-[10px] font-semibold border rounded-md px-2 py-1"
                       style={
                         isSelected
-                          ? { borderColor: accent, color: "#fff", backgroundColor: accent }
-                          : { borderColor: `${accent}40`, color: accent, backgroundColor: `${accent}14` }
+                          ? {
+                              borderColor: accent,
+                              color: "#fff",
+                              backgroundColor: accent,
+                            }
+                          : {
+                              borderColor: `${accent}40`,
+                              color: accent,
+                              backgroundColor: `${accent}14`,
+                            }
                       }
                     >
-                      {v.size}{v.packType ? ` (${v.packType})` : ""}
+                      {v.size}
+                      {v.packType ? ` (${v.packType})` : ""}
                     </span>
                   );
                 })}
@@ -625,7 +789,12 @@ const Portfolio: React.FC = () => {
               {cartVariant.price != null && (
                 <p className="mt-4 text-lg font-bold text-white">
                   ₹{cartVariant.price}
-                  {cartVariant.perUnit && <span className="text-white/40 text-xs font-medium"> / {cartVariant.perUnit}</span>}
+                  {cartVariant.perUnit && (
+                    <span className="text-white/40 text-xs font-medium">
+                      {" "}
+                      / {cartVariant.perUnit}
+                    </span>
+                  )}
                 </p>
               )}
               <button
@@ -671,11 +840,17 @@ const Portfolio: React.FC = () => {
           {gallery.map((src, gi) => (
             <button
               key={gi}
-              onClick={() => setSelectedThumb({ index: gi, name: current.name })}
+              onClick={() =>
+                setSelectedThumb({ index: gi, name: current.name })
+              }
               className="relative w-14 h-14 rounded-2xl overflow-hidden shadow-xl transition-all duration-300 hover:scale-110 ring-2 ring-white/10 hover:ring-2 group"
               style={{ ["--tw-ring-color" as any]: `${accent}` }}
             >
-              <img src={src} alt={`${current.name} ${gi + 1}`} className="w-full h-full object-cover" />
+              <img
+                src={src}
+                alt={`${current.name} ${gi + 1}`}
+                className="w-full h-full object-cover"
+              />
               <div className="absolute inset-0 bg-black/0 group-hover:bg-black/10 transition-colors" />
             </button>
           ))}
@@ -692,7 +867,8 @@ const Portfolio: React.FC = () => {
               className="h-1.5 rounded-full transition-all duration-500"
               style={{
                 width: i === currentIndex ? "2.25rem" : "0.5rem",
-                backgroundColor: i === currentIndex ? accent : "rgba(255,255,255,0.15)",
+                backgroundColor:
+                  i === currentIndex ? accent : "rgba(255,255,255,0.15)",
                 boxShadow: i === currentIndex ? `0 0 16px ${accent}88` : "none",
               }}
               aria-label={`Go to product ${i + 1}`}
@@ -718,7 +894,10 @@ const Portfolio: React.FC = () => {
                 every other category stays on the plain white overlay. */}
             <div
               className="rounded-2xl shadow-2xl overflow-hidden flex items-center justify-center"
-              style={{ backgroundColor: activeCategoryKey === "milk" ? "#99BFEB" : "#99BFEB" }}
+              style={{
+                backgroundColor:
+                  activeCategoryKey === "milk" ? "#99BFEB" : "#99BFEB",
+              }}
             >
               <img
                 src={gallery[selectedThumb.index]}
@@ -744,14 +923,20 @@ const Portfolio: React.FC = () => {
                   className="absolute top-1/2 -translate-y-1/2 left-3 w-10 h-10 bg-black/50 backdrop-blur-xl border border-black/10 rounded-full flex items-center justify-center hover:bg-black/40 transition-colors shadow-lg"
                   aria-label="Previous image"
                 >
-                  <ChevronLeft className="w-5 h-5 text-white" strokeWidth={2.5} />
+                  <ChevronLeft
+                    className="w-5 h-5 text-white"
+                    strokeWidth={2.5}
+                  />
                 </button>
                 <button
                   onClick={showNextThumb}
                   className="absolute top-1/2 -translate-y-1/2 right-3 w-10 h-10 bg-black/50 backdrop-blur-xl border border-black/10 rounded-full flex items-center justify-center hover:bg-black/40 transition-colors shadow-lg"
                   aria-label="Next image"
                 >
-                  <ChevronRight className="w-5 h-5 text-white" strokeWidth={2.5} />
+                  <ChevronRight
+                    className="w-5 h-5 text-white"
+                    strokeWidth={2.5}
+                  />
                 </button>
 
                 {/* Scrollable filmstrip of every sub-image for this product */}
@@ -759,14 +944,26 @@ const Portfolio: React.FC = () => {
                   {gallery.map((src, gi) => (
                     <button
                       key={gi}
-                      onClick={() => setSelectedThumb({ index: gi, name: selectedThumb.name })}
+                      onClick={() =>
+                        setSelectedThumb({
+                          index: gi,
+                          name: selectedThumb.name,
+                        })
+                      }
                       className="relative flex-shrink-0 w-12 h-12 rounded-xl overflow-hidden shadow-md transition-all duration-200"
                       style={{
-                        outline: gi === selectedThumb.index ? `2px solid ${accent}` : "2px solid transparent",
+                        outline:
+                          gi === selectedThumb.index
+                            ? `2px solid ${accent}`
+                            : "2px solid transparent",
                         opacity: gi === selectedThumb.index ? 1 : 0.55,
                       }}
                     >
-                      <img src={src} alt={`${selectedThumb.name} ${gi + 1}`} className="w-full h-full object-cover" />
+                      <img
+                        src={src}
+                        alt={`${selectedThumb.name} ${gi + 1}`}
+                        className="w-full h-full object-cover"
+                      />
                     </button>
                   ))}
                 </div>
@@ -778,7 +975,8 @@ const Portfolio: React.FC = () => {
                 {selectedThumb.name}
                 {gallery.length > 1 && (
                   <span className="text-black/40 font-normal">
-                    {" "}· {selectedThumb.index + 1}/{gallery.length}
+                    {" "}
+                    · {selectedThumb.index + 1}/{gallery.length}
                   </span>
                 )}
               </p>

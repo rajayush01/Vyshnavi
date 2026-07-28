@@ -12,6 +12,7 @@ import {
   Linkedin,
   Twitter,
 } from 'lucide-react';
+import logo from "../assets/logo.png"
 
 interface FormErrors {
   name?: string;
@@ -243,7 +244,7 @@ const ContactUs: React.FC = () => {
       </div>
 
       {/* Mouse Follower Effect */}
-      <motion.div
+      {/* <motion.div
         className="fixed w-6 h-6 bg-cyan-400 rounded-full mix-blend-difference pointer-events-none z-50"
         animate={{
           x: mousePosition.x - 12,
@@ -254,7 +255,7 @@ const ContactUs: React.FC = () => {
           damping: 30,
           stiffness: 400,
         }}
-      />
+      /> */}
 
       {/* Hero Section */}
       <motion.div
@@ -316,7 +317,7 @@ const ContactUs: React.FC = () => {
           >
             <motion.div className="flex justify-center mb-8" animate={floatingAnimation}>
               <div className="relative">
-                <Milk className="h-16 w-16 text-cyan-300" strokeWidth={1.5} />
+                <img src={logo} className="h-20 w-20 text-cyan-300" />
                 <motion.div
                   className="absolute inset-0 rounded-full bg-cyan-400/30"
                   animate={{

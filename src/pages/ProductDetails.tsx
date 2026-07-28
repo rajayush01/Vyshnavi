@@ -47,7 +47,7 @@
  *  Desktop (lg:) appearance is unchanged.
  */
 
-import React, { useEffect, useMemo, useState } from "react";
+import React, { useEffect, useMemo, useState, useRef } from "react";
 import { useLocation, useParams } from "react-router-dom";
 import {
   Share2,
@@ -196,6 +196,7 @@ const ProductDetails: React.FC = () => {
   const params = useParams<{ id?: string }>();
   const location = useLocation();
   const { addToCart } = useCart();
+  const tabsContainerRef = useRef<HTMLDivElement>(null);
 
   // ── Resolve which product to show ──────────────────────────────────────
   const resolvedId = useMemo(() => {
@@ -244,6 +245,23 @@ const ProductDetails: React.FC = () => {
     setLightboxIndex(index);
     setIsLightboxOpen(true);
   };
+
+  useEffect(() => {
+    if (window.innerWidth >= 640) return; // only mobile
+
+    const container = tabsContainerRef.current;
+    if (!container) return;
+
+    const activeTab = container.querySelector(
+      "[data-active='true']",
+    ) as HTMLElement | null;
+
+    activeTab?.scrollIntoView({
+      behavior: "smooth",
+      inline: "center",
+      block: "nearest",
+    });
+  }, [activeDescTab]);
 
   // Reset variant + image selection whenever the product itself changes
   useEffect(() => {
@@ -605,8 +623,8 @@ const ProductDetails: React.FC = () => {
               >
                 <Sparkles className="w-4 h-4 flex-shrink-0" />
                 <span className="break-words">
-                  Price on request — our team will confirm availability for
-                  this size
+                  Price on request — our team will confirm availability for this
+                  size
                 </span>
               </div>
             )}
@@ -726,8 +744,8 @@ const ProductDetails: React.FC = () => {
                   borderColor: `${accent}22`,
                 }}
               >
-                <div className="flex flex-row sm:flex-row items-start sm:items-center justify-between gap-3 sm:gap-4">
-                  <div className="flex items-center gap-3 flex-1 min-w-0 w-full sm:w-auto">
+                <div className="flex flex-col sm:flex-row gap-3 sm:gap-4 sm:items-center sm:justify-between">
+                  <div className="flex items-center gap-3 w-full min-w-0">
                     <span className="bg-blue-600 text-white text-[10px] font-bold px-2.5 py-1 rounded-full flex-shrink-0 uppercase tracking-wide">
                       Pairs Well
                     </span>
@@ -764,10 +782,28 @@ const ProductDetails: React.FC = () => {
                         state: { productId: crossSell.id },
                       })
                     }
-                    className="flex items-center gap-1.5 bg-white border px-4 py-2 rounded-full font-bold text-xs hover:opacity-80 transition-colors flex-shrink-0 self-start sm:self-auto"
-                    style={{ borderColor: `${accent}66`, color: accent }}
+                    className="
+    w-full sm:w-auto
+    flex items-center justify-center
+    gap-1.5
+    bg-white
+    border
+    px-4 py-2
+    rounded-full
+    font-bold
+    text-xs
+    transition-all
+    hover:opacity-80
+    flex-shrink-0
+    sm:self-auto
+  "
+                    style={{
+                      borderColor: `${accent}66`,
+                      color: accent,
+                    }}
                   >
-                    View <ArrowRight className="w-3.5 h-3.5" />
+                    View
+                    <ArrowRight className="w-3.5 h-3.5" />
                   </button>
                 </div>
               </div>
@@ -807,14 +843,16 @@ const ProductDetails: React.FC = () => {
         >
           {/* Tab bar */}
           <div
-  className="flex gap-1 sm:gap-2 mb-6 overflow-x-auto scrollbar-hide border-b"
-  style={{ borderColor: `${accent}22` }}
->
+            ref={tabsContainerRef}
+            className="flex gap-1 sm:gap-2 mb-6 overflow-x-auto scrollbar-hide border-b"
+            style={{ borderColor: `${accent}22` }}
+          >
             {DESC_TABS.map((tab) => {
               const isActive = activeDescTab === tab.key;
               return (
                 <button
                   key={tab.key}
+                  data-active={isActive}
                   onClick={() => setActiveDescTab(tab.key)}
                   className="relative px-4 sm:px-5 py-3 text-xs sm:text-sm font-bold whitespace-nowrap transition-colors flex-shrink-0"
                   style={{ color: isActive ? accent : "#9ca3af" }}

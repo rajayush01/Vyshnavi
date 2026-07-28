@@ -229,15 +229,13 @@ const Header: React.FC = () => {
                 )}
               </button>
 
-              {!isPortfolio && (
                 <button
                   onClick={() => setIsMenuOpen(true)}
-                className="p-2 text-slate-700 hover:text-blue-600 transition-colors"
-                aria-label="Open menu"
+                  className="p-2 text-slate-700 hover:text-blue-600 transition-colors"
+                  aria-label="Open menu"
               >
                 <Menu className="w-6 h-6" />
               </button>
-              )}
             </div>
           </div>
         </div>

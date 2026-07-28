@@ -20,6 +20,11 @@ const Home = lazy(() => import('./pages/Home'));
 
 function App() {
 	const [isInitialLoading, setIsInitialLoading] = useState(true);
+	useEffect(() => {
+		if ("scrollRestoration" in window.history) {
+			window.history.scrollRestoration = "manual";
+		}
+	}, []);
 
 	useEffect(() => {
 		// Set a timer to hide initial loading after animation completes
@@ -33,6 +38,7 @@ function App() {
 	if (isInitialLoading) {
 		return <DairyLoadingAnimation />;
 	}
+
 
 	return (
 		// CartProvider wraps every route so the cart — and the slide-out
