@@ -521,7 +521,7 @@ const ProductDetails: React.FC = () => {
                   <button
                     key={idx}
                     onClick={() => setSelectedImage(idx)}
-                    className={`min-w-16 h-16 sm:min-w-20 sm:h-20 rounded-xl border-2 flex-shrink-0 overflow-hidden transition-all duration-200`}
+                    className={`h-16 sm:min-w-20 sm:h-20 rounded-xl border-2 flex-shrink-0 overflow-hidden transition-all duration-200`}
                     style={{
                       backgroundColor: `${accent}0d`,
                       borderColor:
@@ -726,7 +726,7 @@ const ProductDetails: React.FC = () => {
                   borderColor: `${accent}22`,
                 }}
               >
-                <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 sm:gap-4">
+                <div className="flex flex-row sm:flex-row items-start sm:items-center justify-between gap-3 sm:gap-4">
                   <div className="flex items-center gap-3 flex-1 min-w-0 w-full sm:w-auto">
                     <span className="bg-blue-600 text-white text-[10px] font-bold px-2.5 py-1 rounded-full flex-shrink-0 uppercase tracking-wide">
                       Pairs Well
@@ -807,9 +807,9 @@ const ProductDetails: React.FC = () => {
         >
           {/* Tab bar */}
           <div
-            className="flex gap-1 sm:gap-2 mb-6 overflow-x-auto border-b"
-            style={{ borderColor: `${accent}22` }}
-          >
+  className="flex gap-1 sm:gap-2 mb-6 overflow-x-auto scrollbar-hide border-b"
+  style={{ borderColor: `${accent}22` }}
+>
             {DESC_TABS.map((tab) => {
               const isActive = activeDescTab === tab.key;
               return (

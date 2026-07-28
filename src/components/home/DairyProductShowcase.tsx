@@ -210,7 +210,7 @@ const DairyProductShowcase: React.FC = () => {
           </div>
 
           {/* Rail nav arrows */}
-          <div className="hidden sm:flex items-center gap-2">
+          <div className="flex items-center justify-center sm:justify-end gap-2 mt-4 sm:mt-0">
             <button
               onClick={() => scrollByCard(-1)}
               aria-label="Scroll categories left"
