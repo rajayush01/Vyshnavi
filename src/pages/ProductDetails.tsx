@@ -521,7 +521,7 @@ const ProductDetails: React.FC = () => {
                   <button
                     key={idx}
                     onClick={() => setSelectedImage(idx)}
-                    className={`h-16 sm:min-w-20 sm:h-20 rounded-xl border-2 flex-shrink-0 overflow-hidden transition-all duration-200`}
+                    className={`min-w-16 h-16 sm:min-w-20 sm:h-20 rounded-xl border-2 flex-shrink-0 overflow-hidden transition-all duration-200`}
                     style={{
                       backgroundColor: `${accent}0d`,
                       borderColor:
@@ -535,7 +535,7 @@ const ProductDetails: React.FC = () => {
                     <img
                       src={img}
                       alt={`View ${idx + 1}`}
-                      className="w-full h-full object-cover"
+                      className="h-full object-cover"
                     />
                   </button>
                 ))}
