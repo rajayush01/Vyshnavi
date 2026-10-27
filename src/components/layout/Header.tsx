@@ -11,13 +11,14 @@ type Action =
 
 const NAV_ITEMS: { key: string; label: string; action: Action }[] = [
   { key: "home", label: "Home", action: { type: "navigate", target: "/" } },
-  { key: "ghee", label: "Ghee", action: { type: "navigate", target: "/ghee" } },
-  { key: "about", label: "About Us", action: { type: "navigate", target: "/about" } },
-  { key: "portfolio", label: "Portfolio", action: { type: "navigate", target: "/portfolio" } },
-  { key: "contact", label: "Contact Us", action: { type: "navigate", target: "/contact-us" } },
+  { key: "ghee", label: "Our Ghee", action: { type: "navigate", target: "/ghee" } },
+  { key: "about", label: "Our 25+ Year Story", action: { type: "navigate", target: "/about" } },
+  { key: "portfolio", label: "Our Products", action: { type: "navigate", target: "/portfolio" } },
+  { key: "contact", label: "Contact & Bulk Orders ", action: { type: "navigate", target: "/contact-us" } },
 ];
 
-// Maps the current URL path to the matching nav key, defaulting to "home"
+// Maps the current URL path to the matching nav key, defaulting to "home"  Contact & Bulk Orders 
+
 const getActiveTabFromPath = (pathname: string): string => {
   const match = NAV_ITEMS.find(
     (item) =>
@@ -126,9 +127,9 @@ const Header: React.FC = () => {
       {!isPortfolio && (
         <div className="fixed top-0 left-0 right-0 w-full z-50 h-9 flex items-center bg-gradient-to-r from-blue-600 via-blue-500 to-cyan-500 text-white text-[11px] sm:text-xs overflow-hidden">
           <div className="scroll-banner inline-flex font-semibold tracking-wide">
-            <span className="inline-flex items-center px-8">
-              🥛&nbsp; Fresh Milk Delivered Daily &nbsp;•&nbsp; Trusted by 10,000+ Families &nbsp;•&nbsp; Lab-Tested Purity, Every Batch &nbsp;•&nbsp; 🥛&nbsp; Fresh Milk Delivered Daily &nbsp;•&nbsp; Trusted by 10,000+ Families &nbsp;•&nbsp; Lab-Tested Purity, Every Batch &nbsp;•&nbsp;
-            </span>
+          <span className="inline-flex items-center px-8">
+  🥛&nbsp; 25+ Years of Family Trust &nbsp;•&nbsp; Every Batch Lab-Tested &nbsp;•&nbsp; Zero Palm Oil &nbsp;•&nbsp; Zero Vegetable Oil &nbsp;•&nbsp; Zero Chemicals &nbsp;•&nbsp; Honest Quality at Everyday Family Prices &nbsp;•&nbsp; 🥛&nbsp; 25+ Years of Family Trust &nbsp;•&nbsp; Every Batch Lab-Tested &nbsp;•&nbsp; Zero Palm Oil &nbsp;•&nbsp; Zero Vegetable Oil &nbsp;•&nbsp; Zero Chemicals &nbsp;•&nbsp; Honest Quality at Everyday Family Prices &nbsp;•&nbsp;
+</span>
           </div>
         </div>
       )}

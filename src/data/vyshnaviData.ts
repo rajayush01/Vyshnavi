@@ -55,8 +55,8 @@ export const CATEGORIES: ProductCategory[] = [
     name: "Milk",
     color: "bg-blue-50",
     accentHex: "#1d4ed8",
-    tagline: "PURE & NATURAL",
-    subtitle: "FARM FRESH DAILY",
+    tagline: "LAB-TESTED & NUTRITIOUS",
+    subtitle: " MAHA GOLD, GOLD RICH & TAAZA TONED",
     items: [
       {
         id: 101,
@@ -526,7 +526,7 @@ export const CATEGORIES: ProductCategory[] = [
 
   {
     key: "ghee",
-    name: "Ghee",
+    name: "LAB-TESTED GHEE ",
     color: "bg-amber-50",
     accentHex: "#b45309",
     tagline: "LIQUID GOLD",
@@ -537,13 +537,13 @@ export const CATEGORIES: ProductCategory[] = [
         name: "Cow Ghee",
         // image: cow1l_1, // default hero shot
         image: "https://pub-5910ba650a5b4f4ba76486d5a3630c49.r2.dev/vaishnavi-data/CG5m1.png",
-        description: "A2-rich clarity",
+        description: "Golden granular texture & homemade aroma • Zero palm or vegetable oil ",
         content:
           "Made from the milk of indigenous desi cows via the traditional bilona method. Rich in A2 beta-casein proteins, butyric acid, and a divine aroma that fills the kitchen.",
         variants: [
           {
-            size: "5 ml",
-            packType: "pouch",
+            size: "50 ml",
+            packType: "pouch/Jar",
             price: 95,
             images: [
               "https://pub-5910ba650a5b4f4ba76486d5a3630c49.r2.dev/vaishnavi-data/CG5m1.png",
@@ -555,7 +555,7 @@ export const CATEGORIES: ProductCategory[] = [
           },
           {
             size: "100 ml",
-            packType: "jar",
+            packType: "Jar/Pouch",
             price: 165,
             images: [
               "https://pub-5910ba650a5b4f4ba76486d5a3630c49.r2.dev/vaishnavi-data/CGHun1.png",
@@ -567,7 +567,7 @@ export const CATEGORIES: ProductCategory[] = [
           },
           {
             size: "200 ml",
-            packType: "jar",
+            packType: "Jar/Pouch",
             price: 315,
             images: [
               cowghee200ml1,
@@ -579,7 +579,7 @@ export const CATEGORIES: ProductCategory[] = [
           },
           {
             size: "500 ml",
-            packType: "jar",
+            packType: "Jar/Pouch",
             price: 730,
             images: [
               "https://pub-5910ba650a5b4f4ba76486d5a3630c49.r2.dev/vaishnavi-data/CG500m1.png",
@@ -591,7 +591,7 @@ export const CATEGORIES: ProductCategory[] = [
           },
           {
             size: "1 liter",
-            packType: "jar",
+            packType: "Jar/Pouch",
             price: 1380,
             images: [
               "https://pub-5910ba650a5b4f4ba76486d5a3630c49.r2.dev/vaishnavi-data/CG103.png",
@@ -626,13 +626,13 @@ export const CATEGORIES: ProductCategory[] = [
         id: 602,
         name: "Buffalo Ghee",
         image: "https://pub-5910ba650a5b4f4ba76486d5a3630c49.r2.dev/vaishnavi-data/BG2m1.png",
-        description: "Bold & buttery",
+        description: "Rich, dense & aromatic for rotis and mithai • Zero vanaspati or palm oil ",
         content:
           "Crafted from buffalo cream, this ghee has a higher fat content and a deeply rich, nutty aroma. Ideal for festive cooking and traditional sweets.",
         variants: [
           {
             size: "200 ml",
-            packType: "jar",
+            packType: "Jar/Pouch",
             price: 285,
             images: [
               "https://pub-5910ba650a5b4f4ba76486d5a3630c49.r2.dev/vaishnavi-data/BG2m1.png",
@@ -643,7 +643,7 @@ export const CATEGORIES: ProductCategory[] = [
           },
           {
             size: "500 ml",
-            packType: "jar",
+            packType: "Jar/Pouch",
             price: 660,
             images: [
               "https://pub-5910ba650a5b4f4ba76486d5a3630c49.r2.dev/vaishnavi-data/BG5m2.png",
@@ -654,7 +654,7 @@ export const CATEGORIES: ProductCategory[] = [
           },
           {
             size: "1 liter",
-            packType: "jar",
+            packType: "Jar/Pouch",
             price: 1230,
             images: [
               "https://pub-5910ba650a5b4f4ba76486d5a3630c49.r2.dev/vaishnavi-data/BG102.png",

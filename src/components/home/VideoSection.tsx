@@ -17,15 +17,15 @@ interface Slide {
 
 const slides: Slide[] = [
   {
-    tag: "Behind The Bottle",
-    heading: "From Farm to Family:",
+    tag: "INSIDE OUR AUTOMATED DAIRY",
+    heading: "From Procurement Center to Your Kitchen: Our Quality Process",
     headingAccent: "Our Purity Process",
-    copy: "Every drop travels a short, careful journey — collected before sunrise, cooled instantly, tested for purity, and delivered while it's still fresh.",
+    copy: "We don't rely on fancy marketing stories — we rely on strict science, modern machinery, and family accountability. Every litre is collected at our procurement centers, tested in our lab, and hygienically processed so your family gets safe, delicious dairy at an honest price.",
     video: videoSrc1,
     stats: [
-      { icon: <Droplet className="w-5 h-5" />, label: "Sourced fresh daily from local farms" },
-      { icon: <ThermometerSnowflake className="w-5 h-5" />, label: "Cold-chain preserved at every step" },
-      { icon: <Truck className="w-5 h-5" />, label: "On your doorstep within 6 hours" },
+      { icon: <Droplet className="w-5 h-5" />, label: "Collected daily from our verified milk procurement centers with instant chilling " },
+      { icon: <ThermometerSnowflake className="w-5 h-5" />, label: "Rigorously lab-tested every batch to ensure zero chemicals, zero urea, and zero vegetable oil " },
+      { icon: <Truck className="w-5 h-5" />, label: "Processed and packed using 100% modern, contactless machinery for complete hygiene " },
       { icon: <BadgeCheck className="w-5 h-5" />, label: "Lab tested for purity, every batch" },
     ],
   },

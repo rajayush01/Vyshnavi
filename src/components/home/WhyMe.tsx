@@ -1,36 +1,39 @@
 // WhyMe.tsx
-import React from 'react';
-import { Leaf, Sparkles, Package, Heart, ShieldCheck } from 'lucide-react';
+import React from "react";
+import { Leaf, Sparkles, Package, Heart, ShieldCheck } from "lucide-react";
 import "../../fonts.css";
-import cow from "../../assets/cow.png"
+import cow from "../../assets/cow.png";
 
 export default function WhyMe() {
   const features = [
     {
       icon: <Leaf className="w-7 h-7" />,
-      title: "Farm-Fresh Dairy",
-      description: "Pure milk and dairy straight from local farms, collected before sunrise so nothing sits waiting.",
+      title: "Quality That Fits Your Budget",
+      description:
+        " We believe unadulterated dairy is every middle-class family's right, not an overpriced luxury. You get honest quality at fair everyday prices.",
       big: true,
     },
     {
       icon: <Sparkles className="w-6 h-6" />,
-      title: "100% Natural Goodness",
-      description: "No preservatives, additives, or artificial flavors — ever.",
+      title: "Zero Adulteration Guarantee:",
+      description: "Strictly no palm oil,no vegetable oil,no vanaspati,no starch, and no harmful chemicals — ever. ",
     },
     {
       icon: <Package className="w-6 h-6" />,
-      title: "Hygienic Packaging",
-      description: "Sealed to maintain freshness and purity from farm to fridge.",
+      title: "100% Modern Machinery Process:",
+      description:
+        "Sourced from verified procurement centers and processed through automated, contactless machinery for complete hygiene and consistent taste.",
     },
     {
       icon: <Heart className="w-6 h-6" />,
-      title: "Rich in Nutrition",
-      description: "Packed with calcium, protein, and vitamins your family needs.",
+      title: "Lab-Tested Every Single Batch",
+      description:
+        "Every batch undergoes rigorous laboratory testing for fat, SNF, and quality parameters before it is packed for your home. ",
     },
     {
       icon: <ShieldCheck className="w-6 h-6" />,
-      title: "Trusted Quality",
-      description: "Tested for purity, safety, and taste at every step.",
+      title: "Made with Love by a Family Business:",
+      description: "For over 25 years, our family members have personally overseen operations to ensure every pack delivers the taste and quality our own family eats.",
     },
   ];
 
@@ -40,8 +43,17 @@ export default function WhyMe() {
   return (
     <section className="relative w-full overflow-hidden bg-white py-20 sm:py-24 px-4">
       {/* Decorative dairy illustrations */}
-      <svg className="hidden md:block absolute top-10 left-[5%] w-16 h-16 opacity-70 animate-float-slow" viewBox="0 0 64 64" fill="none">
-        <path d="M26 10 L38 10 L38 18 L42 24 L42 56 L22 56 L22 24 L26 18 Z" fill="#ffffff" stroke="#3b82f6" strokeWidth="2" />
+      <svg
+        className="hidden md:block absolute top-10 left-[5%] w-16 h-16 opacity-70 animate-float-slow"
+        viewBox="0 0 64 64"
+        fill="none"
+      >
+        <path
+          d="M26 10 L38 10 L38 18 L42 24 L42 56 L22 56 L22 24 L26 18 Z"
+          fill="#ffffff"
+          stroke="#3b82f6"
+          strokeWidth="2"
+        />
         <rect x="22" y="30" width="20" height="10" fill="#dbeafe" />
         <rect x="24" y="6" width="16" height="4" rx="1" fill="#3b82f6" />
       </svg>
@@ -64,31 +76,48 @@ export default function WhyMe() {
         <div className="flex justify-center mb-4">
           <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-blue-50 border border-blue-100">
             <svg width="9" height="11" viewBox="0 0 32 40" fill="none">
-              <path d="M16 2 C22 14 28 20 28 28 C28 34.6 22.6 40 16 40 C9.4 40 4 34.6 4 28 C4 20 10 14 16 2 Z" fill="#2563eb" />
+              <path
+                d="M16 2 C22 14 28 20 28 28 C28 34.6 22.6 40 16 40 C9.4 40 4 34.6 4 28 C4 20 10 14 16 2 Z"
+                fill="#2563eb"
+              />
             </svg>
             <span className="text-[11px] font-bold uppercase tracking-[0.25em] text-blue-700">
-              The Vyshnavi Standard
+              The Vyshnavi PROMISE
             </span>
           </div>
         </div>
-
         <h2 className="text-4xl md:text-5xl font-semibold text-center mb-14 sm:mb-16 text-black cinzel tracking-tight">
-          Why <span className="text-blue-600">Vyshnavi Dairy</span>?
+          WHY FAMILIES
+          <br />
+          HAVE TRUSTED US
+          <br />
+          FOR <span className="text-blue-600">25+ YEARS</span>
         </h2>
 
         {/* Bento grid: one large feature + rest in a side grid */}
         <div className="grid grid-cols-1 lg:grid-cols-5 gap-5">
           {/* Large feature card */}
           <div className="lg:col-span-2 relative overflow-hidden rounded-[28px] bg-gradient-to-br from-blue-600 to-cyan-600 text-white p-9 flex flex-col justify-between min-h-[280px] shadow-[0_30px_60px_-25px_rgba(37,99,235,0.55)]">
-            <svg className="absolute -bottom-6 -right-6 w-40 h-40 opacity-15" viewBox="0 0 64 64" fill="none">
-              <path d="M32 6 C40 22 50 30 50 42 C50 52 42 58 32 58 C22 58 14 52 14 42 C14 30 24 22 32 6 Z" fill="#ffffff" />
+            <svg
+              className="absolute -bottom-6 -right-6 w-40 h-40 opacity-15"
+              viewBox="0 0 64 64"
+              fill="none"
+            >
+              <path
+                d="M32 6 C40 22 50 30 50 42 C50 52 42 58 32 58 C22 58 14 52 14 42 C14 30 24 22 32 6 Z"
+                fill="#ffffff"
+              />
             </svg>
             <div className="relative">
               <div className="w-14 h-14 rounded-2xl bg-white/15 backdrop-blur-sm flex items-center justify-center mb-6">
                 {bigFeature.icon}
               </div>
-              <h3 className="text-2xl font-bold mb-3 tracking-tight">{bigFeature.title}</h3>
-              <p className="text-blue-50/90 leading-relaxed text-[15px]">{bigFeature.description}</p>
+              <h3 className="text-2xl font-bold mb-3 tracking-tight">
+                {bigFeature.title}
+              </h3>
+              <p className="text-blue-50/90 leading-relaxed text-[15px]">
+                {bigFeature.description}
+              </p>
             </div>
             <span className="relative mt-6 h-0.5 w-10 rounded-full bg-white/60" />
           </div>

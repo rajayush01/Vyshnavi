@@ -189,7 +189,7 @@ const HorizontalProductScroll: React.FC<HorizontalProductScrollProps> = ({
     };
   }, [isLightboxOpen]); // eslint-disable-line react-hooks/exhaustive-deps
 
-  const resolvedHeading = heading ?? "Our Ghee Collection";
+  const resolvedHeading = heading ?? "Our Ghee Collection — Authentic Granular Taste at Family-Friendly Prices";
 
   if (!active) return null;
 
@@ -308,8 +308,8 @@ const HorizontalProductScroll: React.FC<HorizontalProductScrollProps> = ({
               <path d="M16 2 C22 14 28 20 28 28 C28 34.6 22.6 40 16 40 C9.4 40 4 34.6 4 28 C4 20 10 14 16 2 Z" fill="#2563eb" />
             </svg>
             <span style={{ fontSize: 11, fontWeight: 700, letterSpacing: "0.25em", textTransform: "uppercase", color: "#1d4ed8" }}>
-              Bilona Churned
-            </span>
+  ZERO PALM OIL • ZERO VEGETABLE OIL
+</span>
           </div>
           <h2 style={{ fontSize: "clamp(26px, 6vw, 42px)", fontWeight: 800, color: "#0f172a", letterSpacing: "-0.02em", margin: 0 }}>
             {resolvedHeading}

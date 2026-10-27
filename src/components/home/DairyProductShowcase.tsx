@@ -201,11 +201,11 @@ const DairyProductShowcase: React.FC = () => {
                 <path d="M16 2 C22 14 28 20 28 28 C28 34.6 22.6 40 16 40 C9.4 40 4 34.6 4 28 C4 20 10 14 16 2 Z" fill="#2563eb" />
               </svg>
               <span className="text-[11px] font-bold uppercase tracking-[0.25em] text-blue-700">
-                Shop By Category
+                COMPLETE FAMILY RANGE
               </span>
             </div>
             <h2 className="text-3xl md:text-4xl font-bold text-gray-900 tracking-tight">
-              Our Products
+              Our Products - Lab-Tested Daily Essentials
             </h2>
           </div>
 

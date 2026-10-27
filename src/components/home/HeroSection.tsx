@@ -10,31 +10,31 @@ const HeroSection = () => {
   const slides = [
     {
       image: bnr,
-      title: 'Pure & Fresh Dairy',
-      subtitle: 'Farm-Fresh Goodness Delivered Daily to Your Doorstep',
-      cta: 'Shop Now',
-      badge: 'Premium Quality'
+      title: 'Where Honest Quality Meets Everyday Affordability',
+     subtitle: 'Good Dairy Shouldn’t Be a Luxury. Lab-Tested Purity, Honest Quality, and Everyday Prices for Every Family.',
+      cta: 'Explore Our Products',
+      badge: 'TRUSTED BY FAMILIES FOR 25+ YEARS'
     },
     {
       image: bnr,
-      title: '100% Organic Milk',
-      subtitle: 'Sourced Directly From Local Farms with Love & Care',
-      cta: 'Learn More',
-      badge: 'Farm Fresh'
+     title: 'No Palm Oil. No Chemicals. Just Great Taste',
+     subtitle: 'Collected at Verified Centers, Hygienically Processed & Lab-Tested Every Batch',
+      cta: 'See How We Test Every Batch ',
+      badge: 'ZERO ADULTERATION GUARANTEE '
     },
     {
       image: bnr2,
-      title: 'Artisan Cheese Collection',
-      subtitle: 'Handcrafted With Traditional Methods for Authentic Taste',
-      cta: 'Explore Cheese',
-      badge: 'Handmade'
+      title: 'Aromatic Ghee & Soft Malai Paneer for Every Kitchen',
+      subtitle: '100% real milk ghee and protein-rich Malai Paneer with zero vegetable oil, zero vanaspati, and zero starch — authentic taste that fits your monthly grocery budget.',
+      cta: 'Shop Ghee & Paneer',
+      badge: 'REAL MILK FAT • GRANULAR TEXTURE'
     },
     {
       image: bnr2,
-      title: 'Premium Yogurt Range',
-      subtitle: 'Rich in Protein & Probiotics for a Healthy Lifestyle',
-      cta: 'Discover More',
-      badge: 'Nutritious'
+      title: 'Thick Creamy Curd, Milk & Refreshing Beverages',
+      subtitle: 'From morning tea and kids tiffins to wholesome family meals — enjoy rich milk variants, thick curd, buttermilk, lassi, and badam milk every day.',
+      cta: 'View All Daily Products',
+      badge: 'EVERYDAY FAMILY ESSENTIALS'
     }
   ];
 
