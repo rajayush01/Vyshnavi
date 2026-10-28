@@ -1,14 +1,13 @@
 /**
  * DairyProductShowcase.tsx — Vyshnavi Dairy
  *
- * Category showcase: one card per product category (Milk, Curd, Beverages,
- * Paneer, Butter, Ghee, Sweets), each with a representative image (now
- * cyclable via next/previous arrows through all images in that category),
- * a live item count, and a "Shop Category" button that routes to the full
- * listing for that category — /ghee for Ghee (its own bespoke page), and
- * /category/:key for everything else.
+ * Category showcase: one card per product category, each with a
+ * representative image (cyclable via prev/next arrows), and a CTA button.
  *
- * Fully driven by CATEGORIES from vyshnaviData.ts.
+ * Every piece of card content (badge, eyebrow, title, description, CTA label,
+ * link, images) is read from `category.showcase` in vyshnaviData.ts, so each
+ * card can have completely different content. If a showcase field is missing,
+ * it falls back to the category's own data.
  */
 
 import React, { useRef, useState } from "react";
@@ -33,7 +32,7 @@ function categoryHref(category: ProductCategory): string {
   return category.key === "ghee" ? "/ghee" : `/category/${category.key}`;
 }
 
-// All images available for a category (one per item that actually has one)
+// Fallback images: one per item that actually has one
 function categoryImages(category: ProductCategory): string[] {
   return category.items
     .map((i) => i.image)
@@ -47,8 +46,19 @@ interface CategoryCardProps {
 }
 
 const CategoryCard: React.FC<CategoryCardProps> = ({ category, navigate }) => {
-  const images = categoryImages(category);
-  const href = categoryHref(category);
+  const sc = category.showcase;
+
+  // Everything below comes from data first, with a sensible fallback
+  const images = sc?.images?.length ? sc.images : categoryImages(category);
+  const href = sc?.href ?? categoryHref(category);
+  const badge =
+    sc?.badge ??
+    `${category.items.length} variant${category.items.length !== 1 ? "s" : ""}`;
+  const eyebrow = sc?.eyebrow ?? category.tagline;
+  const title = sc?.title ?? category.name;
+  const description = sc?.description ?? category.subtitle;
+  const ctaLabel = sc?.ctaLabel ?? `Shop ${category.name}`;
+
   const [imgIndex, setImgIndex] = useState(0);
 
   const hasMultipleImages = images.length > 1;
@@ -81,7 +91,7 @@ const CategoryCard: React.FC<CategoryCardProps> = ({ category, navigate }) => {
           <img
             key={activeImage}
             src={activeImage}
-            alt={`${category.name} ${imgIndex + 1}`}
+            alt={`${title} ${imgIndex + 1}`}
             className="relative h-40 sm:h-44 object-contain drop-shadow-lg transition-transform duration-500 group-hover:scale-105 animate-fade-in"
           />
         ) : (
@@ -90,14 +100,14 @@ const CategoryCard: React.FC<CategoryCardProps> = ({ category, navigate }) => {
             style={{ background: FALLBACK_GRADIENT[category.key] ?? "#e5e7eb" }}
           >
             <span className="text-xs text-gray-500 font-semibold text-center px-3">
-              {category.name}
+              {title}
             </span>
           </div>
         )}
 
-        {/* Item count badge */}
+        {/* Badge (from data) */}
         <span className="absolute top-4 left-4 text-[10px] font-bold uppercase tracking-widest px-2.5 py-1 rounded-full bg-white/85 backdrop-blur-sm text-gray-700 shadow-sm">
-          {category.items.length} item{category.items.length !== 1 ? "s" : ""}
+          {badge}
         </span>
 
         {/* Image prev / next arrows — only when there's more than one image */}
@@ -105,14 +115,14 @@ const CategoryCard: React.FC<CategoryCardProps> = ({ category, navigate }) => {
           <>
             <button
               onClick={showPrev}
-              aria-label={`Previous ${category.name} image`}
+              aria-label={`Previous ${title} image`}
               className="absolute left-2.5 top-1/2 -translate-y-1/2 w-8 h-8 rounded-full bg-white/85 backdrop-blur-sm shadow-sm flex items-center justify-center text-gray-700 opacity-0 group-hover:opacity-100 hover:bg-white transition-all duration-300 z-20"
             >
               <ChevronLeft className="w-4 h-4" />
             </button>
             <button
               onClick={showNext}
-              aria-label={`Next ${category.name} image`}
+              aria-label={`Next ${title} image`}
               className="absolute right-2.5 top-1/2 -translate-y-1/2 w-8 h-8 rounded-full bg-white/85 backdrop-blur-sm shadow-sm flex items-center justify-center text-gray-700 opacity-0 group-hover:opacity-100 hover:bg-white transition-all duration-300 z-20"
             >
               <ChevronRight className="w-4 h-4" />
@@ -133,16 +143,16 @@ const CategoryCard: React.FC<CategoryCardProps> = ({ category, navigate }) => {
         )}
       </div>
 
-      {/* Text block */}
+      {/* Text block (all from data) */}
       <div className="p-6 sm:p-7 flex flex-col flex-grow">
         <p className="text-[10px] font-black uppercase tracking-[0.2em] text-gray-400 mb-1.5">
-          {category.tagline}
+          {eyebrow}
         </p>
         <h3 className="text-2xl font-bold text-gray-900 mb-2 leading-tight tracking-tight">
-          {category.name}
+          {title}
         </h3>
         <p className="text-gray-600 text-sm mb-6 leading-relaxed">
-          {category.subtitle}
+          {description}
         </p>
 
         <button
@@ -152,7 +162,7 @@ const CategoryCard: React.FC<CategoryCardProps> = ({ category, navigate }) => {
           }}
           className="mt-auto inline-flex items-center justify-center gap-2 bg-white/90 hover:bg-white text-gray-900 font-bold text-sm py-3 rounded-xl shadow-sm hover:shadow-md transition-all duration-300 group/btn"
         >
-          Shop {category.name}
+          {ctaLabel}
           <ArrowRight className="w-4 h-4 transition-transform duration-300 group-hover/btn:translate-x-1" />
         </button>
       </div>

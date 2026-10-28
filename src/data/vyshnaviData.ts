@@ -36,6 +36,16 @@ export interface ProductItem {
   reviews?: number;
 }
 
+export interface CategoryShowcase {
+  badge?: string;        // e.g. "5 VARIANTS", "NEW RANGE", "FROM ₹95"
+  eyebrow?: string;      // small line above the title
+  title?: string;        // card heading
+  description?: string;  // line under the heading
+  ctaLabel?: string;     // button text
+  href?: string;         // override the default route
+  images?: string[];     // override the cycling images
+}
+
 export interface ProductCategory {
   key: string;
   name: string;
@@ -44,6 +54,7 @@ export interface ProductCategory {
   tagline: string;
   subtitle: string;
   items: ProductItem[];
+  showcase?: CategoryShowcase;
 }
 
 
@@ -57,6 +68,13 @@ export const CATEGORIES: ProductCategory[] = [
     accentHex: "#1d4ed8",
     tagline: "LAB-TESTED & NUTRITIOUS",
     subtitle: " MAHA GOLD, GOLD RICH & TAAZA TONED",
+    showcase: {
+      badge: "5 VARIANTS",
+      eyebrow: "LAB-TESTED & NUTRITIOUS",
+      title: "Milk",
+      description: "Maha Gold, Gold Rich & Taaza Toned",
+      ctaLabel: "Explore Milk",
+    },
     items: [
       {
         id: 101,
@@ -174,6 +192,13 @@ export const CATEGORIES: ProductCategory[] = [
     accentHex: "#15803d",
     tagline: "CREAMY & PROBIOTIC",
     subtitle: "SET FRESH DAILY",
+    showcase: {
+      badge: "POUCHES & BUCKETS ",
+      eyebrow: "THICK & CREAMY",
+      title: "Curd",
+      description: "HYGIENICALLY SET DAILY",
+      ctaLabel: "Shop Curd",
+    },
     items: [
       {
         id: 201,
@@ -272,6 +297,13 @@ export const CATEGORIES: ProductCategory[] = [
     accentHex: "#7e22ce",
     tagline: "REFRESHING & NATURAL",
     subtitle: "SIPPED SINCE DAWN",
+    showcase: {
+      badge: "COOL & ENERGISING",
+      eyebrow: "GREAT TASTE",
+      title: "Beverages",
+      description: "BADAM MILK, LASSI & BUTTERMILK",
+      ctaLabel: "Shop Beverages",
+    },
     items: [
       {
         id: 301,
@@ -372,6 +404,13 @@ export const CATEGORIES: ProductCategory[] = [
     accentHex: "#c2410c",
     tagline: "FRESH & SOFT",
     subtitle: "PRESSED TO PERFECTION",
+    showcase: {
+      badge: "REAL MILK PROTEIN",
+      eyebrow: "NO ANALOGUE / NO VEGETABLE FAT",
+      title: "Malai Paneer",
+      description: "SOFT & FRESH",
+      ctaLabel: "Shop Paneer",
+    },
     items: [
       {
         id: 401,
@@ -463,6 +502,13 @@ export const CATEGORIES: ProductCategory[] = [
     accentHex: "#a16207",
     tagline: "CHURNED TO GOLD",
     subtitle: "TRADITIONAL MAKHAN",
+    showcase: {
+      badge: "REAL MILK PROTEIN",
+      eyebrow: "NO ANALOGUE / NO VEGETABLE FAT",
+      title: "Butter",
+      description: "SOFT & FRESH",
+      ctaLabel: "Shop Butter",
+    },
     items: [
       {
         id: 501,
@@ -497,6 +543,13 @@ export const CATEGORIES: ProductCategory[] = [
     accentHex: "#964B00",
     tagline: "CHURNED TO GOLD",
     subtitle: "TRADITIONAL MAKHAN",
+    showcase: {
+      badge: "TRADITIONAL TASTE",
+      eyebrow: "MADE WITH VYSHNAVI GHEE",
+      title: "Khova",
+      description: "PURE KHOVA",
+      ctaLabel: "Shop Khova",
+    },
     items: [
       {
         id: 801,
@@ -531,6 +584,13 @@ export const CATEGORIES: ProductCategory[] = [
     accentHex: "#b45309",
     tagline: "LIQUID GOLD",
     subtitle: "BILONA CHURNED",
+    showcase: {
+      badge: "ALL SIZES",
+      eyebrow: "ZERO PALM OIL",
+      title: "Ghee",
+      description: "GRANULAR AROMA & TASTE",
+      ctaLabel: "Shop Ghee",
+    },
     items: [
       {
         id: 601,
@@ -689,6 +749,13 @@ export const CATEGORIES: ProductCategory[] = [
     accentHex: "#be185d",
     tagline: "HANDCRAFTED MITHAIS",
     subtitle: "MADE WITH LOVE",
+    showcase: {
+      badge: "TRADITIONAL TASTE",
+      eyebrow: "MADE WITH VYSHNAVI GHEE",
+      title: "Sweets Boxes",
+      description: "MYSORE PAK",
+      ctaLabel: "Shop Sweets",
+    },
     items: [
       {
         id: 701,

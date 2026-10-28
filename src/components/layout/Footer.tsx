@@ -239,15 +239,22 @@
 
 import { MapPin, Phone, Mail, Shield, Clock, Award } from "lucide-react";
 import logo from "../../assets/logo.png";
+import { Link } from "react-router-dom";
+
+
+const categoryPath = (key: string) =>
+  key === "ghee" ? "/ghee" : `/category/${key}`;
 
 const productLinks = [
-  "Milk Variants",
-  "Cow & Buffalo Ghee",
-  "Curd",
-  "Malai Paneer & Butter",
-  "Badam Milk",
-  "Lassi & Buttermilk",
-  "Khova & Mysore Pak",
+  { label: "Milk Variants",        key: "milk" },
+  { label: "Cow & Buffalo Ghee",   key: "ghee" },
+  { label: "Curd",                 key: "curd" },
+  { label: "Malai Paneer",         key: "paneer" },
+  { label: "Butter",               key: "butter" },
+  { label: "Badam Milk",           key: "beverages" },
+  { label: "Lassi & Buttermilk",   key: "beverages" },
+  { label: "Khova",                key: "khova" },
+  { label: "Sweet Boxes",          key: "sweets" },
 ];
 
 const investorLinks = [
@@ -288,9 +295,9 @@ export default function Footer() {
               <div className="flex items-start gap-3 text-sm text-slate-600">
                 <MapPin className="w-4 h-4 text-blue-600 mt-0.5 flex-shrink-0" />
                 <span>
-                  <strong>Corporate Office & Plant:</strong> Sy. 254/A, Gundrathimadugu (V), Konijerla (M), Wyra, Khammam – 507165, Telangana
+                  <strong>Corporate Office & Plant:</strong> Sy. 254/A, Gundrathimadugu (V), Konijerla (M), Wyra, Khammam – 507165, Telangana 
                   <br />
-                  <span className="text-xs text-slate-500 mt-1 block">
+                  <span className="text-sm text-slate-800 mt-1 block">
                     <strong>Hyderabad Office:</strong> Laxmi Nagar Colony, Hyderabad – 500074
                   </span>
                 </span>
@@ -301,7 +308,7 @@ export default function Footer() {
                   href="tel:+918977748444"
                   className="hover:text-blue-600 transition-colors"
                 >
-                  +91 89777 48444 / +91 84658 69663 / 08749-293399
+                  +91 8977748444 / +91 8465869663 / +91 8749293399
                 </a>
               </div>
               <div className="flex items-center gap-3 text-sm text-slate-600">
@@ -322,17 +329,17 @@ export default function Footer() {
               Products
             </h3>
             <ul className="space-y-2.5 text-sm">
-              {productLinks.map((label) => (
-                <li key={label}>
-                  <a
-                    href="#"
-                    className="text-slate-500 hover:text-blue-600 transition-colors"
-                  >
-                    {label}
-                  </a>
-                </li>
-              ))}
-            </ul>
+  {productLinks.map(({ label, key }) => (
+    <li key={label}>
+      <Link
+        to={categoryPath(key)}
+        className="text-slate-500 hover:text-blue-600 transition-colors"
+      >
+        {label}
+      </Link>
+    </li>
+  ))}
+</ul>
           </div>
 
           {/* Quick Links & Enquiries */}
@@ -421,8 +428,8 @@ export default function Footer() {
         </div>
 
         {/* Copyright */}
-        <div className="border-t border-blue-100/70 pt-6 flex flex-col sm:flex-row items-center justify-between gap-3 text-center">
-          <p className="text-sm text-slate-500">
+        <div className="border-t border-blue-100/70 pt-6 flex flex-col sm:flex-row items-center justify-center gap-3 text-center">
+          <p className="text-sm text-center text-slate-500">
             Copyright © 2026 Sri Vyshnavi Foods Pvt. Ltd. All rights reserved.
           </p>
         </div>
