@@ -77,55 +77,59 @@ const HeroSection = () => {
       ))}
 
       {/* Floating glass content card — anchored bottom-left, overlapping edge */}
-      <div className="absolute inset-x-0 bottom-0 z-20 px-4 sm:px-10 lg:px-16">
-        <div className="max-w-[280px] sm:max-w-md lg:max-w-lg pb-5 sm:pb-14 lg:pb-16">
-          <div
-            key={currentSlide}
-            className="rounded-2xl sm:rounded-[32px] bg-white/10 backdrop-blur-xl border border-white/15 p-4 sm:p-8 lg:p-10 shadow-[0_40px_80px_-30px_rgba(0,0,0,0.6)] animate-[heroFadeUp_0.8s_cubic-bezier(0.25,0.46,0.45,0.94)_both]"
+   <div className="absolute inset-x-0 bottom-0 z-20 px-3 sm:px-8 lg:px-12">
+  <div className="max-w-[250px] sm:max-w-sm lg:max-w-md pb-3 sm:pb-8 lg:pb-10">
+    <div
+      key={currentSlide}
+      className="rounded-xl sm:rounded-3xl bg-white/10 backdrop-blur-xl border border-white/15 p-3 sm:p-5 lg:p-6 shadow-[0_30px_60px_-25px_rgba(0,0,0,0.6)] animate-[heroFadeUp_0.8s_cubic-bezier(0.25,0.46,0.45,0.94)_both]"
+    >
+      <span className="inline-block mb-2 sm:mb-3 px-2.5 sm:px-3 py-1 rounded-full text-[8px] sm:text-[9px] font-bold uppercase tracking-[0.18em] sm:tracking-[0.22em] bg-cyan-400/15 border border-cyan-300/30 text-cyan-300">
+        {slide.badge}
+      </span>
+
+      <h1 className="text-base sm:text-3xl lg:text-4xl font-black text-white leading-tight tracking-tight mb-1.5 sm:mb-3">
+        {slide.title}
+      </h1>
+
+      <p className="text-[10px] sm:text-sm text-slate-300 leading-snug sm:leading-relaxed mb-3 sm:mb-5 max-w-[210px] sm:max-w-xs">
+        {slide.subtitle}
+      </p>
+
+      {/* CTA row */}
+      <div className="flex items-center gap-2 sm:gap-3 flex-wrap">
+        <button className="relative overflow-hidden bg-gradient-to-r from-cyan-500 to-blue-600 text-white px-3.5 sm:px-5 py-1.5 sm:py-2.5 rounded-full font-semibold text-[10px] sm:text-xs tracking-wide shadow-[0_12px_25px_-10px_rgba(6,182,212,0.65)] hover:scale-105 transition-all duration-300">
+          {slide.cta}
+        </button>
+
+        <div className="flex items-center gap-1 sm:gap-2 bg-white/5 border border-white/15 rounded-full pl-1 pr-2 sm:pr-3 py-1">
+          <button
+            onClick={goToPrevious}
+            aria-label="Previous slide"
+            className="w-6 h-6 sm:w-7 sm:h-7 rounded-full bg-white/10 hover:bg-cyan-400/25 border border-white/15 flex items-center justify-center transition-all group"
           >
-            <span className="inline-block mb-2.5 sm:mb-4 px-2.5 sm:px-3.5 py-1 sm:py-1.5 rounded-full text-[9px] sm:text-[10px] font-bold uppercase tracking-[0.2em] sm:tracking-[0.25em] bg-cyan-400/15 border border-cyan-300/30 text-cyan-300">
-              {slide.badge}
+            <ChevronLeft className="w-3 h-3 sm:w-3.5 sm:h-3.5 text-slate-300 group-hover:text-cyan-300 transition-all" />
+          </button>
+
+          <span className="text-[9px] sm:text-[11px] font-bold tabular-nums text-white">
+            {String(currentSlide + 1).padStart(2, "0")}
+            <span className="text-slate-400 mx-0.5">/</span>
+            <span className="text-slate-400 font-medium">
+              {String(slides.length).padStart(2, "0")}
             </span>
-            <h1 className="text-lg sm:text-4xl lg:text-5xl font-black text-white leading-[1.15] sm:leading-[1.08] tracking-tight mb-2 sm:mb-4">
-              {slide.title}
-            </h1>
-            <p className="text-[11px] sm:text-base text-slate-300 leading-snug sm:leading-relaxed mb-3.5 sm:mb-7 max-w-[220px] sm:max-w-sm">
-              {slide.subtitle}
-            </p>
+          </span>
 
-            {/* CTA row: button + prev/next + counter */}
-            <div className="flex items-center gap-2 sm:gap-4 flex-wrap">
-              <button className="relative overflow-hidden bg-gradient-to-r from-cyan-500 to-blue-600 text-white px-4 sm:px-7 py-2 sm:py-3 rounded-full font-semibold text-[11px] sm:text-sm tracking-wide shadow-[0_15px_35px_-10px_rgba(6,182,212,0.65)] hover:shadow-[0_20px_45px_-8px_rgba(6,182,212,0.85)] hover:scale-105 transition-all duration-300">
-                {slide.cta}
-              </button>
-
-              <div className="flex items-center gap-1.5 sm:gap-2.5 bg-white/5 border border-white/15 rounded-full pl-1 sm:pl-1.5 pr-2.5 sm:pr-4 py-1 sm:py-1.5">
-                <button
-                  onClick={goToPrevious}
-                  aria-label="Previous slide"
-                  className="w-6 h-6 sm:w-8 sm:h-8 rounded-full bg-white/10 hover:bg-cyan-400/25 border border-white/15 hover:border-cyan-400/50 flex items-center justify-center transition-all duration-300 group"
-                >
-                  <ChevronLeft className="w-3 h-3 sm:w-4 sm:h-4 text-slate-300 group-hover:text-cyan-300 group-hover:-translate-x-0.5 transition-all" />
-                </button>
-
-                <span className="text-[9px] sm:text-xs font-bold tabular-nums text-white tracking-wide">
-                  {String(currentSlide + 1).padStart(2, '0')}
-                  <span className="text-slate-400 font-medium mx-0.5">/</span>
-                  <span className="text-slate-400 font-medium">{String(slides.length).padStart(2, '0')}</span>
-                </span>
-
-                <button
-                  onClick={goToNext}
-                  aria-label="Next slide"
-                  className="w-6 h-6 sm:w-8 sm:h-8 rounded-full bg-white/10 hover:bg-cyan-400/25 border border-white/15 hover:border-cyan-400/50 flex items-center justify-center transition-all duration-300 group"
-                >
-                  <ChevronRight className="w-3 h-3 sm:w-4 sm:h-4 text-slate-300 group-hover:text-cyan-300 group-hover:translate-x-0.5 transition-all" />
-                </button>
-              </div>
-            </div>
-          </div>
+          <button
+            onClick={goToNext}
+            aria-label="Next slide"
+            className="w-6 h-6 sm:w-7 sm:h-7 rounded-full bg-white/10 hover:bg-cyan-400/25 border border-white/15 flex items-center justify-center transition-all group"
+          >
+            <ChevronRight className="w-3 h-3 sm:w-3.5 sm:h-3.5 text-slate-300 group-hover:text-cyan-300 transition-all" />
+          </button>
         </div>
       </div>
+    </div>
+  </div>
+</div>
 
       {/* Mobile dot indicators */}
       <div className="lg:hidden absolute bottom-3 left-1/2 -translate-x-1/2 z-20 flex gap-1.5">

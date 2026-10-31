@@ -11,19 +11,34 @@ type Action =
 
 const NAV_ITEMS: { key: string; label: string; action: Action }[] = [
   { key: "home", label: "Home", action: { type: "navigate", target: "/" } },
-  { key: "ghee", label: "Our Ghee", action: { type: "navigate", target: "/ghee" } },
-  { key: "about", label: "Our 25+ Year Story", action: { type: "navigate", target: "/about" } },
-  { key: "portfolio", label: "Our Products", action: { type: "navigate", target: "/portfolio" } },
-  { key: "contact", label: "Contact & Bulk Orders ", action: { type: "navigate", target: "/contact-us" } },
+  {
+    key: "ghee",
+    label: "Our Ghee",
+    action: { type: "navigate", target: "/ghee" },
+  },
+  {
+    key: "about",
+    label: "Our 25+ Year Story",
+    action: { type: "navigate", target: "/about" },
+  },
+  {
+    key: "portfolio",
+    label: "Our Products",
+    action: { type: "navigate", target: "/portfolio" },
+  },
+  {
+    key: "contact",
+    label: "Contact & Bulk Orders ",
+    action: { type: "navigate", target: "/contact-us" },
+  },
 ];
 
-// Maps the current URL path to the matching nav key, defaulting to "home"  Contact & Bulk Orders 
+// Maps the current URL path to the matching nav key, defaulting to "home"  Contact & Bulk Orders
 
 const getActiveTabFromPath = (pathname: string): string => {
   const match = NAV_ITEMS.find(
     (item) =>
-      item.action.type === "navigate" &&
-      item.action.target === pathname
+      item.action.type === "navigate" && item.action.target === pathname,
   );
 
   return match ? match.key : "";
@@ -34,7 +49,9 @@ const Header: React.FC = () => {
   const location = useLocation();
   const isPortfolio = location.pathname.startsWith("/portfolio");
   const [scrolled, setScrolled] = useState<boolean>(false);
-  const [activeTab, setActiveTab] = useState<string>(() => getActiveTabFromPath(location.pathname));
+  const [activeTab, setActiveTab] = useState<string>(() =>
+    getActiveTabFromPath(location.pathname),
+  );
   const [isMenuOpen, setIsMenuOpen] = useState<boolean>(false);
 
   useEffect(() => {
@@ -52,7 +69,9 @@ const Header: React.FC = () => {
   // Lock body scroll while the mobile drawer is open
   useEffect(() => {
     document.body.style.overflow = isMenuOpen ? "hidden" : "";
-    return () => { document.body.style.overflow = ""; };
+    return () => {
+      document.body.style.overflow = "";
+    };
   }, [isMenuOpen]);
 
   const scrollToSection = (sectionId: string): void => {
@@ -97,17 +116,34 @@ const Header: React.FC = () => {
           width: 100%;
         }
 
-        @keyframes marqueeScrollHeader {
-          0% { transform: translateX(0); }
-          100% { transform: translateX(-50%); }
-        }
-        .scroll-banner {
-          animation: marqueeScrollHeader 26s linear infinite;
-          white-space: nowrap;
-        }
-        .scroll-banner:hover {
-          animation-play-state: paused;
-        }
+.marquee-track {
+  display: flex;
+  width: max-content;
+  flex-wrap: nowrap;
+  animation: seamlessMarquee 30s linear infinite;
+  will-change: transform;
+}
+
+.marquee-content {
+  display: flex;
+  align-items: center;
+  flex: 0 0 auto;
+  white-space: nowrap;
+  padding-right: 40px;
+}
+
+@keyframes seamlessMarquee {
+  from {
+    transform: translateX(0);
+  }
+  to {
+    transform: translateX(-25%);
+  }
+}
+
+.marquee-track:hover {
+  animation-play-state: paused;
+}
 
         .header-shell {
           transition: all 0.35s cubic-bezier(0.25,0.46,0.45,0.94);
@@ -124,15 +160,24 @@ const Header: React.FC = () => {
       `}</style>
 
       {/* Top promo marquee — hidden on /portfolio for a full-bleed, immersive header */}
-      {!isPortfolio && (
-        <div className="fixed top-0 left-0 right-0 w-full z-50 h-9 flex items-center bg-gradient-to-r from-blue-600 via-blue-500 to-cyan-500 text-white text-[11px] sm:text-xs overflow-hidden">
-          <div className="scroll-banner inline-flex font-semibold tracking-wide">
-          <span className="inline-flex items-center px-8">
-  🥛&nbsp; 25+ Years of Family Trust &nbsp;•&nbsp; Every Batch Lab-Tested &nbsp;•&nbsp; Zero Palm Oil &nbsp;•&nbsp; Zero Vegetable Oil &nbsp;•&nbsp; Zero Chemicals &nbsp;•&nbsp; Honest Quality at Everyday Family Prices &nbsp;•&nbsp; 🥛&nbsp; 25+ Years of Family Trust &nbsp;•&nbsp; Every Batch Lab-Tested &nbsp;•&nbsp; Zero Palm Oil &nbsp;•&nbsp; Zero Vegetable Oil &nbsp;•&nbsp; Zero Chemicals &nbsp;•&nbsp; Honest Quality at Everyday Family Prices &nbsp;•&nbsp;
-</span>
-          </div>
+{/* Top promo marquee */}
+{!isPortfolio && (
+  <div className="fixed top-0 left-0 right-0 w-full z-50 h-11 flex items-center bg-gradient-to-r from-blue-600 via-blue-500 to-cyan-500 text-white text-xs sm:text-sm overflow-hidden">
+    <div className="marquee-track">
+      {[0, 1, 2, 3].map((item) => (
+        <div className="marquee-content" key={item}>
+          🥛&nbsp; 25+ Years of Family Trust
+          &nbsp;&nbsp;•&nbsp;&nbsp; Every Batch Lab-Tested
+          &nbsp;&nbsp;•&nbsp;&nbsp; Zero Palm Oil
+          &nbsp;&nbsp;•&nbsp;&nbsp; Zero Vegetable Oil
+          &nbsp;&nbsp;•&nbsp;&nbsp; Zero Chemicals
+          &nbsp;&nbsp;•&nbsp;&nbsp; Honest Quality at Everyday Family Prices
+          &nbsp;&nbsp;•&nbsp;&nbsp;
         </div>
-      )}
+      ))}
+    </div>
+  </div>
+)}
 
       {/* Main header */}
       <header
@@ -140,12 +185,14 @@ const Header: React.FC = () => {
           isPortfolio
             ? "bg-transparent mt-1"
             : scrolled
-            ? "bg-white/90 backdrop-blur-xl shadow-[0_8px_30px_-15px_rgba(37,99,235,0.35)] border-b border-blue-50"
-            : "bg-white/70 backdrop-blur-md"
+              ? "bg-white/90 backdrop-blur-xl shadow-[0_8px_30px_-15px_rgba(37,99,235,0.35)] border-b border-blue-50"
+              : "bg-white/70 backdrop-blur-md"
         }`}
       >
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className={`flex justify-between items-center transition-all duration-300 ${scrolled ? "h-14 lg:h-16" : "h-16 lg:h-20"}`}>
+          <div
+            className={`flex justify-between items-center transition-all duration-300 ${scrolled ? "h-14 lg:h-16" : "h-16 lg:h-20"}`}
+          >
             {/* Logo */}
             <div className="flex items-center">
               <button
@@ -156,7 +203,11 @@ const Header: React.FC = () => {
                     : "text-blue-600 hover:text-blue-700"
                 }`}
               >
-                <img src={logo} alt="Vyshnavi Dairy" className={`transition-all duration-300 ${scrolled && !isPortfolio ? "h-11" : "h-[60px]"} ${isPortfolio ? "h-9" : ""}`} />
+                <img
+                  src={logo}
+                  alt="Vyshnavi Dairy"
+                  className={`transition-all duration-300 ${scrolled && !isPortfolio ? "h-11" : "h-[60px]"} ${isPortfolio ? "h-9" : ""}`}
+                />
               </button>
             </div>
 
@@ -168,7 +219,9 @@ const Header: React.FC = () => {
                     key={item.key}
                     onClick={() => handleNavigation(item.key, item.action)}
                     className={`nav-pill text-[15px] font-semibold transition-colors ${
-                      activeTab === item.key ? "text-blue-600 active" : "text-slate-700 hover:text-blue-600"
+                      activeTab === item.key
+                        ? "text-blue-600 active"
+                        : "text-slate-700 hover:text-blue-600"
                     }`}
                   >
                     {item.label}
@@ -230,10 +283,10 @@ const Header: React.FC = () => {
                 )}
               </button>
 
-                <button
-                  onClick={() => setIsMenuOpen(true)}
-                  className="p-2 text-slate-700 hover:text-blue-600 transition-colors"
-                  aria-label="Open menu"
+              <button
+                onClick={() => setIsMenuOpen(true)}
+                className="p-2 text-slate-700 hover:text-blue-600 transition-colors"
+                aria-label="Open menu"
               >
                 <Menu className="w-6 h-6" />
               </button>

@@ -64,23 +64,24 @@ const WelcomeText = () => {
       </div>
 
       {/* Trust badge marquee */}
-      <div className="relative z-10 mt-14 overflow-hidden">
-        <div className="absolute inset-y-0 left-0 w-24 bg-gradient-to-r from-white to-transparent z-10 pointer-events-none" />
-        <div className="absolute inset-y-0 right-0 w-24 bg-gradient-to-l from-white to-transparent z-10 pointer-events-none" />
-        <div className="flex w-max animate-marquee gap-4 py-1">
-          {[...badges, ...badges, ...badges].map((b, i) => (
-            <div
-              key={i}
-              className="flex items-center gap-2 px-5 py-2.5 rounded-full bg-white border border-blue-50 shadow-[0_8px_20px_-14px_rgba(37,99,235,0.4)] whitespace-nowrap"
-            >
-              <span className="text-blue-600">{b.icon}</span>
-              <span className="text-xs font-bold uppercase tracking-wide text-slate-600">
-                {b.label}
-              </span>
-            </div>
-          ))}
-        </div>
+ <div className="relative z-10 mt-14 overflow-hidden bg-gradient-to-r from-blue-100 via-blue-50 to-cyan-100">
+  <div className="absolute inset-y-0 left-0 w-24 bg-gradient-to-r from-blue-100 to-transparent z-10 pointer-events-none" />
+  <div className="absolute inset-y-0 right-0 w-24 bg-gradient-to-l from-cyan-100 to-transparent z-10 pointer-events-none" />
+
+  <div className="flex w-max animate-marquee gap-4 py-3">
+    {[...badges, ...badges, ...badges].map((b, i) => (
+      <div
+        key={i}
+        className="flex items-center gap-2 px-5 py-2.5 rounded-full bg-gradient-to-r from-white via-blue-50 to-blue-100 border border-blue-200 shadow-[0_6px_18px_-6px_rgba(37,99,235,0.3)] whitespace-nowrap hover:bg-blue-100 hover:border-blue-400 transition-all duration-300"
+      >
+        <span className="text-blue-700">{b.icon}</span>
+        <span className="text-xs font-bold uppercase tracking-wide text-slate-700">
+          {b.label}
+        </span>
       </div>
+    ))}
+  </div>
+</div>
 
       <style>{`
         @keyframes marqueeScroll {

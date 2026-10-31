@@ -147,7 +147,7 @@
 
 
 
-import { useState } from 'react';
+import { useState,useEffect } from 'react';
 import { ChevronLeft, ChevronRight, Quote } from 'lucide-react';
 
 interface Testimonial {
@@ -195,6 +195,17 @@ const TestimonialCarousel = () => {
 
   const handlePrevious = () => setCurrentIndex((prev) => (prev - 1 + testimonials.length) % testimonials.length);
   const handleNext = () => setCurrentIndex((prev) => (prev + 1) % testimonials.length);
+  const [isPaused, setIsPaused] = useState(false);
+
+useEffect(() => {
+  if (isPaused) return;
+
+  const interval = setInterval(() => {
+    setCurrentIndex((prev) => (prev + 1) % testimonials.length);
+  }, 4000);
+
+  return () => clearInterval(interval);
+}, [isPaused, testimonials.length]);
 
   return (
     <div className="w-full py-20 sm:py-24 px-4 -mb-14">
@@ -214,7 +225,11 @@ const TestimonialCarousel = () => {
         </h2>
 
         {/* Spotlight quote card */}
-        <div className="relative bg-white rounded-[32px] shadow-[0_40px_80px_-30px_rgba(37,99,235,0.35)] border border-blue-50 px-6 sm:px-14 py-10 sm:py-14 text-center">
+        <div
+  onMouseEnter={() => setIsPaused(true)}
+  onMouseLeave={() => setIsPaused(false)}
+  className="relative bg-white rounded-[32px] shadow-[0_40px_80px_-30px_rgba(37,99,235,0.35)] border border-blue-50 px-6 sm:px-14 py-10 sm:py-14 text-center"
+>
           <div className="absolute top-0 left-1/2 -translate-x-1/2 -translate-y-1/2 w-16 h-16 rounded-2xl bg-gradient-to-br from-blue-600 to-cyan-500 flex items-center justify-center shadow-[0_15px_35px_-10px_rgba(37,99,235,0.6)]">
             <Quote className="w-7 h-7 text-white" fill="white" />
           </div>

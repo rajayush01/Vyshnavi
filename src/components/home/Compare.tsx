@@ -188,17 +188,8 @@
 //   );
 // }
 
-
-
-
-
-
-
-
-
-
-import React, { useState } from 'react';
-import { Check, Minus } from 'lucide-react';
+import React, { useState } from "react";
+import { Check, Minus } from "lucide-react";
 
 interface Feature {
   name: string;
@@ -222,173 +213,173 @@ interface Categories {
 type CategoryKey = keyof Categories;
 
 export default function Compare() {
-  const [activeCategory, setActiveCategory] = useState<CategoryKey>('milk');
+  const [activeCategory, setActiveCategory] = useState<CategoryKey>("milk");
 
   const categories: Categories = {
     milk: {
-      title: 'Milk',
+      title: "Milk",
       features: [
-        { 
-          name: 'Sourcing & Process', 
-          cheap: 'Untested / Open Handling', 
-          vyshnavi: 'Verified Procurement Centers & Automated Machinery', 
-          overpriced: 'Exaggerated "Local Farm" Gimmicks' 
+        {
+          name: "Sourcing & Process",
+          cheap: "Untested / Open Handling",
+          vyshnavi: "Verified Procurement Centers & Automated Machinery",
+          overpriced: 'Exaggerated "Local Farm" Gimmicks',
         },
-        { 
-          name: 'Lab Testing', 
-          cheap: 'Rarely Tested', 
-          vyshnavi: 'Lab-Tested Every Single Batch', 
-          overpriced: 'Tested, But Priced Like a Luxury' 
+        {
+          name: "Lab Testing",
+          cheap: "Rarely Tested",
+          vyshnavi: "Lab-Tested Every Single Batch",
+          overpriced: "Tested, But Priced Like a Luxury",
         },
-        { 
-          name: 'Chemicals & Preservatives', 
-          cheap: 'Risk of Dilution & Neutralizers', 
-          vyshnavi: 'Zero Chemicals, Zero Preservatives', 
-          overpriced: 'Uses "Organic / A2" Buzzwords to Inflate Price' 
+        {
+          name: "Chemicals & Preservatives",
+          cheap: "Risk of Dilution & Neutralizers",
+          vyshnavi: "Zero Chemicals, Zero Preservatives",
+          overpriced: 'Uses "Organic / A2" Buzzwords to Inflate Price',
         },
-        { 
-          name: 'Taste & Nutrition', 
-          cheap: 'Thin & Inconsistent', 
-          vyshnavi: 'Consistent Fat, SNF & Rich Taste', 
-          overpriced: 'Good, But Unaffordable for Daily Use' 
+        {
+          name: "Taste & Nutrition",
+          cheap: "Thin & Inconsistent",
+          vyshnavi: "Consistent Fat, SNF & Rich Taste",
+          overpriced: "Good, But Unaffordable for Daily Use",
         },
-        { 
-          name: 'Family Budget', 
-          cheap: 'Cheap at the Cost of Health', 
-          vyshnavi: 'Affordable for Every Middle-Class Family', 
-          overpriced: '2x–3x Overpriced Marketing Markup' 
+        {
+          name: "Family Budget",
+          cheap: "Cheap at the Cost of Health",
+          vyshnavi: "Affordable for Every Middle-Class Family",
+          overpriced: "2x–3x Overpriced Marketing Markup",
         },
-        { 
-          name: 'Trust & Legacy', 
-          cheap: 'Unverified Vendors', 
-          vyshnavi: '25+ Years Family-Run Accountability', 
-          overpriced: 'New-Age Marketing Startups' 
-        }
-      ]
+        {
+          name: "Trust & Legacy",
+          cheap: "Unverified Vendors",
+          vyshnavi: "25+ Years Family-Run Accountability",
+          overpriced: "New-Age Marketing Startups",
+        },
+      ],
     },
     ghee: {
-      title: 'Ghee',
+      title: "Ghee",
       features: [
-        { 
-          name: 'Processing', 
-          cheap: 'Crude / Unhygienic Blending', 
-          vyshnavi: 'Modern Hygienic Machinery & Slow Clarification', 
-          overpriced: 'Claims "Hand-Churned" to Charge Double' 
+        {
+          name: "Processing",
+          cheap: "Crude / Unhygienic Blending",
+          vyshnavi: "Modern Hygienic Machinery & Slow Clarification",
+          overpriced: 'Claims "Hand-Churned" to Charge Double',
         },
-        { 
-          name: 'Palm & Vegetable Oil', 
-          cheap: 'Often Mixed with Palm Oil or Vanaspati', 
-          vyshnavi: 'Zero Palm Oil • Zero Vegetable Fat (100% Milk Fat)', 
-          overpriced: 'Pure, But Out of Reach for Monthly Family Use' 
+        {
+          name: "Palm & Vegetable Oil",
+          cheap: "Often Mixed with Palm Oil or Vanaspati",
+          vyshnavi: "Zero Palm Oil • Zero Vegetable Fat (100% Milk Fat)",
+          overpriced: "Pure, But Out of Reach for Monthly Family Use",
         },
-        { 
-          name: 'Aroma & Texture', 
-          cheap: 'Waxy, Greasy & Artificial Aroma', 
-          vyshnavi: 'Authentic Granular (Danedar) Texture & Rich Aroma', 
-          overpriced: 'Good Taste, Extreme Price Tag' 
+        {
+          name: "Aroma & Texture",
+          cheap: "Waxy, Greasy & Artificial Aroma",
+          vyshnavi: "Authentic Granular (Danedar) Texture & Rich Aroma",
+          overpriced: "Good Taste, Extreme Price Tag",
         },
-        { 
-          name: 'Quality Guarantee', 
-          cheap: 'No Lab Verification', 
-          vyshnavi: 'Every Batch Lab-Tested for FSSAI Standards', 
-          overpriced: 'Heavy Packaging & Influencer Cost Added' 
+        {
+          name: "Quality Guarantee",
+          cheap: "No Lab Verification",
+          vyshnavi: "Every Batch Lab-Tested for FSSAI Standards",
+          overpriced: "Heavy Packaging & Influencer Cost Added",
         },
-        { 
-          name: 'Health & Digestion', 
-          cheap: 'Harmful Trans-Fats from Vanaspati', 
-          vyshnavi: 'Natural Milk Vitamins (A, D, E, K)', 
-          overpriced: 'Same Milk Fat Sold at Luxury Rates' 
+        {
+          name: "Health & Digestion",
+          cheap: "Harmful Trans-Fats from Vanaspati",
+          vyshnavi: "Natural Milk Vitamins (A, D, E, K)",
+          overpriced: "Same Milk Fat Sold at Luxury Rates",
         },
-        { 
-          name: 'Price', 
-          cheap: 'Suspiciously Cheap (Adulterated)', 
-          vyshnavi: 'Honest, Pocket-Friendly Family Price', 
-          overpriced: '₹1,800–₹3,000+ Per Litre' 
-        }
-      ]
+        {
+          name: "Price",
+          cheap: "Suspiciously Cheap (Adulterated)",
+          vyshnavi: "Honest, Pocket-Friendly Family Price",
+          overpriced: "₹1,800–₹3,000+ Per Litre",
+        },
+      ],
     },
     curd: {
-      title: 'Curd',
+      title: "Curd",
       features: [
-        { 
-          name: 'Hygiene & Process', 
-          cheap: 'Open Vessels / Inconsistent Hygiene', 
-          vyshnavi: '100% Contactless Automated Machinery', 
-          overpriced: 'High-Margin Boutique Packaging' 
+        {
+          name: "Hygiene & Process",
+          cheap: "Open Vessels / Inconsistent Hygiene",
+          vyshnavi: "100% Contactless Automated Machinery",
+          overpriced: "High-Margin Boutique Packaging",
         },
-        { 
-          name: 'Ingredients', 
-          cheap: 'Starch or Thickening Agents Added', 
-          vyshnavi: 'Real Milk & Active Culture – Zero Added Starch', 
-          overpriced: 'Real Milk at Inflated Prices' 
+        {
+          name: "Ingredients",
+          cheap: "Starch or Thickening Agents Added",
+          vyshnavi: "Real Milk & Active Culture – Zero Added Starch",
+          overpriced: "Real Milk at Inflated Prices",
         },
-        { 
-          name: 'Texture', 
-          cheap: 'Watery or Artificially Chalky', 
-          vyshnavi: 'Naturally Thick, Smooth & Creamy', 
-          overpriced: 'Thick & Creamy, Extreme Price Tag' 
+        {
+          name: "Texture",
+          cheap: "Watery or Artificially Chalky",
+          vyshnavi: "Naturally Thick, Smooth & Creamy",
+          overpriced: "Thick & Creamy, Extreme Price Tag",
         },
-        { 
-          name: 'Taste', 
-          cheap: 'Turns overly sour quickly', 
-          vyshnavi: 'Sweet, Balanced & Homestyle Taste', 
-          overpriced: 'Good Taste, Premium Markup' 
+        {
+          name: "Taste",
+          cheap: "Turns overly sour quickly",
+          vyshnavi: "Sweet, Balanced & Homestyle Taste",
+          overpriced: "Good Taste, Premium Markup",
         },
-        { 
-          name: 'Lab Check', 
-          cheap: 'Untested', 
-          vyshnavi: 'Lab-Tested for Acidity, SNF & Safety', 
-          overpriced: 'Tested, But Out of Reach for Daily Family Meals' 
+        {
+          name: "Lab Check",
+          cheap: "Untested",
+          vyshnavi: "Lab-Tested for Acidity, SNF & Safety",
+          overpriced: "Tested, But Out of Reach for Daily Family Meals",
         },
-        { 
-          name: 'Daily Affordability', 
-          cheap: 'Low Quality', 
-          vyshnavi: 'Priced for Every Meal, Every Day', 
-          overpriced: 'Too Expensive for Daily Consumption' 
-        }
-      ]
+        {
+          name: "Daily Affordability",
+          cheap: "Low Quality",
+          vyshnavi: "Priced for Every Meal, Every Day",
+          overpriced: "Too Expensive for Daily Consumption",
+        },
+      ],
     },
     paneer: {
-      title: 'Paneer',
+      title: "Paneer",
       features: [
-        { 
-          name: 'Paneer Type', 
-          cheap: 'Analogue Paneer (Made from Palm/Vegetable Oil)', 
-          vyshnavi: '100% Real Milk Malai Paneer', 
-          overpriced: 'Real Paneer at Luxury Prices' 
+        {
+          name: "Paneer Type",
+          cheap: "Analogue Paneer (Made from Palm/Vegetable Oil)",
+          vyshnavi: "100% Real Milk Malai Paneer",
+          overpriced: "Real Paneer at Luxury Prices",
         },
-        { 
-          name: 'Manufacturing', 
-          cheap: 'Unhygienic Manual Handling', 
-          vyshnavi: 'Hygienic Automated Machinery Processing', 
-          overpriced: 'Small-Batch Markup' 
+        {
+          name: "Manufacturing",
+          cheap: "Unhygienic Manual Handling",
+          vyshnavi: "Hygienic Automated Machinery Processing",
+          overpriced: "Small-Batch Markup",
         },
-        { 
-          name: 'Texture', 
-          cheap: 'Hard, Rubbery & Chewy', 
-          vyshnavi: 'Rich, Soft & Melt-in-Mouth Malai Texture', 
-          overpriced: 'Soft, but Heavy Price Tag' 
+        {
+          name: "Texture",
+          cheap: "Hard, Rubbery & Chewy",
+          vyshnavi: "Rich, Soft & Melt-in-Mouth Malai Texture",
+          overpriced: "Soft, but Heavy Price Tag",
         },
-        { 
-          name: 'Adulterants', 
-          cheap: 'Starch, Cheap Vegetable Fats & Whitener', 
-          vyshnavi: 'Zero Starch, Zero Vegetable Oil, Zero Chemicals', 
-          overpriced: 'No Adulterants, but Unaffordable Daily' 
+        {
+          name: "Adulterants",
+          cheap: "Starch, Cheap Vegetable Fats & Whitener",
+          vyshnavi: "Zero Starch, Zero Vegetable Oil, Zero Chemicals",
+          overpriced: "No Adulterants, but Unaffordable Daily",
         },
-        { 
-          name: 'Taste in Curries & Snacks', 
-          cheap: 'Bland & Oily', 
-          vyshnavi: 'Absorbs Spices Perfectly with Rich Milky Taste', 
-          overpriced: 'Good Taste, Luxury Branding' 
+        {
+          name: "Taste in Curries & Snacks",
+          cheap: "Bland & Oily",
+          vyshnavi: "Absorbs Spices Perfectly with Rich Milky Taste",
+          overpriced: "Good Taste, Luxury Branding",
         },
-        { 
-          name: 'Value for Family', 
-          cheap: 'Fake Protein (Mostly Cheap Fat)', 
-          vyshnavi: 'High Real-Milk Protein at an Honest Price', 
-          overpriced: 'Overpriced Marketing Markup' 
-        }
-      ]
-    }
+        {
+          name: "Value for Family",
+          cheap: "Fake Protein (Mostly Cheap Fat)",
+          vyshnavi: "High Real-Milk Protein at an Honest Price",
+          overpriced: "Overpriced Marketing Markup",
+        },
+      ],
+    },
   };
 
   const active = categories[activeCategory];
@@ -400,22 +391,22 @@ export default function Compare() {
         <div className="mb-4 flex justify-center">
           <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-cyan-50 border border-cyan-100">
             <svg width="9" height="11" viewBox="0 0 32 40" fill="none">
-              <path d="M16 2 C22 14 28 20 28 28 C28 34.6 22.6 40 16 40 C9.4 40 4 34.6 4 28 C4 20 10 14 16 2 Z" fill="#0891b2" />
+              <path
+                d="M16 2 C22 14 28 20 28 28 C28 34.6 22.6 40 16 40 C9.4 40 4 34.6 4 28 C4 20 10 14 16 2 Z"
+                fill="#0891b2"
+              />
             </svg>
             <span className="text-[11px] font-bold uppercase tracking-[0.25em] text-cyan-700">
               HONEST COMPARISON
             </span>
           </div>
         </div>
-        <div className="mb-12 text-center">
-         <h2 className="text-3xl md:text-5xl font-black text-blue-900 tracking-tight">
-  Why Vyshnavi Is
-  <br />
-  the Smart Choice for
-  <br />
-  Every Family
-</h2>
-        </div>
+     <div className="mb-12 text-center">
+  <h2 className="text-3xl md:text-5xl font-black text-blue-900 tracking-[0.04em] leading-tight">
+    <span className="block">Why Vyshnavi Is the Smart Choice</span>
+    <span className="block mt-2">for Every Family</span>
+  </h2>
+</div>
 
         {/* Category Tabs */}
         <div className="flex flex-wrap justify-center gap-3 mb-14">
@@ -425,8 +416,8 @@ export default function Compare() {
               onClick={() => setActiveCategory(key)}
               className={`px-6 py-2.5 rounded-full font-bold transition-all duration-300 capitalize text-sm tracking-wide border ${
                 activeCategory === key
-                  ? 'bg-blue-600 text-white shadow-[0_10px_30px_-8px_rgba(37,99,235,0.5)] scale-105 border-blue-600'
-                  : 'bg-white text-blue-600 border-blue-100 hover:border-blue-300 hover:bg-blue-50'
+                  ? "bg-blue-600 text-white shadow-[0_10px_30px_-8px_rgba(37,99,235,0.5)] scale-105 border-blue-600"
+                  : "bg-white text-blue-600 border-blue-100 hover:border-blue-300 hover:bg-blue-50"
               }`}
             >
               {categories[key].title}
@@ -446,8 +437,12 @@ export default function Compare() {
                 <div key={i} className="flex items-start gap-3">
                   <Minus className="w-4 h-4 text-slate-300 mt-0.5 flex-shrink-0" />
                   <div>
-                    <p className="text-[11px] font-semibold uppercase tracking-wide text-slate-400">{f.name}</p>
-                    <p className="text-sm text-slate-600 font-medium">{f.cheap}</p>
+                    <p className="text-[11px] font-semibold uppercase tracking-wide text-slate-400">
+                      {f.name}
+                    </p>
+                    <p className="text-sm text-slate-600 font-medium">
+                      {f.cheap}
+                    </p>
                   </div>
                 </div>
               ))}
@@ -466,10 +461,15 @@ export default function Compare() {
               {active.features.map((f, i) => (
                 <div key={i} className="flex items-start gap-3">
                   <span className="w-4 h-4 rounded-full bg-cyan-400 flex items-center justify-center mt-0.5 flex-shrink-0">
-                    <Check className="w-2.5 h-2.5 text-blue-900" strokeWidth={3} />
+                    <Check
+                      className="w-2.5 h-2.5 text-blue-900"
+                      strokeWidth={3}
+                    />
                   </span>
                   <div>
-                    <p className="text-[11px] font-semibold uppercase tracking-wide text-blue-100">{f.name}</p>
+                    <p className="text-[11px] font-semibold uppercase tracking-wide text-blue-100">
+                      {f.name}
+                    </p>
                     <p className="text-sm font-bold">{f.vyshnavi}</p>
                   </div>
                 </div>
@@ -487,8 +487,12 @@ export default function Compare() {
                 <div key={i} className="flex items-start gap-3">
                   <Minus className="w-4 h-4 text-slate-300 mt-0.5 flex-shrink-0" />
                   <div>
-                    <p className="text-[11px] font-semibold uppercase tracking-wide text-slate-400">{f.name}</p>
-                    <p className="text-sm text-slate-600 font-medium">{f.overpriced}</p>
+                    <p className="text-[11px] font-semibold uppercase tracking-wide text-slate-400">
+                      {f.name}
+                    </p>
+                    <p className="text-sm text-slate-600 font-medium">
+                      {f.overpriced}
+                    </p>
                   </div>
                 </div>
               ))}
@@ -498,9 +502,11 @@ export default function Compare() {
 
         {/* Bottom Note */}
         <div className="mt-10 text-center">
-          <p className="text-blue-700 font-semibold italic max-w-2xl mx-auto">
-            Why choose between unsafe cheap dairy and overpriced luxury brands? With Vyshnavi, your family gets lab-tested quality at an honest price.
-          </p>
+         <p className="text-blue-700 text-lg md:text-xl font-semibold italic max-w-3xl mx-auto leading-relaxed">
+  Why choose between unsafe cheap dairy and overpriced luxury brands?
+  With Vyshnavi, your family gets lab-tested quality at an honest
+  price.
+</p>
         </div>
       </div>
     </section>

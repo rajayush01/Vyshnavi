@@ -57,6 +57,8 @@ export default function WhyMe() {
         <rect x="22" y="30" width="20" height="10" fill="#dbeafe" />
         <rect x="24" y="6" width="16" height="4" rx="1" fill="#3b82f6" />
       </svg>
+
+      
       {/* <svg className="hidden md:block absolute bottom-8 right-[6%] w-20 h-20 opacity-70 animate-float" viewBox="0 0 64 64" fill="none">
         <ellipse cx="32" cy="38" rx="22" ry="14" fill="#ffffff" stroke="#ef4444" strokeWidth="2" />
         <circle cx="16" cy="30" r="3" fill="#ef4444" />
@@ -98,16 +100,7 @@ export default function WhyMe() {
         <div className="grid grid-cols-1 lg:grid-cols-5 gap-5">
           {/* Large feature card */}
           <div className="lg:col-span-2 relative overflow-hidden rounded-[28px] bg-gradient-to-br from-blue-600 to-cyan-600 text-white p-9 flex flex-col justify-between min-h-[280px] shadow-[0_30px_60px_-25px_rgba(37,99,235,0.55)]">
-            <svg
-              className="absolute -bottom-6 -right-6 w-40 h-40 opacity-15"
-              viewBox="0 0 64 64"
-              fill="none"
-            >
-              <path
-                d="M32 6 C40 22 50 30 50 42 C50 52 42 58 32 58 C22 58 14 52 14 42 C14 30 24 22 32 6 Z"
-                fill="#ffffff"
-              />
-            </svg>
+       
             <div className="relative">
               <div className="w-14 h-14 rounded-2xl bg-white/15 backdrop-blur-sm flex items-center justify-center mb-6">
                 {bigFeature.icon}
