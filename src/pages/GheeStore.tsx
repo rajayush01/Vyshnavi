@@ -15,8 +15,8 @@
  * product gallery on hover, same as before.
  */
 
-import React, { useState } from "react";
-import { useNavigate } from "react-router-dom";
+import React, { useMemo, useState } from "react";
+import { useNavigate, useLocation } from "react-router-dom";
 import { Star, ShoppingCart, Sparkles } from "lucide-react";
 import Header from "@/components/layout/Header";
 import { useCart } from "@/context/cartContext";
@@ -36,29 +36,54 @@ interface VariantCard {
   variant: ProductVariant;
 }
 
-const flattenToVariantCards = (products: ProductItem[]): VariantCard[] =>
-  products.flatMap((product) =>
-    (product.variants.length > 0 ? product.variants : [undefined]).map(
-      (variant) => ({
-        cardKey: `${product.id}-${variant?.size ?? "default"}`,
-        product,
-        variant: variant as ProductVariant,
-      })
-    )
-  );
+const flattenToVariantCards = (
+  products: ProductItem[],
+  selectedProductId?: number,
+  selectedSize?: string,
+): VariantCard[] =>
+  products.flatMap((product) => {
+    let variants: (ProductVariant | undefined)[] =
+      product.variants.length > 0 ? product.variants : [undefined];
+
+    // For the selected product, bring the chosen size to the front
+    if (product.id === selectedProductId && selectedSize) {
+      variants = [
+        ...variants.filter((v) => v?.size === selectedSize),
+        ...variants.filter((v) => v?.size !== selectedSize),
+      ];
+    }
+
+    return variants.map((variant) => ({
+      cardKey: `${product.id}-${variant?.size ?? "default"}`,
+      product,
+      variant: variant as ProductVariant,
+    }));
+  });
 
 // ── Main component ───────────────────────────────────────────────────────
 const GheeStore: React.FC = () => {
   const navigate = useNavigate();
   const { addToCart } = useCart();
+  const location = useLocation();
+  const { productId, variantSize } =
+    (location.state as { productId?: number; variantSize?: string } | null) ??
+    {};
 
-  // Pull the ghee category from the central data store
   const gheeCategory = getCategoryByKey("ghee");
-  const products: ProductItem[] = gheeCategory?.items ?? [];
 
-  // Flatten once — each variant becomes its own card
-  const variantCards = flattenToVariantCards(products);
+  const products: ProductItem[] = useMemo(() => {
+    const list = gheeCategory?.items ?? [];
+    const selected = list.find((p) => p.id === productId);
+    // Selected product first, everything else keeps its original order
+    return selected
+      ? [selected, ...list.filter((p) => p.id !== selected.id)]
+      : list;
+  }, [gheeCategory, productId]);
 
+  const variantCards = useMemo(
+    () => flattenToVariantCards(products, productId, variantSize),
+    [products, productId, variantSize],
+  );
   const [hoveredKey, setHoveredKey] = useState<string | null>(null);
 
   // ── Cart helper ───────────────────────────────────────────────────────
@@ -70,16 +95,46 @@ const GheeStore: React.FC = () => {
   return (
     <div className="relative min-h-screen bg-gradient-to-b from-amber-50/60 via-blue-50/40 to-blue-50 overflow-hidden">
       {/* Decorative dairy/ghee illustrations */}
-      <svg className="hidden md:block absolute top-1/4 right-[3%] w-14 h-14 opacity-40 animate-float pointer-events-none z-0" viewBox="0 0 64 64" fill="none">
-        <path d="M32 6 C40 22 50 30 50 42 C50 52 42 58 32 58 C22 58 14 52 14 42 C14 30 24 22 32 6 Z" fill="#ffffff" stroke="#60a5fa" strokeWidth="2" />
+      <svg
+        className="hidden md:block absolute top-1/4 right-[3%] w-14 h-14 opacity-40 animate-float pointer-events-none z-0"
+        viewBox="0 0 64 64"
+        fill="none"
+      >
+        <path
+          d="M32 6 C40 22 50 30 50 42 C50 52 42 58 32 58 C22 58 14 52 14 42 C14 30 24 22 32 6 Z"
+          fill="#ffffff"
+          stroke="#60a5fa"
+          strokeWidth="2"
+        />
         <ellipse cx="27" cy="40" rx="4" ry="6" fill="#bfdbfe" opacity="0.7" />
       </svg>
-      <svg className="hidden md:block absolute bottom-16 right-[5%] w-14 h-14 opacity-40 animate-float-slow pointer-events-none z-0" viewBox="0 0 64 64" fill="none">
-        <path d="M12 52 C12 30 30 12 52 12 C52 34 34 52 12 52 Z" fill="#bbf7d0" stroke="#16a34a" strokeWidth="2" />
-        <path d="M14 50 C24 40 34 30 50 14" stroke="#16a34a" strokeWidth="1.5" />
+      <svg
+        className="hidden md:block absolute bottom-16 right-[5%] w-14 h-14 opacity-40 animate-float-slow pointer-events-none z-0"
+        viewBox="0 0 64 64"
+        fill="none"
+      >
+        <path
+          d="M12 52 C12 30 30 12 52 12 C52 34 34 52 12 52 Z"
+          fill="#bbf7d0"
+          stroke="#16a34a"
+          strokeWidth="2"
+        />
+        <path
+          d="M14 50 C24 40 34 30 50 14"
+          stroke="#16a34a"
+          strokeWidth="1.5"
+        />
       </svg>
-      <svg className="hidden lg:block absolute top-1/2 left-[45%] -translate-x-1/2 w-10 h-10 opacity-25 animate-float pointer-events-none z-0" viewBox="0 0 64 64" fill="none">
-        <path d="M32 10 C38 22 46 28 46 38 C46 46 40 51 32 51 C24 51 18 46 18 38 C18 28 26 22 32 10 Z" fill="#93c5fd" opacity="0.6" />
+      <svg
+        className="hidden lg:block absolute top-1/2 left-[45%] -translate-x-1/2 w-10 h-10 opacity-25 animate-float pointer-events-none z-0"
+        viewBox="0 0 64 64"
+        fill="none"
+      >
+        <path
+          d="M32 10 C38 22 46 28 46 38 C46 46 40 51 32 51 C24 51 18 46 18 38 C18 28 26 22 32 10 Z"
+          fill="#93c5fd"
+          opacity="0.6"
+        />
       </svg>
 
       <Header />
@@ -98,7 +153,8 @@ const GheeStore: React.FC = () => {
           </span>
         </h1>
         <p className="text-slate-500 text-sm sm:text-base max-w-xl mx-auto">
-          Slow-churned the traditional way, from A2 milk — nothing rushed, nothing added.
+          Slow-churned the traditional way, from A2 milk — nothing rushed,
+          nothing added.
         </p>
       </div>
 
@@ -111,7 +167,8 @@ const GheeStore: React.FC = () => {
           // the product default when the variant has no photo of its own.
           const imgs = {
             primary: variant?.images?.[0] ?? product.image,
-            hover: variant?.images?.[1] ?? product.gallery?.[1] ?? product.image,
+            hover:
+              variant?.images?.[1] ?? product.gallery?.[1] ?? product.image,
           };
 
           return (
@@ -120,8 +177,15 @@ const GheeStore: React.FC = () => {
               className="group bg-white rounded-[26px] border border-amber-50 shadow-[0_15px_40px_-25px_rgba(217,119,6,0.35)] hover:shadow-[0_30px_60px_-25px_rgba(217,119,6,0.4)] hover:-translate-y-1.5 transition-all duration-500 ease-out overflow-hidden flex flex-col relative"
             >
               {/* Subtle corner watermark */}
-              <svg className="absolute top-3 right-3 w-6 h-6 opacity-15 pointer-events-none z-10" viewBox="0 0 64 64" fill="none">
-                <path d="M18 26 Q18 20 32 20 Q46 20 46 26 L44 50 Q44 56 32 56 Q20 56 20 50 Z" fill="#d97706" />
+              <svg
+                className="absolute top-3 right-3 w-6 h-6 opacity-15 pointer-events-none z-10"
+                viewBox="0 0 64 64"
+                fill="none"
+              >
+                <path
+                  d="M18 26 Q18 20 32 20 Q46 20 46 26 L44 50 Q44 56 32 56 Q20 56 20 50 Z"
+                  fill="#d97706"
+                />
               </svg>
 
               {/* Image */}
@@ -131,7 +195,10 @@ const GheeStore: React.FC = () => {
                 onMouseLeave={() => setHoveredKey(null)}
                 onClick={() =>
                   navigate("/details", {
-                    state: { productId: product.id, variantSize: variant?.size },
+                    state: {
+                      productId: product.id,
+                      variantSize: variant?.size,
+                    },
                   })
                 }
               >
@@ -147,7 +214,9 @@ const GheeStore: React.FC = () => {
                 {product.tag && (
                   <span
                     className={`absolute top-4 left-4 text-[10px] font-bold uppercase tracking-widest text-white px-2.5 py-1 rounded-full shadow-sm ${
-                      product.tag === "Best Seller" ? "bg-blue-600" : "bg-amber-600"
+                      product.tag === "Best Seller"
+                        ? "bg-blue-600"
+                        : "bg-amber-600"
                     }`}
                   >
                     {product.tag}
@@ -169,13 +238,19 @@ const GheeStore: React.FC = () => {
                   className="text-base sm:text-lg font-bold text-gray-900 mb-1 leading-snug cursor-pointer hover:text-amber-700 transition-colors tracking-tight"
                   onClick={() =>
                     navigate("/details", {
-                      state: { productId: product.id, variantSize: variant?.size },
+                      state: {
+                        productId: product.id,
+                        variantSize: variant?.size,
+                      },
                     })
                   }
                 >
                   {product.name}
                   {variant?.size && (
-                    <span className="text-amber-600 font-semibold"> · {variant.size}</span>
+                    <span className="text-amber-600 font-semibold">
+                      {" "}
+                      · {variant.size}
+                    </span>
                   )}
                 </h3>
 
@@ -189,7 +264,12 @@ const GheeStore: React.FC = () => {
                   <div className="flex items-center gap-2 mb-3">
                     <div className="flex text-amber-400">
                       {[...Array(5)].map((_, i) => (
-                        <Star key={i} className="w-3.5 h-3.5" fill="currentColor" strokeWidth={0} />
+                        <Star
+                          key={i}
+                          className="w-3.5 h-3.5"
+                          fill="currentColor"
+                          strokeWidth={0}
+                        />
                       ))}
                     </div>
                     <span className="text-xs text-gray-400 font-medium">
@@ -217,10 +297,14 @@ const GheeStore: React.FC = () => {
                       )}
                     </div>
                   ) : (
-                    <span className="text-sm text-gray-400 italic">Price on selection</span>
+                    <span className="text-sm text-gray-400 italic">
+                      Price on selection
+                    </span>
                   )}
                   {variant?.perUnit && (
-                    <p className="text-xs text-gray-400 mt-0.5">{variant.perUnit}</p>
+                    <p className="text-xs text-gray-400 mt-0.5">
+                      {variant.perUnit}
+                    </p>
                   )}
                 </div>
 
@@ -256,4 +340,4 @@ const GheeStore: React.FC = () => {
   );
 };
 
-export default GheeStore; 
+export default GheeStore;

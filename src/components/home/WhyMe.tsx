@@ -16,7 +16,8 @@ export default function WhyMe() {
     {
       icon: <Sparkles className="w-6 h-6" />,
       title: "Zero Adulteration Guarantee:",
-      description: "Strictly no palm oil,no vegetable oil,no vanaspati,no starch, and no harmful chemicals — ever. ",
+      description:
+        "Strictly no palm oil,no vegetable oil,no vanaspati,no starch, and no harmful chemicals — ever. ",
     },
     {
       icon: <Package className="w-6 h-6" />,
@@ -33,7 +34,8 @@ export default function WhyMe() {
     {
       icon: <ShieldCheck className="w-6 h-6" />,
       title: "Made with Love by a Family Business:",
-      description: "For over 25 years, our family members have personally overseen operations to ensure every pack delivers the taste and quality our own family eats.",
+      description:
+        "For over 25 years, our family members have personally overseen operations to ensure every pack delivers the taste and quality our own family eats.",
     },
   ];
 
@@ -58,7 +60,6 @@ export default function WhyMe() {
         <rect x="24" y="6" width="16" height="4" rx="1" fill="#3b82f6" />
       </svg>
 
-      
       {/* <svg className="hidden md:block absolute bottom-8 right-[6%] w-20 h-20 opacity-70 animate-float" viewBox="0 0 64 64" fill="none">
         <ellipse cx="32" cy="38" rx="22" ry="14" fill="#ffffff" stroke="#ef4444" strokeWidth="2" />
         <circle cx="16" cy="30" r="3" fill="#ef4444" />
@@ -67,11 +68,11 @@ export default function WhyMe() {
         <circle cx="22" cy="42" r="2" fill="#ef4444" />
         <ellipse cx="14" cy="38" rx="6" ry="8" fill="#ffffff" stroke="#ef4444" strokeWidth="2" />
       </svg> */}
-      <img
+      {/* <img
         src={cow}
         alt="Cow"
         className="hidden md:block absolute bottom-5 right-[6%] w-36 lg:w-52 object-contain opacity-90 animate-float pointer-events-none select-none drop-shadow-2xl"
-      />
+      /> */}
 
       <div className="relative max-w-7xl mx-auto">
         {/* Eyebrow */}
@@ -93,14 +94,28 @@ export default function WhyMe() {
           <br />
           HAVE TRUSTED US
           <br />
-          FOR <span className="text-blue-600">25+ YEARS</span>
+          <span className="relative inline-block">
+            FOR <span className="text-blue-600">25+ YEARS</span>
+            {/* Desktop: cow hangs off the right edge of the line */}
+            <img
+              src={cow}
+              alt="Cow"
+              className="hidden md:block absolute left-full -bottom-3 ml-4 w-28 lg:w-40 max-w-none object-contain animate-float pointer-events-none select-none drop-shadow-xl"
+            />
+            {/* Mobile: small cow inline after the text */}
+            <img
+              src={cow}
+              alt=""
+              aria-hidden="true"
+              className="md:hidden inline-block align-middle ml-2 w-12 object-contain animate-float pointer-events-none select-none"
+            />
+          </span>
         </h2>
 
         {/* Bento grid: one large feature + rest in a side grid */}
         <div className="grid grid-cols-1 lg:grid-cols-5 gap-5">
           {/* Large feature card */}
           <div className="lg:col-span-2 relative overflow-hidden rounded-[28px] bg-gradient-to-br from-blue-600 to-cyan-600 text-white p-9 flex flex-col justify-between min-h-[280px] shadow-[0_30px_60px_-25px_rgba(37,99,235,0.55)]">
-       
             <div className="relative">
               <div className="w-14 h-14 rounded-2xl bg-white/15 backdrop-blur-sm flex items-center justify-center mb-6">
                 {bigFeature.icon}

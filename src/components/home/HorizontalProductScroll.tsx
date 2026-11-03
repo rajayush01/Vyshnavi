@@ -741,7 +741,14 @@ const HorizontalProductScroll: React.FC<HorizontalProductScrollProps> = ({
               {category.name}
             </p>
             <h3
-              onClick={() => navigate(`/ghee`)}
+              onClick={() =>
+                navigate("/ghee", {
+                  state: {
+                    productId: item.id,
+                    variantSize: selectedVariant?.size,
+                  },
+                })
+              }
               style={{
                 fontSize: "clamp(22px, 5vw, 32px)",
                 fontWeight: 800,

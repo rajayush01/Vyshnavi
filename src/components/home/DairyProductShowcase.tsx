@@ -390,12 +390,12 @@ const DairyProductShowcase: React.FC = () => {
         <div className="flex flex-col sm:flex-row sm:items-end sm:justify-between gap-4 mb-10 sm:mb-12">
           <div className="text-center sm:text-left">
             <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-blue-50 border border-blue-100 mb-4">
-              <svg width="9" height="11" viewBox="0 0 32 40" fill="none">
+              {/* <svg width="9" height="11" viewBox="0 0 32 40" fill="none">
                 <path
                   d="M16 2 C22 14 28 20 28 28 C28 34.6 22.6 40 16 40 C9.4 40 4 34.6 4 28 C4 20 10 14 16 2 Z"
                   fill="#2563eb"
                 />
-              </svg>
+              </svg> */}
               <span className="text-[11px] font-bold uppercase tracking-[0.25em] text-blue-700">
                 COMPLETE FAMILY RANGE
               </span>

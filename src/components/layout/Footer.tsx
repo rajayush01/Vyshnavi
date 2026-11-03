@@ -240,6 +240,7 @@
 import { MapPin, Phone, Mail, Shield, Clock, Award } from "lucide-react";
 import logo from "../../assets/logo.png";
 import { Link } from "react-router-dom";
+import FreshnessJourney from "./FreshnessJourney";
 
 
 const categoryPath = (key: string) =>
@@ -386,6 +387,8 @@ export default function Footer() {
           </div>
         </div>
 
+        <FreshnessJourney/>
+
         {/* Trust bar */}
         <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 mb-10">
           <div className="flex items-center gap-3 bg-white/70 backdrop-blur-sm rounded-2xl px-5 py-4 border border-blue-100/70">
@@ -433,6 +436,7 @@ export default function Footer() {
             Copyright © 2026 Sri Vyshnavi Foods Pvt. Ltd. All rights reserved.
           </p>
         </div>
+
 
         <div className="pb-4 text-center text-gray-400 mt-5">
           <p className="text-sm md:text-lg flex items-center justify-center">
