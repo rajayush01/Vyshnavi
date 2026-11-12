@@ -2,7 +2,7 @@ import { useRef } from "react";
 import { Link } from "react-router-dom";
 import { ChevronLeft, ChevronRight } from "lucide-react";
 import { CATEGORIES } from "@/data/vyshnaviData";
-import { underlineLink } from "./shared";
+import { underlineLink } from "./Shared";
 
 const DOTS = ["#B9C3EE", "#9FD3EA", "#C9B8E8", "#BFE3D0", "#A9CDEB"];
 

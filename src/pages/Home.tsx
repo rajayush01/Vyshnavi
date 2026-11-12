@@ -7,7 +7,7 @@ import Stats from "@/components/home/Stats";
 import VideoSection from "@/components/home/VideoSection";
 import HappyFolks from "@/components/home/HappyFolks";
 import BulkOrderBanner from "@/components/home/BulkOrderBanner";
-import { CurveDivider, SKY } from "@/components/home/shared";
+import { CurveDivider, SKY} from "@/components/home/Shared";
 import TrustCards from "@/components/home/TrustCards";
 import InstaReelsGrid from "@/components/home/InstaReels";
 

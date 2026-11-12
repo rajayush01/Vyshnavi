@@ -1,5 +1,5 @@
 import { motion, useReducedMotion } from "framer-motion";
-import { BirdsDoodle, SunDoodle, TearBadge } from "./shared";
+import { BirdsDoodle, SunDoodle, TearBadge } from "./Shared";
 
 const STEPS = [
   { color: "#BFE0F2", text: "We're a family business, and for over 25 years we've made dairy that our own families can trust." },

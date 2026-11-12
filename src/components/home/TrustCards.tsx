@@ -1,7 +1,7 @@
 import { Link } from "react-router-dom";
 import { motion } from "framer-motion";
 import { FlaskConical, HeartHandshake, PackageCheck } from "lucide-react";
-import { MUTED, underlineLink } from "./shared";
+import { MUTED, underlineLink } from "./Shared";
 
 const CARDS = [
   {

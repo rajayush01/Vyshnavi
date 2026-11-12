@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { MUTED } from "./shared";
+import { MUTED } from "./Shared";
 
 // TODO: replace these placeholders with real customer reviews (Google, LinkedIn, X...).
 const REVIEWS = [

@@ -1,5 +1,5 @@
 import { Link } from "react-router-dom";
-import { BirdsDoodle, SunDoodle } from "./shared";
+import { BirdsDoodle, SunDoodle } from "./Shared";
 
 export default function BulkOrderBanner() {
   return (
