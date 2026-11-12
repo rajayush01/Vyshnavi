@@ -2,7 +2,7 @@
 import React from "react";
 import { Leaf, Sparkles, Package, Heart, ShieldCheck } from "lucide-react";
 import "../../fonts.css";
-import cow from "../../assets/cow.png";
+// import cow from "../../assets/cow.png";
 
 export default function WhyMe() {
   const features = [
@@ -97,18 +97,18 @@ export default function WhyMe() {
           <span className="relative inline-block">
             FOR <span className="text-blue-600">25+ YEARS</span>
             {/* Desktop: cow hangs off the right edge of the line */}
-            <img
+            {/* <img
               src={cow}
               alt="Cow"
               className="hidden md:block absolute left-full -bottom-3 ml-4 w-28 lg:w-40 max-w-none object-contain animate-float pointer-events-none select-none drop-shadow-xl"
-            />
+            /> */}
             {/* Mobile: small cow inline after the text */}
-            <img
+            {/* <img 
               src={cow}
               alt=""
               aria-hidden="true"
               className="md:hidden inline-block align-middle ml-2 w-12 object-contain animate-float pointer-events-none select-none"
-            />
+            /> */}
           </span>
         </h2>
 

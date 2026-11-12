@@ -116,35 +116,6 @@ const Header: React.FC = () => {
           width: 100%;
         }
 
-.marquee-track {
-  display: flex;
-  width: max-content;
-  flex-wrap: nowrap;
-  animation: seamlessMarquee 30s linear infinite;
-  will-change: transform;
-}
-
-.marquee-content {
-  display: flex;
-  align-items: center;
-  flex: 0 0 auto;
-  white-space: nowrap;
-  padding-right: 40px;
-}
-
-@keyframes seamlessMarquee {
-  from {
-    transform: translateX(0);
-  }
-  to {
-    transform: translateX(-25%);
-  }
-}
-
-.marquee-track:hover {
-  animation-play-state: paused;
-}
-
         .header-shell {
           transition: all 0.35s cubic-bezier(0.25,0.46,0.45,0.94);
         }
@@ -159,29 +130,9 @@ const Header: React.FC = () => {
         @keyframes drawerSlideIn { from { transform: translateX(100%); } to { transform: translateX(0); } }
       `}</style>
 
-      {/* Top promo marquee — hidden on /portfolio for a full-bleed, immersive header */}
-{/* Top promo marquee */}
-{!isPortfolio && (
-  <div className="fixed top-0 left-0 right-0 w-full z-50 h-11 flex items-center bg-gradient-to-r from-blue-600 via-blue-500 to-cyan-500 text-white text-xs sm:text-sm overflow-hidden">
-    <div className="marquee-track">
-      {[0, 1, 2, 3].map((item) => (
-        <div className="marquee-content" key={item}>
-          🥛&nbsp; 25+ Years of Family Trust
-          &nbsp;&nbsp;•&nbsp;&nbsp; Every Batch Lab-Tested
-          &nbsp;&nbsp;•&nbsp;&nbsp; Zero Palm Oil
-          &nbsp;&nbsp;•&nbsp;&nbsp; Zero Vegetable Oil
-          &nbsp;&nbsp;•&nbsp;&nbsp; Zero Chemicals
-          &nbsp;&nbsp;•&nbsp;&nbsp; Honest Quality at Everyday Family Prices
-          &nbsp;&nbsp;•&nbsp;&nbsp;
-        </div>
-      ))}
-    </div>
-  </div>
-)}
-
       {/* Main header */}
       <header
-        className={`header-shell fixed left-0 right-0 w-full z-50 ${isPortfolio ? "top-0" : "top-9"} ${
+        className={`header-shell fixed top-0 left-0 right-0 w-full z-50 ${
           isPortfolio
             ? "bg-transparent mt-1"
             : scrolled

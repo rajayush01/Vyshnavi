@@ -293,7 +293,7 @@ export default function InstaReelsGrid() {
   };
 
   return (
-    <div className="py-14 px-4 sm:px-6 lg:px-8 -mb-48 bg-[#e0f2fe]">
+    <div className="py-14 px-4 sm:px-6 lg:px-8 bg-[#e0f2fe]">
       <div className="max-w-[1440px] mx-auto">
         <div className="flex flex-col sm:flex-row sm:items-end sm:justify-between mb-10 gap-3 px-1">
           <div>
