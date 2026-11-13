@@ -16,6 +16,7 @@ import CategoryStore from './pages/CategoryStore';
 import ScrollToTop from './components/ui/ScrollToTop';
 import ContactUs from './pages/ContactUs';
 import Blogs from './components/home/Blogs';
+import ProductPage from './pages/ProductPage';
 
 const Home = lazy(() => import('./pages/Home'));
 
@@ -75,6 +76,7 @@ function App() {
 						<Route path="/contact-us" element={ <ContactUs />} />
 						<Route path="/category/:key" element={<CategoryStore />} />
 						<Route path="/blogs" element={<Blogs />} />
+						<Route path="/products" element={<ProductPage />} />
 {/* <Route path="/our-facility" element={<OurFacility />} />
 <Route path="/blogs/know-your-dairy" element={<KnowYourDairy />} />
 <Route path="/bulk-orders" element={<BulkOrders />} />

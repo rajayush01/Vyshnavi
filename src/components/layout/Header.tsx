@@ -24,7 +24,7 @@ const NAV_ITEMS: { key: string; label: string; action: Action }[] = [
   {
     key: "portfolio",
     label: "Our Products",
-    action: { type: "navigate", target: "/portfolio" },
+    action: { type: "navigate", target: "/products" },
   },
   {
     key: "contact",
