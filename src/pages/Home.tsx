@@ -1,6 +1,6 @@
 import { useEffect } from "react";
 import HeroSection from "@/components/home/HeroSection";
-import ProductCategories from "@/components/home/ProductCategories";
+// import ProductCategories from "@/components/home/ProductCategories";
 import HorizontalProductScroll from "@/components/home/HorizontalProductScroll";
 // import OurStory from "@/components/home/OurStory";
 import Stats from "@/components/home/Stats";
