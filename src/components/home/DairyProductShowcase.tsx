@@ -184,30 +184,11 @@ const CategoryCard: React.FC<CategoryCardProps> = ({ category, navigate }) => {
   return (
     <div
       onClick={() => navigate(href)}
-      className={`${category.color} group relative rounded-3xl overflow-hidden border border-white/60 shadow-[0_15px_40px_-20px_rgba(15,23,42,0.35)] hover:shadow-[0_30px_60px_-20px_rgba(37,99,235,0.35)] transition-all duration-500 ease-out hover:-translate-y-1.5 cursor-pointer flex flex-col flex-shrink-0 w-[80%] sm:w-[340px] snap-start`}
+      className={`bg-white group relative rounded-3xl overflow-hidden border border-white/60 transition-all duration-500 ease-out hover:-translate-y-1.5 cursor-pointer flex flex-col flex-shrink-0 w-[80%] sm:w-[340px] snap-start`}
     >
       {/* Dynamic ambient mood lighting */}
       <div
         className="absolute inset-0 pointer-events-none transition-all duration-1000 ease-in-out"
-        style={{
-          background: `
-      radial-gradient(
-        circle at 85% 15%,
-        ${moodColor}55 0%,
-        transparent 45%
-      ),
-      radial-gradient(
-        circle at 10% 85%,
-        ${moodColor}40 0%,
-        transparent 50%
-      ),
-      linear-gradient(
-        135deg,
-        ${moodColor}12,
-        transparent 65%
-      )
-    `,
-        }}
       />
       {/* Subtle corner milk-drop watermark */}
       <svg
@@ -227,16 +208,14 @@ const CategoryCard: React.FC<CategoryCardProps> = ({ category, navigate }) => {
 
         <div
           className="absolute w-2/3 h-2/3 rounded-full blur-3xl transition-all duration-1000"
-          style={{
-            backgroundColor: `${moodColor}55`,
-          }}
+          
         />
         {activeImage ? (
           <img
             key={activeImage}
             src={activeImage}
             alt={`${title} ${imgIndex + 1}`}
-            className="relative h-40 sm:h-44 object-contain drop-shadow-lg transition-transform duration-500 group-hover:scale-105 animate-fade-in"
+            className="relative h-40 sm:h-44 object-contain  transition-transform duration-500 group-hover:scale-105 animate-fade-in"
           />
         ) : (
           <div
@@ -327,7 +306,7 @@ const DairyProductShowcase: React.FC = () => {
   };
 
   return (
-    <div className="relative w-full max-w-7xl mx-auto px-4 py-16 sm:py-20 overflow-hidden">
+    <div className="bg-[#E0F2FE] relative w-full mx-auto px-4 py-16 sm:py-20 overflow-hidden">
       {/* Decorative dairy illustrations */}
       <svg
         className="hidden md:block absolute top-2 left-[2%] w-14 h-14 opacity-50 animate-float-slow pointer-events-none"
@@ -385,7 +364,7 @@ const DairyProductShowcase: React.FC = () => {
         <circle cx="22" cy="40" r="1.5" fill="#fbbf24" />
       </svg>
 
-      <div className="relative">
+      <div className="relative max-w-7xl mx-auto">
         {/* Eyebrow + heading */}
         <div className="flex flex-col sm:flex-row sm:items-end sm:justify-between gap-4 mb-10 sm:mb-12">
           <div className="text-center sm:text-left">
@@ -434,8 +413,8 @@ const DairyProductShowcase: React.FC = () => {
 
         {/* Category scroll rail */}
         <div className="relative -mx-4 px-4">
-          <div className="pointer-events-none absolute inset-y-0 left-0 w-10 bg-gradient-to-r from-white to-transparent z-10" />
-          <div className="pointer-events-none absolute inset-y-0 right-0 w-10 bg-gradient-to-l from-white to-transparent z-10" />
+          <div className="pointer-events-none absolute inset-y-0 left-0 w-10 bg-gradient-to-r from-[#E0F2FE] to-transparent z-10" />
+          <div className="pointer-events-none absolute inset-y-0 right-0 w-10 bg-gradient-to-l from-[#E0F2FE] to-transparent z-10" />
           <div
             ref={railRef}
             className="flex gap-6 sm:gap-7 overflow-x-auto pb-4 snap-x snap-mandatory scrollbar-hide scroll-smooth"

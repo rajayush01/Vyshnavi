@@ -8,8 +8,9 @@ import VideoSection from "@/components/home/VideoSection";
 import HappyFolks from "@/components/home/HappyFolks";
 import BulkOrderBanner from "@/components/home/BulkOrderBanner";
 import { CurveDivider, SKY} from "@/components/home/Shared";
-import TrustCards from "@/components/home/TrustCards";
+// import TrustCards from "@/components/home/TrustCards";
 import InstaReelsGrid from "@/components/home/InstaReels";
+import DairyProductShowcase from "@/components/home/DairyProductShowcase";
 
 const Home = () => {
   useEffect(() => {
@@ -19,16 +20,20 @@ const Home = () => {
   return (
     <main className="overflow-hidden bg-white">
       <HeroSection />
-      <TrustCards />
-      <ProductCategories />
+      {/* <TrustCards /> */}
 
+      <DairyProductShowcase />
+            <CurveDivider color={SKY} flip/>
+
+      <Stats />
       <CurveDivider color={SKY} />
       <HorizontalProductScroll />
       <CurveDivider color={SKY} flip />
 
+      {/* <ProductCategories /> */}
       {/* <OurStory /> */}
-      <Stats />
 
+      <InstaReelsGrid/>
       <CurveDivider color={SKY} />
       <div id="process">
         <VideoSection />
@@ -37,9 +42,7 @@ const Home = () => {
 
       <HappyFolks />
 
-      <InstaReelsGrid/>
 
-      <CurveDivider color={SKY} flip/>
       <BulkOrderBanner />
     </main>
   );

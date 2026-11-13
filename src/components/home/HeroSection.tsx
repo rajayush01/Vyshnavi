@@ -27,7 +27,7 @@ const SLIDES: Slide[] = [
   { id: "milk", src: img3, alt: "Tested milk packets", blob: "#F6EFD8" },
 ];
 
-const MARQUEE_ITEMS = ["🥛&nbsp; 25+ Years of Family Trust", "Every Batch Lab-Tested", "Zero Palm Oil", "Zero Vegetable Oil", "Zero Chemicals", "Honest Quality at Everyday Family Prices"];
+const MARQUEE_ITEMS = ["🥛 25+ Years of Family Trust", "Every Batch Lab-Tested", "Zero Palm Oil", "Zero Vegetable Oil", "Zero Chemicals", "Honest Quality at Everyday Family Prices"];
 
 const SLIDE_INTERVAL = 3800;
 
@@ -67,14 +67,14 @@ export default function HeroSection() {
           onMouseLeave={() => setPaused(false)}
         >
           {/* static doodles */}
-          <svg className="absolute right-[12%] top-[10%] z-10 h-20 w-20 text-neutral-800 md:h-24 md:w-24" viewBox="0 0 100 100" fill="none" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" aria-hidden>
+          {/* <svg className="absolute right-[12%] top-[10%] z-10 h-20 w-20 text-neutral-800 md:h-24 md:w-24" viewBox="0 0 100 100" fill="none" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" aria-hidden>
             <path d="M50 8 L47 20 M68 12 L62 22 M82 28 L72 34 M30 12 L35 22" />
             <path d="M70 40 a16 16 0 0 0 -30 -4 a12 12 0 0 0 -12 18 a9 9 0 0 0 6 14 h28 a14 14 0 0 0 8 -28z" />
             <path d="M82 52 q-2 14 -14 18" />
           </svg>
           <svg className="absolute bottom-[12%] left-[7%] z-10 h-10 w-24 text-neutral-700" viewBox="0 0 100 40" fill="none" stroke="currentColor" strokeWidth="1.4" strokeLinecap="round" aria-hidden>
             <path d="M82 6 l-6 6 M86 2 l-4 4 M72 14 l-6 6 M2 38 h8 M16 38 h62" />
-          </svg>
+          </svg> */}
 
           <AnimatePresence mode="popLayout" initial={false}>
             <motion.div

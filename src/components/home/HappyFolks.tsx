@@ -15,7 +15,7 @@ function ReviewCard({ r, tilt }: { r: (typeof REVIEWS)[number]; tilt: string }) 
   const [open, setOpen] = useState(false);
   return (
     <article
-      className={`flex min-h-[320px] w-[300px] shrink-0 snap-center flex-col justify-between rounded-[28px] bg-white p-8 shadow-[0_24px_44px_-26px_rgba(47,111,163,0.5)] transition-transform duration-300 hover:rotate-0 ${tilt}`}
+      className={`flex min-h-[320px] w-[300px] shrink-0 snap-center flex-col justify-between rounded-[28px] bg-[#E0F2FE] p-8 shadow-[0_24px_44px_-26px_rgba(47,111,163,0.5)] transition-transform duration-300 hover:rotate-0 ${tilt}`}
     >
       <div>
         <p className={`text-[15px] leading-7 text-[#1B2430] ${open ? "" : "line-clamp-5"}`}>{r.text}</p>
